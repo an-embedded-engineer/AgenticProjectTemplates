@@ -1,0 +1,34 @@
+# {{PROJECT_NAME}} Agent Common Instructions (Draft Master)
+
+## 1. 目的
+
+このファイルは `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の共通 master として使う。
+各 Agent 向けファイルは本ファイルへのシンボリックリンク化を前提とする。
+
+## 2. 必須参照（索引）
+
+- プロジェクト概要: `docs/rules/project_overview.md`
+- アーキテクチャ概要: `docs/architecture/overview.md`
+- コードパターン: `docs/architecture/code_patterns.md`
+- よくある落とし穴: `docs/architecture/common_pitfalls.md`
+- 開発・実行ルール: `docs/rules/development_workflow.md`
+- 言語ルール: `docs/rules/language_rules.md`
+- コーディングルール: `docs/rules/coding_rules.md`
+- skills カタログ: `docs/rules/skill_catalog.md`
+- 手順書索引: `docs/procedure/README.md`
+
+## 3. 最重要ルール（抜粋）
+
+- 内部思考は英語、チャット応答は日本語
+- コメント/Docstring は日本語、ログ/UI/エラー文字列は英語
+- 例外を握りつぶさない
+- 不必要なフォールバックを実装しない
+- `./.venv/bin/pyright --outputjson > pylance_error.json` のエラーを 0 にする
+
+## 4. skills 適用
+
+- 仕様変更: `spec-change-workflow`
+- レビュー反映: `ai-review-response-workflow`
+- 不具合修正: `bugfix-workflow`
+
+詳細は `docs/procedure/` の各手順書を参照する。
