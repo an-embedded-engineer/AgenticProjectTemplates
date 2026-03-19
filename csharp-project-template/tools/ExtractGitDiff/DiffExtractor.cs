@@ -184,15 +184,23 @@ public static class DiffExtractor
         return stats;
     }
 
-    /// <summary>出力ディレクトリを初期化する。</summary>
+    /// <summary>出力ディレクトリを初期化する。ツールが生成するファイルのみ削除する。</summary>
     public static void PrepareOutputDir(string outputDir)
     {
-        if (Directory.Exists(outputDir))
+        Directory.CreateDirectory(outputDir);
+
+        var diffDir = Path.Combine(outputDir, "diff");
+        var reportPath = Path.Combine(outputDir, "report.md");
+
+        if (Directory.Exists(diffDir))
         {
-            Directory.Delete(outputDir, recursive: true);
+            Directory.Delete(diffDir, recursive: true);
         }
 
-        Directory.CreateDirectory(outputDir);
+        if (File.Exists(reportPath))
+        {
+            File.Delete(reportPath);
+        }
     }
 
     /// <summary>before/afterのファイルを出力ディレクトリに保存する。</summary>

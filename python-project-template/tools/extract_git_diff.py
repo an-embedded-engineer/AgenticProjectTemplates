@@ -349,9 +349,15 @@ def aggregate_by_directory(
 
 def prepare_output_dir(output_dir: Path) -> None:
     """出力ディレクトリを初期化する。"""
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    diff_dir: Path = output_dir / "diff"
+    report_path: Path = output_dir / "report.md"
+
+    if diff_dir.exists():
+        shutil.rmtree(diff_dir)
+    if report_path.exists():
+        report_path.unlink()
 
 
 def _get_file_at_commit(commit_sha: str, file_path: str) -> bytes | None:
