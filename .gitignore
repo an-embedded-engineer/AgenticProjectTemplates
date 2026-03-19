@@ -22,6 +22,13 @@ htmlcov/
 .tox/
 .nox/
 
+# C# / .NET
+bin/
+obj/
+*.user
+*.suo
+*.DotSettings.user
+
 # IDE
 .vscode/
 .idea/

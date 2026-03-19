@@ -41,8 +41,11 @@ AgenticProjectTemplates/
 ├── scripts/
 │   └── sync_agent_skills.sh  # SKILL.master.md を .claude/ .github/ ~/.codex/ へ配布
 └── tools/
-    └── extract_git_diff.py   # git差分抽出ツール（ワークフローで使用）
+    ├── extract_git_diff.py       # git差分抽出ツール（Python版）
+    └── ExtractGitDiff/           # git差分抽出ツール（C#版）
 ```
+
+> **Note:** Python テンプレートは `extract_git_diff.py`、C# テンプレートは `ExtractGitDiff/`（dotnet コンソールアプリ）を使用する。
 
 ## 設計上の重要な判断
 
@@ -59,20 +62,20 @@ AgenticProjectTemplates/
 - 旧コピーは `~/.codex/skills/_obsoleted/` にバックアップ
 
 ### tools ディレクトリ
-`tools/extract_git_diff.py` はワークフローで使用する git 差分抽出ツール。日付範囲またはコミット ID 範囲を指定し、変更ファイルの before/after ソースと unified diff、レポート（`report.md`）を出力する。
+ワークフローで使用する git 差分抽出ツール。日付範囲またはコミット ID 範囲を指定し、変更ファイルの before/after ソースと unified diff、レポート（`report.md`）を出力する。Python テンプレートは Python スクリプト版、C# テンプレートは dotnet コンソールアプリ版を同梱。
 
 ```bash
-# 日付範囲指定
+# Python テンプレート
 python tools/extract_git_diff.py --date-from 2024-01-01 --date-to 2024-02-01
-
-# コミットID範囲指定
 python tools/extract_git_diff.py --commit-from abc1234 --commit-to def5678
-
-# ディレクトリ・拡張子フィルタ付き
 python tools/extract_git_diff.py --date-from 2024-01-01 --date-to 2024-02-01 -d src tests -e .py
-
-# 出力先指定（デフォルト: output/git_diff）
 python tools/extract_git_diff.py --commit-from abc1234 --commit-to def5678 -o output/my_diff
+
+# C# テンプレート
+dotnet run --project tools/ExtractGitDiff -- --date-from 2024-01-01 --date-to 2024-02-01
+dotnet run --project tools/ExtractGitDiff -- --commit-from abc1234 --commit-to def5678
+dotnet run --project tools/ExtractGitDiff -- --date-from 2024-01-01 --date-to 2024-02-01 -d src tests -e .cs
+dotnet run --project tools/ExtractGitDiff -- --commit-from abc1234 --commit-to def5678 -o output/my_diff
 ```
 
 ## テンプレート別ルール

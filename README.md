@@ -80,7 +80,8 @@ dotnet restore
 ├── scripts/
 │   └── sync_agent_skills.sh
 └── tools/
-    └── extract_git_diff.py # git 差分抽出・レポート生成ツール
+    ├── extract_git_diff.py     # git 差分抽出・レポート生成ツール（Python版）
+    └── ExtractGitDiff/         # git 差分抽出・レポート生成ツール（C#版）
 ```
 
 ## ワークフロー skills
@@ -96,19 +97,20 @@ dotnet restore
 
 ## ツール
 
-### extract_git_diff.py
+### extract_git_diff
 
-git コミット履歴から指定範囲の差分を抽出し、before/after ソース・unified diff・レポートを出力します。
+git コミット履歴から指定範囲の差分を抽出し、before/after ソース・unified diff・レポートを出力します。Python テンプレートは Python スクリプト版、C# テンプレートは dotnet コンソールアプリ版を同梱しています。
 
 ```bash
-# 日付範囲指定
+# Python テンプレート
 python tools/extract_git_diff.py --date-from 2024-01-01 --date-to 2024-02-01
-
-# コミットID範囲指定
 python tools/extract_git_diff.py --commit-from abc1234 --commit-to def5678
-
-# フィルタ付き
 python tools/extract_git_diff.py --date-from 2024-01-01 --date-to 2024-02-01 -d src -e .py
+
+# C# テンプレート
+dotnet run --project tools/ExtractGitDiff -- --date-from 2024-01-01 --date-to 2024-02-01
+dotnet run --project tools/ExtractGitDiff -- --commit-from abc1234 --commit-to def5678
+dotnet run --project tools/ExtractGitDiff -- --date-from 2024-01-01 --date-to 2024-02-01 -d src -e .cs
 ```
 
 ## ライセンス
