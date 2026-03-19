@@ -28,6 +28,8 @@ obj/
 *.user
 *.suo
 *.DotSettings.user
+# ルート直下の自動生成 .sln を除外（テンプレート内の .sln は追跡する）
+/*.sln
 
 # IDE
 .vscode/
