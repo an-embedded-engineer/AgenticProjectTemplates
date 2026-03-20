@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python Template Doc Filler"
+  short_description: "既存Pythonプロジェクトへテンプレート文書を適用"
+  default_prompt: "Use $python-template-doc-filler to adapt `python-project-template` to this project and fill the project-specific documentation placeholders."
