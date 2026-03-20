@@ -12,11 +12,14 @@
 - `.claude/skills/*/SKILL.md`
 - `.github/skills/*/SKILL.md`
 - `~/.codex/skills/*/SKILL.md`
+- resources を持つ structured skill の `agents/` `references/` `scripts/` `assets/`
 
 ## 運用方針
 
-- プロジェクト内 Agent（`.claude` / `.github`）は `SKILL.master.md` への symlink を使う。
-- `~/.codex/skills` は symlink を使わず、`SKILL.master.md` の実体をコピーする。
+- legacy workflow skill は `SKILL.master.md` を master として扱う。
+- resources を持つ structured skill は `SKILL.md` を起点に skill ディレクトリ全体を同期する。
+- プロジェクト内 Agent（`.claude` / `.github`）は symlink を使う。
+- `~/.codex/skills` は symlink を使わず、skill 実体をコピーする。
 - 標準運用は `scripts/sync_agent_skills.sh` を実行する。
 
 ## 事前準備
@@ -53,12 +56,26 @@ ln -s ../instructions/agent_common_master.md .github/copilot-instructions.md
 ## 例: skills 手動同期
 
 ```bash
-# .claude / .github は symlink（{{SKILL_NAME}} を実際の skill 名に置き換える）
+# legacy workflow skill の例: .claude / .github は SKILL.master.md への symlink
 ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/SKILL.master.md .claude/skills/{{SKILL_NAME}}/SKILL.md
 ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/SKILL.master.md .github/skills/{{SKILL_NAME}}/SKILL.md
 
-# ~/.codex/skills は実体コピー（symlink 非対応）
+# structured skill の例: .claude / .github は SKILL.md と resource ディレクトリを同期
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/SKILL.md .claude/skills/{{SKILL_NAME}}/SKILL.md
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/references .claude/skills/{{SKILL_NAME}}/references
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/scripts .claude/skills/{{SKILL_NAME}}/scripts
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/agents .claude/skills/{{SKILL_NAME}}/agents
+
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/SKILL.md .github/skills/{{SKILL_NAME}}/SKILL.md
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/references .github/skills/{{SKILL_NAME}}/references
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/scripts .github/skills/{{SKILL_NAME}}/scripts
+ln -sfn ../../../instructions/skills/{{SKILL_NAME}}/agents .github/skills/{{SKILL_NAME}}/agents
+
+# legacy workflow skill の例: ~/.codex/skills は SKILL.master.md をコピー
 cp instructions/skills/{{SKILL_NAME}}/SKILL.master.md ~/.codex/skills/{{SKILL_NAME}}/SKILL.md
+
+# structured skill の例: ~/.codex/skills は skill ディレクトリ全体をコピー
+cp -R instructions/skills/{{SKILL_NAME}}/. ~/.codex/skills/{{SKILL_NAME}}/
 ```
 
 ## 検証
@@ -70,9 +87,11 @@ ls -l AGENTS.md CLAUDE.md .github/copilot-instructions.md
 # .claude / .github skills は symlink
 ls -l .claude/skills/{{SKILL_NAME}}/SKILL.md
 ls -l .github/skills/{{SKILL_NAME}}/SKILL.md
+ls -l .claude/skills/{{SKILL_NAME}}
+ls -l .github/skills/{{SKILL_NAME}}
 
 # ~/.codex/skills は symlink ではないことを確認
-ls -l ~/.codex/skills/{{SKILL_NAME}}/SKILL.md
+ls -l ~/.codex/skills/{{SKILL_NAME}}
 test ! -L ~/.codex/skills/{{SKILL_NAME}}/SKILL.md
 ```
 
@@ -92,6 +111,7 @@ mv .claude/skills/{{SKILL_NAME}}/SKILL.md.bak .claude/skills/{{SKILL_NAME}}/SKIL
 mv .github/skills/{{SKILL_NAME}}/SKILL.md.bak .github/skills/{{SKILL_NAME}}/SKILL.md
 
 # ~/.codex/skills は同期スクリプト退避先から復元
+# 例: BACKUP_TAG=20260216_120000_skill_sync
 BACKUP_TAG=<backup_tag>
-cp ~/.codex/skills/_obsoleted/$BACKUP_TAG/{{SKILL_NAME}}/SKILL.md ~/.codex/skills/{{SKILL_NAME}}/SKILL.md
+cp -R ~/.codex/skills/_obsoleted/$BACKUP_TAG/{{SKILL_NAME}}/. ~/.codex/skills/{{SKILL_NAME}}/
 ```

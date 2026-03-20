@@ -15,6 +15,7 @@ HTML_TODO_PATTERN = re.compile(r"<!--\s*TODO:\s*(.*?)\s*-->")
 
 DEFAULT_GLOBS = ("docs/**/*.md", "instructions/**/*.md", ".github/**/*.md", "*.md")
 EXAMPLE_COMPONENT_DIR = "docs/components/_example_component"
+CURRENT_SKILL_ROOT = Path(__file__).resolve().parent.parent
 
 
 class ScanRecord(TypedDict):
@@ -61,6 +62,8 @@ def iter_candidate_files(root: Path) -> list[Path]:
             if not path.is_file():
                 continue
             resolved = path.resolve()
+            if CURRENT_SKILL_ROOT == resolved or CURRENT_SKILL_ROOT in resolved.parents:
+                continue
             if resolved in seen:
                 continue
             seen.add(resolved)
