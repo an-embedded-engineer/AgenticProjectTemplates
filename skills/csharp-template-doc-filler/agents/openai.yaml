@@ -1,0 +1,4 @@
+interface:
+  display_name: "CSharp Template Doc Filler"
+  short_description: "既存C#プロジェクトへテンプレート文書を適用して整備"
+  default_prompt: "Use $csharp-template-doc-filler to adapt `csharp-project-template` to this project and fill the project-specific documentation placeholders."
