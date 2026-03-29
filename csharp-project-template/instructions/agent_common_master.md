@@ -21,13 +21,20 @@
 
 - 内部思考は英語、チャット応答は日本語
 - コメント/XML Doc は日本語、ログ/UI/エラー文字列は英語
+- 類似ロジックは重複実装より抽象化・共通化を優先して検討する
+- `reflection` / `dynamic` / `object` / `Dictionary<string, object?>` の乱用を避け、抽象化・共通化・汎用化に必要な局所利用だけを許容する
+- 明示的に指示されない限り、後方互換レイヤーや旧経路は残さない
 - 例外を握りつぶさない
-- 不必要なフォールバックを実装しない
+- 不必要なフォールバックを実装せず、プロジェクト内で閉じる仕様不一致は例外として顕在化させる
 - `dotnet build --warnaserrors` の警告・エラーを 0 にする
 
 ## 4. skills 適用
 
 - 仕様変更: `spec-change-workflow`
+- 新機能追加: `new-feature-workflow`
+- 課題解決: `issue-resolution-workflow`
+- リファクタリング: `refactoring-workflow`
+- 調査・分析: `research-analysis-workflow`
 - レビュー反映: `ai-review-response-workflow`
 - 不具合修正: `bugfix-workflow`
 

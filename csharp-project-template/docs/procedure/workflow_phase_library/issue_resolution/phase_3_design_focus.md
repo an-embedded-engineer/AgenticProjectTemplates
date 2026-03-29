@@ -1,0 +1,23 @@
+# issue-resolution Phase 3: 設計書の観点
+
+## 設計書
+
+- `docs/design_analysis/issue_resolution/<yyyymmdd>_<topic>/design/<topic>_issue_resolution_design.md`
+
+## 必須観点
+
+- 解決対象の課題を閉じるための設計変更
+- 影響範囲と切り戻しポイント
+- 効果確認方法
+- 類似ロジックの抽象化・共通化方針
+- `reflection` / `dynamic` / `object` / `Dictionary<string, object?>` を使う必要がある場合の局所化方針
+- 明示要求または外部契約がない限り、旧経路を残す後方互換設計を採らない方針
+- プロジェクト内で閉じる仕様不一致に対する例外・エラーハンドリング方針
+- 残課題の扱い
+
+## レビュー観点
+
+- 設計が完了条件に直接つながっているか
+- 別課題を無制限に抱き込んでいないか
+- 重複追加や不要な互換レイヤーに依存していないか
+- 効果確認が設計段階で準備されているか
