@@ -352,10 +352,13 @@ def prepare_output_dir(output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     diff_dir: Path = output_dir / "diff"
+    diff_zip_path: Path = output_dir / "diff.zip"
     report_path: Path = output_dir / "report.md"
 
     if diff_dir.exists():
         shutil.rmtree(diff_dir)
+    if diff_zip_path.exists():
+        diff_zip_path.unlink()
     if report_path.exists():
         report_path.unlink()
 
@@ -445,6 +448,23 @@ def generate_diffs(files: list[ChangedFile], output_dir: Path) -> None:
             diff_path.write_text("".join(diff_lines), encoding="utf-8")
 
 
+def archive_diff_dir(output_dir: Path) -> None:
+    """diffディレクトリをzip化し、展開ディレクトリを削除する。"""
+    diff_dir: Path = output_dir / "diff"
+    if not diff_dir.exists():
+        logger.warning("Diff directory does not exist: %s", diff_dir)
+        return
+
+    archive_base_path: Path = output_dir / "diff"
+    shutil.make_archive(
+        base_name=str(archive_base_path),
+        format="zip",
+        root_dir=output_dir,
+        base_dir=diff_dir.name,
+    )
+    shutil.rmtree(diff_dir)
+
+
 # ---------------------------------------------------------------------------
 # レポート生成
 # ---------------------------------------------------------------------------
@@ -516,6 +536,9 @@ def generate_report(
     """report.mdを生成する。"""
     lines: list[str] = []
     lines.append("# Git Diff Report\n\n")
+    lines.append("## Artifacts\n\n")
+    lines.append("- Unified diff archive: [diff.zip](diff.zip)\n")
+    lines.append("- `diff.zip` を同じディレクトリで展開すると、以下の `diff/...` リンクを参照できる\n\n")
 
     # 範囲情報
     lines.append("## Range\n\n")
@@ -724,6 +747,9 @@ def main() -> None:
 
         # レポート生成
         generate_report(commits, files, start_sha, end_sha, config.output_dir, diff_stats)
+
+        # diff成果物を圧縮し、展開ディレクトリは残さない
+        archive_diff_dir(config.output_dir)
 
         logger.info("Output written to: %s", config.output_dir)
     except subprocess.CalledProcessError as e:

@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text;
 
 namespace ExtractGitDiff;
@@ -190,11 +191,17 @@ public static class DiffExtractor
         Directory.CreateDirectory(outputDir);
 
         var diffDir = Path.Combine(outputDir, "diff");
+        var diffZipPath = Path.Combine(outputDir, "diff.zip");
         var reportPath = Path.Combine(outputDir, "report.md");
 
         if (Directory.Exists(diffDir))
         {
             Directory.Delete(diffDir, recursive: true);
+        }
+
+        if (File.Exists(diffZipPath))
+        {
+            File.Delete(diffZipPath);
         }
 
         if (File.Exists(reportPath))
@@ -299,5 +306,29 @@ public static class DiffExtractor
         {
             return ["(Binary file)"];
         }
+    }
+
+    /// <summary>diffディレクトリをzip化し、展開ディレクトリを削除する。</summary>
+    public static void ArchiveDiffDir(string outputDir)
+    {
+        var diffDir = Path.Combine(outputDir, "diff");
+        if (!Directory.Exists(diffDir))
+        {
+            Console.Error.WriteLine($"WARNING: Diff directory does not exist: {diffDir}");
+            return;
+        }
+
+        var diffZipPath = Path.Combine(outputDir, "diff.zip");
+        using (var archive = ZipFile.Open(diffZipPath, ZipArchiveMode.Create))
+        {
+            foreach (var filePath in Directory.EnumerateFiles(diffDir, "*", SearchOption.AllDirectories))
+            {
+                var relativePath = Path.GetRelativePath(outputDir, filePath)
+                    .Replace(Path.DirectorySeparatorChar, '/');
+                archive.CreateEntryFromFile(filePath, relativePath, CompressionLevel.Optimal);
+            }
+        }
+
+        Directory.Delete(diffDir, recursive: true);
     }
 }

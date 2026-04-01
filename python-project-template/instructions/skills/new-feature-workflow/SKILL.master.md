@@ -34,5 +34,5 @@ description: {{PROJECT_NAME}}の新機能追加で、要求整理、設計、レ
 7. 設計文書は `plan` / `design` / `impl` に分離して管理する
 8. レビュー文書はレビュー担当 Agent が作成する
 9. 恒久ドキュメントへ利用方法・制約を反映する
-10. Phase 6 のマージ前にソース差分レポート（`diff/` + `report.md`）を生成してコミットする
+10. Phase 6 のマージ前にソース差分レポート（`diff.zip` + `report.md`）を生成してコミットする
 11. 完了時は `todo_archive_<year>.md` へ移し、各 STOP ゲートで承認を待つ

@@ -35,5 +35,5 @@ description: {{PROJECT_NAME}}の不具合修正で、再現、原因分析、修
 7. 設計文書は `plan` / `design` / `impl` に分離して管理する
 8. レビュー文書はレビュー担当 Agent が作成する
 9. `meta.md` の `plan_status` / `design_status` / `impl_status` を更新する
-10. Phase 6 のマージ前にソース差分レポート（`diff/` + `report.md`）を生成してコミットする
+10. Phase 6 のマージ前にソース差分レポート（`diff.zip` + `report.md`）を生成してコミットする
 11. issue 正本と関連文書を更新し、完了時は archive 方針に従う

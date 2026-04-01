@@ -134,6 +134,9 @@ static int Run(string[] args)
         // レポート生成
         ReportGenerator.GenerateReport(commits, files, startSha, endSha, config.OutputDir, diffStats);
 
+        // diff成果物を圧縮し、展開ディレクトリは残さない
+        DiffExtractor.ArchiveDiffDir(config.OutputDir);
+
         Console.WriteLine($"INFO: Output written to: {config.OutputDir}");
         return 0;
     }

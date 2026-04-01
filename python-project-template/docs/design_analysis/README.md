@@ -38,8 +38,8 @@ docs/design_analysis/
 │   ├── <topic>_plan_review.md
 │   ├── <topic>_design_review.md
 │   └── <topic>_impl_review.md
-├── diff/
-│   └── report.md
+├── diff.zip
+├── report.md
 └── meta.md
 ```
 
@@ -62,5 +62,5 @@ related_commits: []
 1. 課題ディレクトリは日付プレフィックスで一意に識別する
 2. `meta.md` のステータスは各 Phase 完了時に必ず更新する
 3. レビュー文書は `review/` ディレクトリに配置する
-4. ソース差分レポートは `diff/` ディレクトリに配置する
+4. ソース差分レポートは `diff.zip` と `report.md` を課題ディレクトリ直下に配置する
 5. 調査・分析は `research_analysis/` に配置する（workflow Phase を伴わない）

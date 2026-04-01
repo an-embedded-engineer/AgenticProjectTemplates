@@ -112,6 +112,11 @@ public static partial class ReportGenerator
         var sb = new StringBuilder();
         sb.AppendLine("# Git Diff Report");
         sb.AppendLine();
+        sb.AppendLine("## Artifacts");
+        sb.AppendLine();
+        sb.AppendLine("- Unified diff archive: [diff.zip](diff.zip)");
+        sb.AppendLine("- `diff.zip` を同じディレクトリで展開すると、以下の `diff/...` リンクを参照できる");
+        sb.AppendLine();
 
         // 範囲情報
         sb.AppendLine("## Range");

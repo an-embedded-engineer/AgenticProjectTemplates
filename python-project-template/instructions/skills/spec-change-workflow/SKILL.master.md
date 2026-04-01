@@ -35,5 +35,5 @@ description: {{PROJECT_NAME}}の仕様変更で、要求整理、ブランチ作
 7. レビュー文書はレビュー担当 Agent が作成する
 8. `meta.md` の `plan_status` / `design_status` / `impl_status` を更新する
 9. 関連ドキュメントへ反映する
-10. Phase 6 のマージ前にソース差分レポート（`diff/` + `report.md`）を生成してコミットする
+10. Phase 6 のマージ前にソース差分レポート（`diff.zip` + `report.md`）を生成してコミットする
 11. 完了時は `todo_archive_<year>.md` へ移し、各 STOP ゲートでユーザへ報告し、承認を待つ
