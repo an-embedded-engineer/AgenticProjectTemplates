@@ -1,4 +1,4 @@
-# このファイルは symlink 移行前の draft です
+# このファイルは生成対象の説明用 draft です
 
-運用時は `instructions/agent_common_master.md` への symlink に置き換えてください。
-詳細は `instructions/symlink_migration_guide.md` を参照してください。
+`AGENTS.md` はテンプレートへ同梱せず、`scripts/sync_agent_skills.sh --codex` などの同期スクリプトで生成する。
+詳細は `instructions/agent_sync_guide.md` を参照してください。

@@ -1,9 +1,9 @@
-# {{PROJECT_NAME}} Agent Common Instructions (Draft Master)
+# {{PROJECT_NAME}} Agent Common Instructions (Sync Source)
 
 ## 1. 目的
 
-このファイルは `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の共通 master として使う。
-各 Agent 向けファイルは本ファイルへのシンボリックリンク化を前提とする。
+このファイルは `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の共通同期元として使う。
+各 Agent 向けファイルは `scripts/sync_agent_skills.*` で本ファイルを実体コピーして生成する。
 
 ## 2. 必須参照（索引）
 

@@ -84,8 +84,7 @@
 ## 注意事項
 
 - `instructions/skills/**/*.md` を置換対象に含めてよい
-- `instructions/symlink_migration_guide.md` の `{{SKILL_NAME}}` は skill 名の利用例なので置換しない
-- `AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` が symlink の場合、実体は `instructions/` 側にある。重複して個別編集しない
+- `AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` は同期スクリプトで生成される。更新時は `instructions/agent_common_master.md` を編集し、再同期する
 
 ## プロジェクト形状ごとの補助観点
 
