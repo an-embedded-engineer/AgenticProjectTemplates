@@ -50,9 +50,9 @@ scripts\sync_agent_skills.bat --claude --codex
 
 ## オプション
 
-- `copilot`: `.github/copilot-instructions.md` と `.github/skills` を同期する
-- `claude`: `CLAUDE.md` と `.claude/skills` を同期する
-- `codex`: `AGENTS.md` と `~/.codex/skills` を同期する
+- `--copilot`: `.github/copilot-instructions.md` と `.github/skills` を同期する
+- `--claude`: `CLAUDE.md` と `.claude/skills` を同期する
+- `--codex`: `AGENTS.md` と `~/.codex/skills` を同期する
 - オプション未指定時は全ターゲットを同期する
 
 ## 運用ルール
@@ -60,3 +60,4 @@ scripts\sync_agent_skills.bat --claude --codex
 - `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` は手編集せず、`instructions/agent_common_master.md` を更新して再同期する
 - skills は `instructions/skills/` を更新して再同期する
 - Agent が導入されていない環境では、必要なターゲットだけ同期する
+- 同期先はバックアップを作成せずに上書きする。必要なら実行前に手動で退避する

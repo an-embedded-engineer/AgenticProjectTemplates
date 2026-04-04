@@ -61,12 +61,18 @@ echo Project root: %PROJECT_ROOT%
 echo Skill master:  %MASTER_SKILLS_DIR%
 echo Instruction:   %COMMON_INSTRUCTIONS%
 
-if "%SYNC_COPILOT%"=="1" call :sync_copilot
-if errorlevel 1 exit /b 1
-if "%SYNC_CLAUDE%"=="1" call :sync_claude
-if errorlevel 1 exit /b 1
-if "%SYNC_CODEX%"=="1" call :sync_codex
-if errorlevel 1 exit /b 1
+if "%SYNC_COPILOT%"=="1" (
+    call :sync_copilot
+    if errorlevel 1 exit /b 1
+)
+if "%SYNC_CLAUDE%"=="1" (
+    call :sync_claude
+    if errorlevel 1 exit /b 1
+)
+if "%SYNC_CODEX%"=="1" (
+    call :sync_codex
+    if errorlevel 1 exit /b 1
+)
 
 echo === Agent Sync Complete ===
 exit /b 0
