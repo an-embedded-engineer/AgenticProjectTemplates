@@ -12,6 +12,9 @@
 # Root の Agent CLI tmux 補助スクリプト
 python3 -m py_compile scripts/agent_cli_tmux.py
 
+# Agent instructions / skills 同期スクリプト
+bash scripts/sync_agent_skills.sh --help
+
 # Python テンプレートの Agent CLI tmux 補助スクリプト
 python3 -m py_compile python-project-template/scripts/agent_cli_tmux.py
 python3 -m pytest python-project-template/tests/test_agent_cli_tmux_python_template.py
@@ -26,7 +29,8 @@ dotnet build csharp-project-template/tools/ExtractGitDiff/ExtractGitDiff.csproj
 
 ## 変更種別ごとの確認
 
-- root `docs/` / `instructions/` / `scripts/`: 関連リンク、プレースホルダ、workflow 参照の整合を確認し、root script は `py_compile` を実行する
+- root `docs/` / `instructions/` / `scripts/`: 関連リンク、プレースホルダ、workflow 参照の整合を確認し、root script は `py_compile` または `--help` で検証する
+- `.github/` / `.claude/`: `instructions/` を変更したら `scripts/sync_agent_skills.sh --copilot --claude` で同期する
 - `python-project-template/` の scripts/tools/tests: Python 側の該当 pytest / py_compile を実行する
 - `csharp-project-template/` の tools/tests: 対象 `.csproj` の `dotnet build` と該当 test runner を実行する
 - 両テンプレートへ横展開する変更: Python / C# の両方で同等の検証を行う
