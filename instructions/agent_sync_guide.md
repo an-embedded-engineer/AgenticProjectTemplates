@@ -63,5 +63,6 @@ scripts\sync_agent_skills.bat --claude --codex
 
 - `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` は手編集せず、`instructions/agent_common_master.md` を更新して再同期する
 - skills は `instructions/skills/` を更新して再同期する
+- `--codex` または `--all` はユーザホームの `~/.codex/skills` をグローバルに上書きする。複数プロジェクトで Codex skills を使い分ける場合は、実行前に必要な skill を退避するか、対象プロジェクトの skills だけを同期する方針を明確にする
 - Agent が導入されていない環境では、必要なターゲットだけ同期する
 - 同期先はバックアップを作成せずに上書きする。必要なら実行前に手動で退避する

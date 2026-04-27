@@ -12,6 +12,7 @@
 1. テンプレート境界
    - `python-project-template/` と `csharp-project-template/` の片方だけを変更する場合、差異が意図的かを文書または実装記録に残す
    - C# テンプレートに Python 実行前提の保守ツールを追加しない。必要な場合は .NET tool として実装する
+   - root `scripts/agent_cli_tmux.py` と `python-project-template/scripts/agent_cli_tmux.py` は意図的な重複として同一内容を保持し、変更時は両方を同期する
 2. Agent instructions
    - Agent 向け同期元は `instructions/agent_common_master.md` と `instructions/skills/` を正本とする
    - テンプレート内の生成物は直接編集しない

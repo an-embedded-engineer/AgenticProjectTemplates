@@ -37,7 +37,7 @@
 
 **推奨対応**: `docs/architecture/overview.md` の「主要ファイルリファレンス」に `Root Agent CLI tmux tool: scripts/agent_cli_tmux.py` を追記する。
 
-**対応**: 未対応。follow-up で `overview.md` を更新する。
+**対応**: 対応済み。`docs/architecture/overview.md` の「主要ファイルリファレンス」に `Root Agent CLI tmux tool: scripts/agent_cli_tmux.py` を追記した。
 
 ---
 
@@ -54,7 +54,7 @@ python3 -m py_compile scripts/agent_cli_tmux.py
 
 **推奨対応**: `development_workflow.md` に「root の agent_cli_tmux.py は python-project-template/tests/ で間接的に検証される（ファイルが完全同一のため）」旨を明記するか、root に向けたテスト実行コマンドを追加する。
 
-**対応**: 未対応。follow-up で `development_workflow.md` を更新する。
+**対応**: 対応済み。`docs/rules/development_workflow.md` に、root `scripts/agent_cli_tmux.py` は `py_compile` で確認し、動作検証は同一内容の `python-project-template/scripts/agent_cli_tmux.py` を対象にした pytest で間接検証する方針を追記した。
 
 ---
 
@@ -66,7 +66,7 @@ python3 -m py_compile scripts/agent_cli_tmux.py
 
 **推奨対応**: `agent_sync_guide.md` の「運用ルール」に「`--codex` または `--all` を指定すると `~/.codex/skills` がグローバルに上書きされる。複数プロジェクトで codex を利用する場合はバックアップを先に取るか `--copilot --claude` のみ同期する」旨を追記する。
 
-**対応**: 未対応。follow-up で `agent_sync_guide.md` を更新する。
+**対応**: 対応済み。`instructions/agent_sync_guide.md` の運用ルールに、`--codex` / `--all` が `~/.codex/skills` をグローバルに上書きすることと、複数プロジェクト利用時は退避または同期対象の方針確認が必要である旨を追記した。
 
 ---
 
@@ -76,7 +76,7 @@ python3 -m py_compile scripts/agent_cli_tmux.py
 
 **推奨対応**: `docs/architecture/overview.md` または `docs/rules/coding_rules.md` に「`scripts/agent_cli_tmux.py` (root) と `python-project-template/scripts/agent_cli_tmux.py` は意図的に同一内容を保持する。変更時は両ファイルを同時に更新し、`development_workflow.md` の両 py_compile を通過させる」旨を記載する。
 
-**対応**: 未対応。follow-up で方針を明文化する。
+**対応**: 対応済み。`docs/architecture/overview.md` と `docs/rules/coding_rules.md` に、root `scripts/agent_cli_tmux.py` と Python テンプレート側スクリプトを意図的な重複として同一内容に保つ方針を追記した。
 
 ---
 
@@ -88,7 +88,7 @@ python3 -m py_compile scripts/agent_cli_tmux.py
 
 **推奨対応**: デフォルト動作を `--copilot --claude` に絞り、`--all` を明示的なオプションとして維持する変更を検討する。または現状維持でドキュメントに警告を加える（最小変更案）。
 
-**対応**: 最小変更案（ドキュメント追記）を採用する方向で follow-up 検討。
+**対応**: 対応済み（最小変更案）。`instructions/agent_sync_guide.md` に `--codex` / `--all` のグローバル上書きリスクを明記した。デフォルト動作は既存テンプレートとの同期スクリプト互換を優先して現状維持とする。
 
 ---
 
@@ -100,7 +100,7 @@ python3 -m py_compile scripts/agent_cli_tmux.py
 
 **推奨対応**: `docs/architecture/code_patterns.md` または C# `Program.cs` の先頭コメントに「標準 CLIライブラリ非依存のため独自パーサーを使用」と理由を記録することで、将来の読者が疑問を持たないようにする。
 
-**対応**: 未対応（軽微）。必要なら follow-up。
+**対応**: 対応済み。`csharp-project-template/tools/AgentCliTmux/Program.cs` に、外部 CLI パーサー依存を避けてテンプレート単体で build/run できるよう最小パーサーを使う旨のコメントを追記した。
 
 ---
 
@@ -142,12 +142,12 @@ python3 -m py_compile scripts/agent_cli_tmux.py
 
 | 優先度 | 項目 | 理由 |
 |--------|------|------|
-| 高 | 2.1: ~/.codex グローバルインストールの警告未記載 | 誤操作で他プロジェクトのスキルを上書きするリスクがある |
-| 中 | 1.1: overview.md に root scripts パス未記載 | Agent が root スクリプトの存在を見落とす可能性がある |
-| 中 | 1.2: root スクリプトのテスト戦略未定義 | development_workflow.md の検証コマンドが不完全 |
-| 中 | 2.2: root/template 間スクリプト重複の方針未文書 | 将来の変更者が一方だけ更新するリスクがある |
-| 低 | 3.1: 引数なし全同期デフォルト | ドキュメント追記で当面は対応可能 |
-| 低 | 3.2: C# 独自パーサーの設計理由未記録 | 動作上問題はないが読者の疑問を残す |
+| 高 | 2.1: ~/.codex グローバルインストールの警告未記載 | 対応済み |
+| 中 | 1.1: overview.md に root scripts パス未記載 | 対応済み |
+| 中 | 1.2: root スクリプトのテスト戦略未定義 | 対応済み |
+| 中 | 2.2: root/template 間スクリプト重複の方針未文書 | 対応済み |
+| 低 | 3.1: 引数なし全同期デフォルト | 対応済み（ドキュメント警告、動作は現状維持） |
+| 低 | 3.2: C# 独自パーサーの設計理由未記録 | 対応済み |
 
 ---
 
@@ -160,8 +160,5 @@ python3 -m py_compile scripts/agent_cli_tmux.py
 - **対称性**: Python/C# の同等ツールが機能・テスト・dry-run の各軸で対称的に実装
 - **文書整合**: CLAUDE.md / agent_common_master.md、.claude/skills / .github/skills がいずれも同期済み
 
-**残課題（follow-up 必須）**:
-1. `agent_sync_guide.md` へ `~/.codex` グローバル上書きの警告を追記する（優先度 高）
-2. `docs/architecture/overview.md` へ root `scripts/agent_cli_tmux.py` のパスを追記する（優先度 中）
-3. `development_workflow.md` に root スクリプトと python-template テストの関係を明記する（優先度 中）
-4. `coding_rules.md` または `overview.md` に root/template 間スクリプト重複の運用方針を明記する（優先度 中）
+**残課題**:
+なし。レビュー指摘はすべて対応済み。

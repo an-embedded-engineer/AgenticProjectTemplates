@@ -35,6 +35,7 @@ internal static partial class Program
         }
 
         var command = args[0];
+        // 外部 CLI パーサー依存を避け、テンプレート単体で build/run できるよう最小パーサーにしている。
         var options = ParseOptions(args[1..]);
         var runner = new TmuxRunner(options.ContainsKey("dry-run"));
         var builder = new AgentCommandBuilder();

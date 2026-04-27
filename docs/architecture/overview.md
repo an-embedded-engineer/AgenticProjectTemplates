@@ -31,10 +31,13 @@ AgenticProjectTemplates 自体の保守 workflow、レビュー運用、ADR、Cl
 - Root instructions: `instructions/agent_common_master.md`
 - Root skills: `instructions/skills/`
 - Root workflow docs: `docs/procedure/`
+- Root Agent CLI tmux tool: `scripts/agent_cli_tmux.py`
 - Python template instructions: `python-project-template/instructions/`
 - C# template instructions: `csharp-project-template/instructions/`
 - Python Agent CLI tmux tool: `python-project-template/scripts/agent_cli_tmux.py`
 - C# Agent CLI tmux tool: `csharp-project-template/tools/AgentCliTmux/`
+
+`scripts/agent_cli_tmux.py` と `python-project-template/scripts/agent_cli_tmux.py` は、root のレビュー運用と Python テンプレート利用者向けに同一内容を保持する。変更時は両ファイルを同時に更新し、`docs/rules/development_workflow.md` の root / Python template 両方の検証を通す。
 
 ## ドキュメント構成
 
