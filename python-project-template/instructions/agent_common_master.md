@@ -7,6 +7,7 @@
 
 ## 2. 必須参照（索引）
 
+- ADR 索引: `docs/adr/README.md`
 - プロジェクト概要: `docs/rules/project_overview.md`
 - アーキテクチャ概要: `docs/architecture/overview.md`
 - コードパターン: `docs/architecture/code_patterns.md`
@@ -28,6 +29,7 @@
 - 明示的に指示されない限り、後方互換レイヤーや旧経路は残さない
 - 例外を握りつぶさない
 - 不必要なフォールバックを実装せず、プロジェクト内で閉じる仕様不一致は例外として顕在化させる
+- 関連 ADR が存在する場合は、計画前・実装前・レビュー時に `docs/adr/README.md` の索引規則で対象 ADR を判定して先に参照する
 - `./.venv/bin/pyright --outputjson > pylance_error.json` のエラーを 0 にする
 
 ## 4. skills 適用

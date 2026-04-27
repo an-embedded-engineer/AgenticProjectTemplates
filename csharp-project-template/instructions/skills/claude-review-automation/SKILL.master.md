@@ -1,6 +1,6 @@
 ---
 name: claude-review-automation
-description: {{PROJECT_NAME}} のレビュー依頼を Claude Code CLI のインタラクティブモードで自動化する手順。Codex が tmux 経由で Claude を起動・監視し、spec-change/new-feature/bugfix/issue-resolution/refactoring の Phase 2/3/4/5 レビューと指摘対応確認を代行する。
+description: {{PROJECT_NAME}} のレビュー依頼を Claude Code CLI のインタラクティブモードで自動化する手順。Codex が tools/AgentCliTmux 経由で Claude を起動・監視し、spec-change/new-feature/bugfix/issue-resolution/refactoring の Phase 2/3/4/5 レビューと指摘対応確認を代行する。
 ---
 
 # claude-review-automation
@@ -21,6 +21,7 @@ description: {{PROJECT_NAME}} のレビュー依頼を Claude Code CLI のイン
 - レビュー反映手順: `docs/procedure/ai_review_response_workflow.md`
 - レビュー観点: `docs/procedure/review_checkpoints.md`
 - tmux 監視の基準手順: `docs/procedure/autonomous_workflow_orchestrator.md`
+- tmux / Agent CLI 共通スクリプト: `tools/AgentCliTmux`
 
 ## この skill の役割
 
@@ -45,7 +46,7 @@ description: {{PROJECT_NAME}} のレビュー依頼を Claude Code CLI のイン
 1. `docs/design_analysis/.../<yyyymmdd>_<topic>/` が作成済みである
 2. 対象 Phase の「レビュー依頼前コミット」が完了済みである
 3. `tmux` と `claude` コマンドが実行可能である
-4. Codex が `tmux capture-pane` と承認ダイアログ処理を自律実行できる
+4. Codex が `tools/AgentCliTmux` を実行できる
 
 ## workflow 判定
 
@@ -88,8 +89,11 @@ description: {{PROJECT_NAME}} のレビュー依頼を Claude Code CLI のイン
 2. Claude はインタラクティブモードで起動する
 ```bash
 SESSION_NAME="{{PROJECT_NAME_LOWER}}-claude-${TOPIC}"
-tmux new-session -d -s "${SESSION_NAME}" -x 220 -y 60 -c "${MAIN_PROJECT_DIR}"
-tmux send-keys -t "${SESSION_NAME}:0.0" "TERM=dumb claude" Enter
+dotnet run --project tools/AgentCliTmux -- ensure \
+  --session "${SESSION_NAME}" \
+  --pane 0.0 \
+  --cwd "${MAIN_PROJECT_DIR}" \
+  --agent claude
 ```
 
 3. 既存セッションがある場合は再利用し、Claude プロセスが落ちている時だけ再起動する
@@ -111,20 +115,24 @@ tmux send-keys -t "${SESSION_NAME}:0.0" "TERM=dumb claude" Enter
 2. review 文書の出力先を決める
 3. Claude 用プロンプトファイルを作る
 - 一時ファイル例: `/tmp/{{PROJECT_NAME_LOWER}}_claude_review_prompt.txt`
-- 長文は `tmux load-buffer` + `tmux paste-buffer` で送る
+- 長文は `dotnet run --project tools/AgentCliTmux -- send-prompt` で送る
 
 4. Claude にレビューを依頼する
 ```bash
 PROMPT_FILE="/tmp/{{PROJECT_NAME_LOWER}}_claude_review_prompt.txt"
-tmux load-buffer "${PROMPT_FILE}"
-tmux paste-buffer -t "${SESSION_NAME}:0.0"
-tmux send-keys -t "${SESSION_NAME}:0.0" Enter
+dotnet run --project tools/AgentCliTmux -- send-prompt \
+  --session "${SESSION_NAME}" \
+  --pane 0.0 \
+  --file "${PROMPT_FILE}"
 ```
 
 5. `sleep` を挟みながら `tmux capture-pane` で Claude の出力を監視する
 ```bash
-sleep 15
-tmux capture-pane -t "${SESSION_NAME}:0.0" -p -S -120
+dotnet run --project tools/AgentCliTmux -- capture \
+  --session "${SESSION_NAME}" \
+  --pane 0.0 \
+  --sleep-before 15 \
+  --lines 120
 ```
  - 監視中は `15s -> 30s -> 60s` の backoff を使ってよい
  - 5 分程度の長い `thinking` は通常範囲とみなし、安易に中断しない
@@ -202,6 +210,6 @@ tmux kill-session -t "${SESSION_NAME}" 2>/dev/null || true
 
 - `tmux capture-pane` が空になる: Claude が alt-screen で動作している可能性が高い。`TERM=dumb claude` で再起動する
 - 5 分以上 `thinking` が続く: 直ちに停止扱いせず、`15s -> 30s -> 60s` の backoff 監視へ切り替える。10 分程度進捗が見えなければユーザへ相談する
-- プロンプト投入が崩れる: `tmux send-keys` の直打ちではなく `tmux load-buffer` + `tmux paste-buffer` を使う
+- プロンプト投入が崩れる: `tmux send-keys` の直打ちではなく `dotnet run --project tools/AgentCliTmux -- send-prompt` を使う
 - Claude が review 文書をコミットしない: 「レビュー文書の更新とコミットまでお願いします」と追送する
 - 承認ダイアログで停止する: まず Codex がコマンド内容を確認し、安全なら承認、危険ならユーザへ確認する
