@@ -7,8 +7,11 @@ components:
   - "python-project-template/tools/extract_git_diff.py"
   - "docs/procedure/autonomous_workflow_orchestrator.md"
   - "docs/procedure/autonomous_workflow_orchestrator_copilot_cli.md"
-status: "draft"
-related_commits: []
+status: "merged"
+related_commits:
+  - "01ff5e0 : Phase 1 initialize research meta for cli auto approval settings"
+  - "6369b9e : Phase 2 add cli auto approval settings research report"
+  - "95e86ac : Phase 3 reviewer add cli auto approval settings report review"
 source_design_path: "docs/design_analysis/research_analysis/20260501_cli_auto_approval_settings/report.md"
 ---
 
