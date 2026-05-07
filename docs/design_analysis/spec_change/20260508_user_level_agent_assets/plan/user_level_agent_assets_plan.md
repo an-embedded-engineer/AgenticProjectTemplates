@@ -113,11 +113,13 @@
 - `instructions/agent_common_master.md` と `instructions/*.draft.md` を薄い index と固有ルール中心へ整理する
 - template 同梱 workflow skills と `docs/procedure/` を段階的に削減する
 - `docs/rules/skill_catalog.md` の参照元を更新し、削除方向で整理する
+	- ripple 対象には `root/CLAUDE.md`、`root/AGENTS.md`、`.github/copilot-instructions.md`、各 template の `instructions/skills/*/SKILL.master.md` を含める
 
 ### 7.5 Sync / Wrapper 再設計
 
 - user-level install script と project-level sync script の責務を分ける
 - `agent_cli_tmux` / `AgentCliTmux` を呼ぶ OS 別 wrapper または publish 済み executable の配置方針を定める
+	- macOS / Linux は `.sh`、Windows は `.ps1` を優先し、必要に応じて `.cmd` または publish 済み executable を併用する
 - allowlist は wrapper / executable 単位で設計する
 
 ## 8. リスクと段階的移行方針
@@ -135,7 +137,7 @@
 ### 8.3 Copilot user-level skill 検出の環境差
 
 - リスク: `~/.copilot/skills` または `~/.agents/skills` の検出結果が実環境に依存する
-- 対策: Phase 5 の smoke test で最小 skill を使って検証し、必要なら project-level fallback を明示する
+- 対策: Phase 5 の smoke test で最小 skill を使って検証し、不合格時は `.github/skills/` を project-level fallback として維持する範囲と削除条件を Phase 3 で設計確定する
 
 ### 8.4 `docs/procedure/` の早期除去による workflow 破綻
 
@@ -190,7 +192,7 @@ Phase 5 では少なくとも以下をユーザ確認対象とする。
 - `instructions/`: sync source の再編、project-level index 化
 - `instructions/skills/`: user-level 正本化、`references/` 同梱化
 - `docs/procedure/`: user-level skill 側への移管
-- `docs/rules/skill_catalog.md`: 参照元更新を伴う削除方向整理
+- `docs/rules/skill_catalog.md`: `root/CLAUDE.md`、`root/AGENTS.md`、`.github/copilot-instructions.md`、各 template の `instructions/skills/*/SKILL.master.md` の参照更新を伴う削除方向整理
 - `scripts/`: sync / install / wrapper の責務再設計
 - `python-project-template/`, `csharp-project-template/`: project-level instructions と docs の薄化、検証導線更新
 
@@ -200,6 +202,7 @@ Phase 5 では少なくとも以下をユーザ確認対象とする。
 2. install script と sync script の機能分割をどこまで root / template 共通化するか
 3. docs bootstrap skill の補助スクリプトを shell / PowerShell / publish 済み executable のどれで提供するか
 4. project-level fallback をどの期間まで残すか
+5. Copilot smoke test が不合格だった場合、`.github/skills/` に残す workflow skills の範囲と解消条件をどう定義するか
 
 ## 14. 受け入れ条件
 
@@ -207,3 +210,6 @@ Phase 5 では少なくとも以下をユーザ確認対象とする。
 2. workflow skill が `docs/procedure/` を project-level に要求せず、skill 同梱 `references/` から必要手順を参照できる。
 3. project-level instructions は共通原則の再掲ではなく、固有ルールと成果物索引へ縮小される。
 4. `skill_catalog.md` 削除方向に伴う参照更新、wrapper allowlist、Copilot smoke test を含む検証計画が定義されている。
+5. user-level install script は `dry-run`、`missing-only default`、既存 user skill 保護、未作成 skill directory 作成を満たす。
+
+補足: 詳細な受け入れ条件の対応表は Section 6 と `docs/todo/todo.md` の `SC-20260508-001` を正とする。
