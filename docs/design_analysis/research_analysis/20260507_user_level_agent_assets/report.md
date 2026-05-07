@@ -297,7 +297,7 @@ Python / C# テンプレートから削減候補:
 - `docs/rules/skill_catalog.md`
 - `scripts/sync_agent_skills.*` のうち、ユーザレベル install と重複する機能
 
-`docs/rules/skill_catalog.md` は root / template の `agent_common_master.md` から参照されているため、削除する場合は `CLAUDE.md`、`AGENTS.md`、`.github/copilot-instructions.md`、各 `SKILL.master.md` の索引参照も同時に更新する必要がある。削除ではなく「user-level skills の薄い索引」として残す案も比較対象にする。
+`docs/rules/skill_catalog.md` は root / template の `agent_common_master.md` から参照されているため、削除方向で整理する場合は `CLAUDE.md`、`AGENTS.md`、`.github/copilot-instructions.md`、各 `SKILL.master.md` の索引参照も同時に更新する必要がある。
 
 残す候補:
 
