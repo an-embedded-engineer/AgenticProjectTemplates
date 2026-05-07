@@ -10,14 +10,17 @@ components:
   - python-project-template
   - csharp-project-template
 status: in_progress
-plan_status: in_review
+plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
 design_status: N/A
 impl_status: not_started
 branch: feature/spec-user-level-agent-assets-20260508
 source_research_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 source_research_review_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/user_level_agent_assets_report_review.md
-related_commits: []
+related_commits:
+  - 4bc2fec : Phase 2 pre-review plan
+  - eca2abe : Phase 2 plan review Round 1
+  - cea5833 : Phase 2 post-review plan fix
 ---
 
 # メタ情報
