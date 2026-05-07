@@ -12,7 +12,8 @@ components:
 status: in_progress
 plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
-design_status: N/A
+design_status: draft
+source_design_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md
 impl_status: not_started
 branch: feature/spec-user-level-agent-assets-20260508
 source_research_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
@@ -44,6 +45,6 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 
 ## 未着手の後続 Phase
 
-- Phase 3: user-level asset ディレクトリ構造、install / sync / wrapper 責務、template 縮小順序の設計確定
+- Phase 3: user-level asset ディレクトリ構造、install / sync / wrapper 責務、template 縮小順序の設計レビュー
 - Phase 4: user-level assets / bootstrap skill / sync source 再編の実装
 - Phase 5: smoke test、テンプレート検証、恒久ドキュメント同期
