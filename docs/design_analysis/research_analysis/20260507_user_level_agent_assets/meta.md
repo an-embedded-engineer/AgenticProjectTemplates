@@ -8,9 +8,10 @@ components:
   - docs_templates
   - python-project-template
   - csharp-project-template
-status: draft
+status: in_review
 related_commits:
   - dd6e612 : Phase 1 meta 初期化
+  - e40aabe : Phase 2 調査レポート作成
 source_design_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 ---
 
