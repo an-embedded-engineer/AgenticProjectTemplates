@@ -12,7 +12,7 @@ components:
 status: in_progress
 plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
-design_status: draft
+design_status: in_review
 source_design_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md
 impl_status: not_started
 branch: feature/spec-user-level-agent-assets-20260508
