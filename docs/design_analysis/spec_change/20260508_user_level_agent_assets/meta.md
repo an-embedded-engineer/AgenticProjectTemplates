@@ -26,6 +26,7 @@ related_commits:
   - fb34c22 : Phase 3 pre-review design
   - 8f0767f : Phase 3 design review Round 1
   - c4171ce : Phase 3 post-review design fix
+  - 2e68fd4 : Phase 3 design review Round 2 approval
 ---
 
 # メタ情報
@@ -49,6 +50,5 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 
 ## 未着手の後続 Phase
 
-- Phase 3: user-level asset ディレクトリ構造、install / sync / wrapper 責務、template 縮小順序の設計レビュー
 - Phase 4: user-level assets / bootstrap skill / sync source 再編の実装
 - Phase 5: smoke test、テンプレート検証、恒久ドキュメント同期

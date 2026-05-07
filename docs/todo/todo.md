@@ -7,7 +7,7 @@
 ### SC-20260508-001: ユーザレベル Agent 資産化
 
 - workflow: `spec-change`
-- status: `phase_3_designing`
+- status: `phase_3_done`
 - source_research: `docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md`
 - review: `docs/design_analysis/research_analysis/20260507_user_level_agent_assets/user_level_agent_assets_report_review.md`
 - meta: `docs/design_analysis/spec_change/20260508_user_level_agent_assets/meta.md`
