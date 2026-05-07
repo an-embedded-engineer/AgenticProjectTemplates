@@ -10,7 +10,7 @@ components:
   - python-project-template
   - csharp-project-template
 status: in_progress
-plan_status: draft
+plan_status: in_review
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
 design_status: N/A
 impl_status: not_started
