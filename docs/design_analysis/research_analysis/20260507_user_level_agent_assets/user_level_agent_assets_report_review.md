@@ -4,9 +4,9 @@ created_date: "2026-05-07"
 category: research_analysis_review
 target_report: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 target_meta: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/meta.md
-review_target_commit: 51cc2b1
+review_target_commit: 0516d00
 fix_commit: e96aa40
-status: approved
+status: round_3_open_low
 ---
 
 # レビュー文書: ユーザレベル Agent 資産化の妥当性調査
@@ -171,3 +171,25 @@ status: approved
     - Low-4: リスク 5 と未解決事項 #7 に user-level 補助スクリプトの言語前提を追記。OK
   - 新規指摘: なし
   - 状態: 承認済み（次 workflow へ移行可）
+- Round 3 (2026-05-08)
+  - レビュー担当: Claude (Opus 4.7)
+  - 対象コミット: 0516d00
+  - 観点
+    - post-review 追記後の自己矛盾の有無
+    - Copilot user-level skills の取り扱いが Microsoft Learn / GitHub Docs と整合しているか
+    - 未解決事項が実装 workflow に渡せる粒度になっているか
+    - `docs/procedure/` の references 化、`skill_catalog.md` 削除方向、OS 別 wrapper 方針が変更手順案・推奨方針・リスク対策で整合しているか
+    - `spec-change-workflow` 実行前に追加で解消すべき不明点が残っていないか
+  - 確認結果
+    - Copilot 取り扱い: 報告書は Microsoft Learn と GitHub Docs の両 URL を引用し、Microsoft Learn 由来の `~/.claude/skills/` 表記と GitHub Docs 由来の経路差を本文中で明記している。本文（L102-104, L162-163）、リスク 3（L388-405）、推奨方針 #5、Phase A step 3、Phase B step 5/6、未解決事項 #2 で配置先と smoke test 要件が整合しており、内部矛盾は検出できなかった。
+    - 未解決事項の粒度: 8 項目について `状態` と `方針` が明示されている。`方針確定` が 6 件、`動作確認待ち` が 2 件（#2 Copilot smoke test、#6 docs/procedure references 化後の動作確認）。動作確認待ち 2 件は spec-change の実装段階で解消する性質であり、計画段階の阻害要因にはならない。実装 workflow へ渡せる粒度と判断する。
+    - `docs/procedure/` references 化: Phase D step 3、推奨方針 #4、リスク 4 対策、未解決事項 #6 が整合している。
+    - OS 別 wrapper 方針: Phase B step 4、リスク 5 対策、推奨方針 #7、未解決事項 #8 が整合している。`agent_cli_tmux` / `AgentCliTmux` を `python` / `dotnet` 全体ではなく wrapper / executable 単位で allowlist する点も明記されている。
+    - `skill_catalog.md` 削除方向: Phase D step 7、推奨方針 #6、未解決事項 #4 はいずれも「削除方向で確定」を示している。ただし下記 [Low-1] のとおり、推奨アーキテクチャ節の本文記述に未確定時の表現が残置している。
+  - 指摘
+    - [Low-1] 推奨アーキテクチャ節の `skill_catalog.md` 記述が方針確定状況と非整合
+      - 対象: report.md L300「削除ではなく『user-level skills の薄い索引』として残す案も比較対象にする」
+      - 理由: Phase D step 7「`docs/rules/skill_catalog.md` は不要とし、参照元から削除する」、推奨方針 #6「削除方向に整理する」、未解決事項 #4「削除方向で扱う」が確定方針として整理済みであるのに対し、L300 は「比較対象にする」と未確定の代替案を提示しており、確定状況と不整合。読み手に「削除と維持が両論併記のまま」と誤読させ得る。
+      - 推奨対応: L300 末尾の「削除ではなく『user-level skills の薄い索引』として残す案も比較対象にする。」を削除するか、「削除方向で確定済みのため、参照元（CLAUDE.md / AGENTS.md / .github/copilot-instructions.md / 各 SKILL.master.md）の索引も同時に更新する。」等、確定方針を反映した記述に書き換える。
+  - 新規指摘: Low 1
+  - 状態: 軽微指摘 1 件（Low-1）あり。当該指摘の対応後に Round 4 で承認する想定。`spec-change-workflow` への引き継ぎ自体は L300 修正と同時実施で問題なく、ブロッキングではない。
