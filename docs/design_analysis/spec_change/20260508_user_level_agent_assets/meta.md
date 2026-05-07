@@ -12,7 +12,7 @@ components:
 status: in_progress
 plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
-design_status: in_review
+design_status: done
 source_design_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md
 impl_status: not_started
 branch: feature/spec-user-level-agent-assets-20260508
@@ -22,6 +22,10 @@ related_commits:
   - 4bc2fec : Phase 2 pre-review plan
   - eca2abe : Phase 2 plan review Round 1
   - cea5833 : Phase 2 post-review plan fix
+  - b92d3a5 : Phase 2 plan review Round 2 approval
+  - fb34c22 : Phase 3 pre-review design
+  - 8f0767f : Phase 3 design review Round 1
+  - c4171ce : Phase 3 post-review design fix
 ---
 
 # メタ情報

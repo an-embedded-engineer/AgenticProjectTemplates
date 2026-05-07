@@ -5,7 +5,7 @@ category: spec_change_design_review
 target_design: docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md
 target_meta: docs/design_analysis/spec_change/20260508_user_level_agent_assets/meta.md
 target_commit: fb34c225bdd21d470d6c9ab99d96157487a03750
-status: in_review
+status: approved
 ---
 
 # レビュー文書: ユーザレベル Agent 資産化 Phase 3 設計
@@ -149,4 +149,15 @@ Phase 4 実装に支障をきたす未解決事項（Medium 指摘）:
   - レビュー担当: Claude Sonnet 4.6 (GitHub Copilot CLI)
   - 対象コミット: fb34c22
   - 指摘: Medium 3 / Low 2
-  - 状態: 指摘対応待ち
+  - 状態: 指摘対応待ち → Round 2 で対応完了
+- Round 2 (2026-05-08)
+  - レビュー担当: Claude Sonnet 4.6 (GitHub Copilot CLI)
+  - 対象コミット: c4171ce
+  - 確認内容
+    - Medium-1: Section 4.1 ツリーに `autonomous-workflow-orchestrator` / `copilot-cli-workflow-orchestrator` を追加。設計判断に "orchestration skill も user-level 正本化対象" を明記。Section 9.1 に両 skill の fallback 非対象根拠も追記。OK
+    - Medium-2: `user-agent-assets/bin/` と `runtime/` をツリーに追加（`agentic-agent-cli-tmux.sh`、`.ps1`、`agent_cli_tmux.py`、`AgentCliTmux.exe`）。Section 6.4 として shared helper 配布設計（install 先 `~/.agentic-project-templates/`・macOS/Linux と Windows の wrapper 呼び出し方針・SKILL.md からは wrapper 経由のみ・`python`/`dotnet` 直 allowlist 禁止）を追加。skill 個別 `bin/` と shared `bin/` の分離方針も明記。OK
+    - Medium-3: Section 4.3 として `agent_common_master.md` の After 構成（5 保持セクション: 目的・必須参照・project 固有ルール・生成物運用・user-level assets 利用前提 / 4 削除カテゴリ: 共通原則・ADR 参照一般ルール・フォールバック禁止一般原則・skill_catalog 横断参照）を追加。root / Python / C# 統一方針も明記。OK
+    - Low-1: Section 9.1 設計判断に除外 5 skill の根拠（"Copilot Chat 日常導線より Claude/Codex/明示起動用途が主"）を追記。smoke test 不合格時の代替案内（Claude/Codex 側 user-level skill から起動・明示参照 advanced operation として扱う）も追記。OK
+    - Low-2: Section 7.2 に共通コピー対象 10 ファイルを列挙。Section 7.3 に `spec-change-workflow` および `copilot-review-automation` / orchestration skill の固有ファイル例を追記。OK
+  - 新規指摘: なし
+  - 状態: 承認済み（Phase 4 実装への移行可）
