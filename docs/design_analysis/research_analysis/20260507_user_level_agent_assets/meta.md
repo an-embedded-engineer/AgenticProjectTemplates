@@ -9,7 +9,8 @@ components:
   - python-project-template
   - csharp-project-template
 status: draft
-related_commits: []
+related_commits:
+  - dd6e612 : Phase 1 meta 初期化
 source_design_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 ---
 
