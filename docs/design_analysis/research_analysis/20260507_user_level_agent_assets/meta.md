@@ -8,12 +8,14 @@ components:
   - docs_templates
   - python-project-template
   - csharp-project-template
-status: in_review
+status: merged
 related_commits:
   - dd6e612 : Phase 1 meta 初期化
   - e40aabe : Phase 2 調査レポート作成
   - 51cc2b1 : Phase 3 レビュー依頼前ステータス更新
   - 5fa6c58 : Phase 3 Claude レビュー Round 1
+  - e96aa40 : Phase 4 レビュー指摘対応
+  - 3bb72c1 : Phase 4 Claude レビュー Round 2 承認
 source_design_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 ---
 
