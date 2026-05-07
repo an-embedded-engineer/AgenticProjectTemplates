@@ -20,6 +20,8 @@ related_commits:
   - 4fc6048 : Post-review GitHub Docs Copilot skills / wrapper 方針反映
   - a4182ff : Post-review 未解決事項の実装前集約
   - 8815a40 : Post-review 未解決事項の解消方針反映
+  - bd1e290 : Phase 3 Claude レビュー Round 3
+  - 5915b8b : Phase 4 Round 3 指摘対応
 source_design_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 ---
 
