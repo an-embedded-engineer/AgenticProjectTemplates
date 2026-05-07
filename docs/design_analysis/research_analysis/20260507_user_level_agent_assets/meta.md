@@ -16,6 +16,7 @@ related_commits:
   - 5fa6c58 : Phase 3 Claude レビュー Round 1
   - e96aa40 : Phase 4 レビュー指摘対応
   - 3bb72c1 : Phase 4 Claude レビュー Round 2 承認
+  - 5118d9a : Post-review Copilot user-level skills 公式情報反映
 source_design_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 ---
 
