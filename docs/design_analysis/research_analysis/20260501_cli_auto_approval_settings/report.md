@@ -131,6 +131,42 @@ Copilot CLI の shell permission pattern は基本的に command 名ベースで
 
 repo 既存の `python scripts/agent_cli_tmux.py` 形式のままでは、`python` 全体を緩めることになりやすい。
 
+#### `agent_cli_tmux` / `AgentCliTmux` の shell wrapper 化
+
+`agent_cli_tmux.py` と C# 版 `AgentCliTmux` は、ターゲット OS に応じた shell wrapper を用意する価値がある。目的は実装言語を隠蔽することではなく、承認設定の対象を `python` / `dotnet` ではなく、用途が限定された command 名へ寄せることである。
+
+候補:
+
+- macOS / Linux: `scripts/agent-cli-tmux.sh`
+- Windows PowerShell: `scripts/agent-cli-tmux.ps1`
+- Windows Command Prompt が必要なら薄い `scripts/agent-cli-tmux.cmd`
+
+wrapper の責務:
+
+1. OS / テンプレート種別に応じて、内部で `python scripts/agent_cli_tmux.py` または `dotnet run --project tools/AgentCliTmux --` を呼び分ける
+2. 引数は `ensure` / `capture` / `send-prompt` など既存 subcommand へそのまま渡す
+3. destructive command は実装しない
+4. `--dry-run` を持つ場合は、実行予定コマンドだけを出力する
+5. exit code と stderr を内部 tool から素直に伝播する
+
+allowlist 例:
+
+```bash
+copilot \
+  --allow-tool='shell(scripts/agent-cli-tmux.sh:*)' \
+  --allow-tool='shell(scripts/extract-git-diff.sh:*)'
+```
+
+```powershell
+copilot `
+  --allow-tool='shell(scripts/agent-cli-tmux.ps1:*)' `
+  --allow-tool='shell(scripts/extract-git-diff.ps1:*)'
+```
+
+この形にすると、Copilot CLI / Claude Code の command allowlist は `python` や `dotnet` 全体ではなく、対象 repo の用途別 wrapper だけを許可できる。特に Windows / macOS / Linux を跨ぐ運用では、Agent 向け手順書に「許可すべき wrapper command」を固定しやすい。
+
+注意点として、wrapper 自体が任意コマンド実行口にならないよう、subcommand と引数の扱いは既存 `agent_cli_tmux` の API に限定する。PowerShell wrapper は `Start-Process` や `Invoke-Expression` を避け、配列引数で外部プロセスを起動する。
+
 #### VS Code Copilot Chat との関係
 
 VS Code 同梱 Copilot 拡張の公開文字列には `github.copilot.resetAutomaticCommandExecutionPrompt` という command が存在した。一方で、公開 configuration key として command auto approval の allowlist を定義する項目は確認できなかった。
@@ -261,9 +297,9 @@ claude -p "Run the read-only inspection workflow" \
 
 最も再現性が高く、repo 共有もしやすい。`agent_cli_tmux` と `extract_git_diff` も command prefix で許可しやすい。
 
-### 推奨 2: Copilot CLI は `--allow-tool` を使うが、script は wrapper 化を前提にする
+### 推奨 2: Copilot CLI は `--allow-tool` を使い、script は OS 別 wrapper 化を前提にする
 
-`grep` / `rg` / `find` / `cat` / `git status` は直接 allowlist できる。一方で Python script を `python <script>` で呼ぶ構成は粒度が荒いので、wrapper command へ寄せた方がよい。
+`grep` / `rg` / `find` / `cat` / `git status` は直接 allowlist できる。一方で Python script を `python <script>`、C# tool を `dotnet run --project ...` で呼ぶ構成は粒度が荒い。`scripts/agent-cli-tmux.sh` / `scripts/agent-cli-tmux.ps1` のような用途別 wrapper command へ寄せた方がよい。
 
 ### 推奨 3: Codex は現状の `-a on-request` 維持が妥当
 
@@ -274,7 +310,7 @@ claude -p "Run the read-only inspection workflow" \
 ### リスク
 
 1. Copilot CLI の `--no-ask-user` を tool auto approval と誤認したまま運用すると、想定より多くの承認待ちが残る。
-2. Copilot CLI で Python wrapper を使わず `python ...` 形式を残すと、`python` 全体を許可しがちで許可粒度が粗くなる。
+2. Copilot CLI で wrapper を使わず `python ...` / `dotnet ...` 形式を残すと、`python` / `dotnet` 全体を許可しがちで許可粒度が粗くなる。
 3. Claude Code の `bypassPermissions` や Copilot CLI の `--allow-all-tools` を安易に使うと、read-only command だけを緩める意図を超えてしまう。
 
 ### 未解決事項
@@ -282,6 +318,7 @@ claude -p "Run the read-only inspection workflow" \
 1. VS Code Copilot Chat に、公開されていない内部設定以外で declarative な command allowlist が存在するかは未確認。
 2. Copilot CLI の tool allowlist を設定ファイルへ永続化する公式キーは、今回の `help config` 範囲では確認できなかった。
 3. Copilot CLI の `shell(...)` が script path をどの粒度で match するかは、live session での挙動確認までは実施していない。
+4. wrapper command の命名、配置、PowerShell / sh の引数エスケープ仕様は未設計。
 
 ## 推奨する次 workflow
 
@@ -291,4 +328,5 @@ claude -p "Run the read-only inspection workflow" \
 
 - `docs/procedure/autonomous_workflow_orchestrator_copilot_cli.md` の承認説明を実仕様へ合わせて修正する必要がある。
 - `scripts/agent_cli_tmux.py` の Copilot 起動オプションを `--no-ask-user` 中心から `--allow-tool` ベースへ再設計する余地がある。
+- `agent_cli_tmux.py` / `tools/AgentCliTmux` の前段に OS 別 wrapper (`.sh` / `.ps1` / 必要なら `.cmd`) を置き、承認設定では wrapper command を許可する設計を検討する必要がある。
 - Claude Code / Copilot CLI 向けの shared settings / wrapper command 方針を、instructions と procedure に同期する必要がある。
