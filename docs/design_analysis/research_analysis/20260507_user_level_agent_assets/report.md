@@ -201,7 +201,6 @@ user-agent-assets/
 ├── shared/
 │   └── references/
 │       └── procedure/
-│           ├── review_checkpoints.md
 │           └── workflow_phase_library/
 │               └── common/
 └── install/
@@ -227,15 +226,9 @@ SKILL.md -> docs/procedure/*.md を参照
 ```text
 SKILL.md
 references/
-  procedure/
-    spec_change_workflow.md
-    workflow_phase_library/...
-shared/
-   references/
-      procedure/
-         review_checkpoints.md
-scripts/
-  resolve_project_context.py
+   procedure/
+      spec_change_workflow.md
+      workflow_phase_library/...
 ```
 
 これにより、対象プロジェクトに `docs/procedure/` がなくても workflow skill が動く。
@@ -243,7 +236,7 @@ scripts/
 補足:
 
 - `workflow_selection.md` は skill が読み込まれた時点で役割を終えているため、各 workflow skill の `references/` へは持ち込まない
-- `review_checkpoints.md` は `ai_review_response_workflow.md` からのみ参照する shared 文書として扱う
+- `review_checkpoints.md` は `ai-review-response-workflow` の `references/procedure/` に最初から同梱する
 
 ここでの `SKILL.md` は user-level の実行時正本である。移行期間中に既存 `SKILL.master.md` を継続する場合でも、install script は `SKILL.master.md` から placeholder を除去して `SKILL.md` を生成する。
 
@@ -346,7 +339,7 @@ Python / C# テンプレートから削減候補:
 1. core workflow skill 5 種と `research-analysis-workflow` は、root 正本の `SKILL.master.md` から top-level procedure 文書を直接参照している
 2. core workflow skill 5 種は、workflow 本体文書の下流依存として `workflow_phase_library/<type>/` と `workflow_phase_library/common/` も必要になる
 3. `workflow_selection.md` は original skill では直接参照されているが、skill 選択済みの実行時には不要であるため、各 user-level skill へは移さない方が自然である
-4. `review_checkpoints.md` は用途上 `ai_review_response_workflow.md` の補助文書として扱い、shared 正本へ寄せた上で `ai-review-response-workflow` にだけ配置するのが妥当である
+4. `review_checkpoints.md` は用途上 `ai_review_response_workflow.md` の補助文書として扱い、shared 配布対象にはせず `ai-review-response-workflow` にだけ同梱するのが妥当である
 5. `workflow_phase_library/common` の 6 ファイルは、phase library を使う全 skill の共通依存であるため、shared 正本へ切り出して hydrate するのが最も保守しやすい
 
 ### skill 別の最小コピー集合
@@ -359,7 +352,7 @@ Python / C# テンプレートから削減候補:
 | `issue-resolution-workflow` | `issue_resolution_workflow.md` | `workflow_phase_library/issue_resolution/*`、common 6 files | 起点文書 1 件 + `workflow_phase_library/issue_resolution/` + shared common |
 | `refactoring-workflow` | `refactoring_workflow.md` | `workflow_phase_library/refactoring/*`、common 6 files | 起点文書 1 件 + `workflow_phase_library/refactoring/` + shared common |
 | `research-analysis-workflow` | `research_analysis_workflow.md` | なし | 起点文書 1 件のみ |
-| `ai-review-response-workflow` | `ai_review_response_workflow.md` | shared `review_checkpoints.md` | 起点文書 1 件 + shared `review_checkpoints.md` |
+| `ai-review-response-workflow` | `ai_review_response_workflow.md` | `review_checkpoints.md` | 起点文書 1 件 + `review_checkpoints.md` |
 | `copilot-review-automation` | `workflow_phase_library/README.md`、5 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、common 6 files | 起点文書一式 + `workflow_phase_library/README.md` + 全 workflow phase library + shared common |
 | `claude-review-automation` | 5 workflow 本体、`ai_review_response_workflow.md`、`autonomous_workflow_orchestrator.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、common 6 files | 起点文書一式 + `autonomous_workflow_orchestrator.md` + 全 workflow phase library + shared common |
 | `autonomous-workflow-orchestrator` | `autonomous_workflow_orchestrator.md`、5 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、common 6 files | 起点文書一式 + 全 workflow phase library + shared common |
@@ -373,7 +366,7 @@ Python / C# テンプレートから削減候補:
 2. ただし、直接参照された workflow 文書が `workflow_phase_library` を必要とする場合は、その下流依存を追加でコピーする
 3. `workflow_phase_library/common` は `user-agent-assets/shared/references/procedure/workflow_phase_library/common/` にだけ置き、install / sync 時に必要 skill へ hydrate する
 4. `workflow_selection.md` は user-level workflow skill の payload へ入れず、必要なら将来 standalone skill として再定義する
-5. `review_checkpoints.md` は `ai-review-response-workflow` にだけ配置し、その skill 内から参照する shared 文書として扱う
+5. `review_checkpoints.md` は `ai-review-response-workflow` にだけ配置し、その skill 内から参照する専用文書として扱う
 6. `copilot-review-automation` だけは root 正本で `workflow_phase_library/README.md` を直接参照しているため、これを個別保持する
 7. `docs/procedure/README.md` や、直接・間接に参照されない別 workflow 文書は skill reference へ持ち込まない
 8. review automation / orchestrator 群は 5 workflow を束ねる suite と見なし、5 workflow 本体とそれぞれの phase library を一体で配布する
@@ -461,7 +454,7 @@ GitHub Docs の agent skills 概念ページでも、agent skills は Copilot CL
 
 - Copilot も user-level skills 正本化の対象に含める
 - install script は `~/.copilot/skills/` と `~/.agents/skills/` をサポート対象に含める
-- project-level `.github/skills/` / `.claude/skills/` / `.agents/skills/` は、チーム共有したい skill だけを置く fallback / workspace 共有経路として整理する
+- project-level の workspace fallback は持たず、問題があれば user-level 正本を修正して再検証する
 - Copilot Chat / Copilot CLI の対象バージョンで user-level skill 検出の smoke test を行う
 
 ### リスク 4: workflow skill が対象プロジェクト docs に依存して壊れる
