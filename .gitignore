@@ -30,6 +30,10 @@ obj/
 *.DotSettings.user
 # ルート直下の自動生成 .sln を除外（テンプレート内の .sln は追跡する）
 /*.sln
+!user-agent-assets/bin/
+!user-agent-assets/bin/**
+!user-agent-assets/skills/*/bin/
+!user-agent-assets/skills/*/bin/**
 
 # IDE
 .vscode/
@@ -57,4 +61,5 @@ output/
 */.github/copilot-instructions.md
 */.claude/skills/
 */.github/skills/
+reference/
 tmp/

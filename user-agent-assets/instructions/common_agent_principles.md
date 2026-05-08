@@ -7,13 +7,13 @@
 
 ## 2. 必須参照
 
-- workflow 選択: `workflow_selection.md`
+- workflow 選択: インストール済み workflow skill の `SKILL.md`
 - 言語方針: `language_policy.md`
 - インストール済み workflow / review skill: `~/.copilot/skills/`、`~/.claude/skills/`、`~/.agents/skills/`、`~/.codex/skills/`
 
 ## 3. 運用ルール
 
-- まず workflow を選び、その skill の `SKILL.md` と同梱 `references/procedure/` に従う
+- まず適切な workflow skill を選び、その `SKILL.md` と同梱 `references/procedure/` に従う
 - アーキテクチャ、コーディング規約、検証コマンド、ADR 判定は各プロジェクトのローカル規約を優先する
 - tmux ベースの Agent orchestration には `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` を使う
 - user-level skill は self-contained を前提とし、リポジトリ側の `docs/procedure/` や `skill_catalog.md` を前提にしない

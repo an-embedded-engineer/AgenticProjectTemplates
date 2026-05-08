@@ -27,6 +27,17 @@ log() {
     printf '%s\n' "$*"
 }
 
+is_supported_target() {
+    case "$1" in
+        copilot|claude|codex)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 run_mkdir() {
     local path="$1"
     if [ "${DRY_RUN}" -eq 1 ]; then
@@ -36,9 +47,26 @@ run_mkdir() {
     fi
 }
 
+merge_missing_dir() {
+    local source_dir="$1"
+    local target_dir="$2"
+    local source_path
+
+    run_mkdir "${target_dir}"
+    for source_path in "${source_dir}"/* "${source_dir}"/.[!.]* "${source_dir}"/..?*; do
+        [ -e "${source_path}" ] || continue
+        copy_path "${source_path}" "${target_dir}/$(basename "${source_path}")"
+    done
+}
+
 copy_path() {
     local source_path="$1"
     local target_path="$2"
+
+    if [ -d "${source_path}" ] && [ -e "${target_path}" ] && [ "${MODE}" = "missing" ]; then
+        merge_missing_dir "${source_path}" "${target_path}"
+        return
+    fi
 
     if [ -e "${target_path}" ] && [ "${MODE}" = "missing" ]; then
         log "[skip] ${target_path}"
@@ -50,11 +78,24 @@ copy_path() {
         return
     fi
 
+    mkdir -p "$(dirname "${target_path}")"
     rm -rf "${target_path}"
     if [ -d "${source_path}" ]; then
         cp -R "${source_path}" "${target_path}"
     else
         cp "${source_path}" "${target_path}"
+    fi
+}
+
+ensure_shell_wrapper_executable() {
+    local wrapper_path="$1"
+    if [ "${DRY_RUN}" -eq 1 ]; then
+        log "[dry-run] chmod 755 ${wrapper_path}"
+        return
+    fi
+
+    if [ -f "${wrapper_path}" ]; then
+        chmod 755 "${wrapper_path}"
     fi
 }
 
@@ -95,6 +136,17 @@ normalize_targets() {
     echo "${TARGETS}" | tr ',' '\n' | awk 'NF {print $1}'
 }
 
+validate_targets() {
+    local target
+    while IFS= read -r target; do
+        [ -n "${target}" ] || continue
+        if ! is_supported_target "${target}"; then
+            echo "Unsupported target: ${target}" >&2
+            exit 1
+        fi
+    done < <(normalize_targets)
+}
+
 install_copilot() {
     local skill_root="$1"
     local source_root="$2"
@@ -119,6 +171,7 @@ install_single_runtime() {
     copy_path "${source_root}/bin/agentic-agent-cli-tmux.ps1" "${helper_root}/bin/agentic-agent-cli-tmux.ps1"
     copy_path "${source_root}/instructions" "${helper_root}/instructions"
     copy_path "${source_root}/runtime/agent-cli-tmux" "${helper_root}/runtime/agent-cli-tmux"
+    ensure_shell_wrapper_executable "${helper_root}/bin/agentic-agent-cli-tmux.sh"
 }
 
 install_claude() {
@@ -184,6 +237,7 @@ parse_args() {
 
 main() {
     parse_args "$@"
+    validate_targets
 
     local resolved_root
     resolved_root="$(cd "${SOURCE_ROOT}" && pwd)"

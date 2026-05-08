@@ -92,7 +92,9 @@ user-agent-assets/
 │       ├── templates/
 │       │   ├── common/
 │       │   ├── python/
+│       │   │   └── docs/
 │       │   └── csharp/
+│       │       └── docs/
 │       ├── references/
 │       └── bin/
 ├── shared/
@@ -215,6 +217,8 @@ Copilot の install 先は、実行環境差を吸収するため単一優先で
 - `~/.copilot/skills` を first-class target とする
 - `~/.agents/skills` は互換ミラーとして同時 install する
 - install script は `--targets copilot,claude,codex` のような絞り込みを許可するが、default は利用可能 runtime 全部に配布する
+- `--targets` は配布先 runtime の絞り込みだけを行い、選択した runtime には user-level skill 一式をまとめて配布する
+- suite skill は他 workflow skill の同時 install を前提にするため、runtime ごとの部分 install は許可しても skill 単位の selective install は提供しない
 
 ### 6.2 install script の I/F
 
@@ -251,7 +255,7 @@ review / orchestration skill が共有利用する helper は `user-agent-assets
 - macOS / Linux
   - `agentic-agent-cli-tmux.sh` が `~/.agentic-project-templates/runtime/agent-cli-tmux/python/agent_cli_tmux.py` を呼ぶ
 - Windows
-  - `agentic-agent-cli-tmux.ps1` が `~/.agentic-project-templates/runtime/agent-cli-tmux/win-x64/AgentCliTmux.exe` を呼ぶ
+  - `agentic-agent-cli-tmux.ps1` は `~/.agentic-project-templates/runtime/agent-cli-tmux/win-x64/AgentCliTmux.exe` を優先し、未配置時は Python runtime へ fallback する
 
 `SKILL.md` からは wrapper だけを呼び、`python` / `dotnet` を直接 allowlist 対象にしない。
 
@@ -314,10 +318,10 @@ install script と repo 内 sync script は、phase library を必要とする s
 | `refactoring-workflow` | `refactoring_workflow.md` | `workflow_phase_library/refactoring/*`、shared common 6 files | 起点文書 1 件 + `workflow_phase_library/refactoring/` + hydrate された common |
 | `research-analysis-workflow` | `research_analysis_workflow.md` | なし | 起点文書 1 件のみ |
 | `ai-review-response-workflow` | `ai_review_response_workflow.md` | `review_checkpoints.md` | 起点文書 1 件 + `review_checkpoints.md` |
-| `copilot-review-automation` | `workflow_phase_library/README.md`、5 種 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + `workflow_phase_library/README.md` + 5 workflow 分の phase library + hydrate された common |
-| `claude-review-automation` | 5 種 workflow 本体、`ai_review_response_workflow.md`、`autonomous_workflow_orchestrator.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + `autonomous_workflow_orchestrator.md` + 5 workflow 分の phase library + hydrate された common |
-| `autonomous-workflow-orchestrator` | `autonomous_workflow_orchestrator.md`、5 種 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + 5 workflow 分の phase library + hydrate された common |
-| `copilot-cli-workflow-orchestrator` | `autonomous_workflow_orchestrator_copilot_cli.md`、5 種 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + 5 workflow 分の phase library + hydrate された common |
+| `copilot-review-automation` | なし（`SKILL.md` から 6 skill 名を索引） | 同時 install された workflow / review skill | `references/` 追加なし |
+| `claude-review-automation` | `autonomous_workflow_orchestrator.md` | 同時 install された workflow / review skill | 起点文書 1 件のみ |
+| `autonomous-workflow-orchestrator` | `autonomous_workflow_orchestrator.md` | 同時 install された workflow / review skill | 起点文書 1 件のみ |
+| `copilot-cli-workflow-orchestrator` | `autonomous_workflow_orchestrator_copilot_cli.md` | 同時 install された workflow / review skill | 起点文書 1 件のみ |
 
 ### 7.3 shared common の対象と hydrate 条件
 
@@ -339,15 +343,15 @@ hydrate 対象 skill:
 - `bugfix-workflow`
 - `issue-resolution-workflow`
 - `refactoring-workflow`
-- `copilot-review-automation`
-- `claude-review-automation`
-- `autonomous-workflow-orchestrator`
-- `copilot-cli-workflow-orchestrator`
 
 hydrate 不要 skill:
 
 - `research-analysis-workflow`
 - `ai-review-response-workflow`
+- `copilot-review-automation`
+- `claude-review-automation`
+- `autonomous-workflow-orchestrator`
+- `copilot-cli-workflow-orchestrator`
 - `project-doc-bootstrap`
 
 `review_checkpoints.md` は shared 正本へは置かず、`ai-review-response-workflow/references/procedure/review_checkpoints.md` に同梱する。
@@ -355,12 +359,12 @@ hydrate 不要 skill:
 ### 7.4 移行ルール
 
 - 各 skill の reference payload は、root 正本 `SKILL.master.md` を出発点にするが、`workflow_selection.md` 除外と `review_checkpoints.md` の `ai-review-response-workflow` への集約を明示例外として適用する
-- review automation / orchestrator 群は「複数 workflow を束ねる suite」とみなし、5 workflow 本体とその phase library を丸ごと持つ
+- review automation / orchestrator 群は「複数 workflow を束ねる suite」とみなすが、procedure を重複コピーせず、同時 install 済みの他 skill を `SKILL.md` から skill 名で索引する
 - core workflow skill と `research-analysis-workflow` には `workflow_selection.md` と `review_checkpoints.md` を持たせない
 - `review_checkpoints.md` は `ai-review-response-workflow` にのみ同梱し、その skill 内から参照する
 - `workflow_selection.md` は user-level skill の `references/` へ移さない。必要になった場合だけ standalone skill として再定義する
 - `workflow_phase_library/README.md` は root 正本で直接参照される `copilot-review-automation` にだけ置く
-- shared common 以外の `workflow_phase_library` は skill ごとに個別配置し、install 時に勝手に追加コピーしない
+- shared common 以外の `workflow_phase_library` は core workflow skill ごとに個別配置し、suite skill へは install 時にも追加コピーしない
 - `docs/procedure/README.md` や未参照の別 workflow 文書は user-level skill の `references/` に持ち込まない
 
 ### 7.5 `SKILL.master.md` からの移行
@@ -382,7 +386,9 @@ project-doc-bootstrap/
 ├── templates/
 │   ├── common/
 │   ├── python/
+│   │   └── docs/
 │   └── csharp/
+│       └── docs/
 ├── references/
 │   ├── python-target-docs.md
 │   └── csharp-target-docs.md
@@ -408,6 +414,7 @@ project-doc-bootstrap/
 - default は missing-only
 - `templates/common` を先にコピーし、その後 `templates/python|csharp` を追加適用する
 - コピー後に placeholder / TODO 残存一覧を出力する
+- `templates/common` は shared docs を抽出できた時だけ使い、Phase 4 時点では空ディレクトリのままでもよい
 - 既存 docs を上書きするのは明示 `overwrite` 時のみ
 
 ## 9. project-level fallback 設計

@@ -14,7 +14,7 @@ plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
 design_status: done
 source_design_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md
-impl_status: not_started
+impl_status: in_progress
 branch: feature/spec-user-level-agent-assets-20260508
 source_research_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 source_research_review_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/user_level_agent_assets_report_review.md
@@ -30,6 +30,7 @@ related_commits:
   - cf4045b : Phase 3 post-review design refine (migration policy)
   - 0b98917 : Phase 3 design review Round 3 approval
   - 6d96e46 : Phase 3 post-review design simplify (no fallback)
+  - d115d62 : Phase 4 user-level assets foundation
 ---
 
 # メタ情報

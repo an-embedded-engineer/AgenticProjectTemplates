@@ -16,7 +16,7 @@ description: AgenticProjectTemplates のワークフロー全 Phase を設計・
 | 役割 | 担当 | 起動方法 |
 |------|------|---------|
 | 設計・実装 Agent | Copilot Chat / Copilot CLI | ユーザが直接操作 |
-| レビュー Agent | Copilot CLI（デフォルト: `claude-sonnet-4.6`） | `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` 経由で起動 |
+| レビュー Agent | Copilot CLI（デフォルト: `claude-sonnet-4.6`） | `~/.agentic/bin/agentic-agent-cli-tmux.sh` 経由で起動 |
 
 レビュー Agent のデフォルトモデルは `claude-sonnet-4.6`。ユーザが別モデルを指示した場合はそちらを優先する。
 
@@ -31,7 +31,7 @@ description: AgenticProjectTemplates のワークフロー全 Phase を設計・
 - リファクタリング: `references/procedure/refactoring_workflow.md`
 - レビュー反映手順: `references/procedure/ai_review_response_workflow.md`
 - レビュー観点: `ai-review-response-workflow` skill に同梱された `references/procedure/review_checkpoints.md`
-- tmux / Agent CLI 共通スクリプト: `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh`
+- tmux / Agent CLI 共通スクリプト: `~/.agentic/bin/agentic-agent-cli-tmux.sh`
 
 ## 設計・実装 Agent（自身）の責務
 
@@ -68,7 +68,7 @@ description: AgenticProjectTemplates のワークフロー全 Phase を設計・
 1. `docs/design_analysis/.../<yyyymmdd>_<topic>/` が作成済みである
 2. 対象 Phase の「レビュー依頼前コミット」が完了済みである
 3. `tmux` と `copilot` コマンドが実行可能である
-4. 設計・実装 Agent が `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` を実行できる
+4. 設計・実装 Agent が `~/.agentic/bin/agentic-agent-cli-tmux.sh` を実行できる
 
 ## workflow 判定
 
@@ -104,7 +104,7 @@ description: AgenticProjectTemplates のワークフロー全 Phase を設計・
 ## レビュー Agent セッション管理
 
 1. tmux session 名は topic 単位で固定する
-   - 書式: `agentic-project-templates-review-<topic>`
+   - 書式: `agentic-review-<topic>`
    - 同じ issue の Phase 2 / 3 / 4 / 5 と再レビューでは同じ session を再利用する
    - session 再作成は、tmux 消失、Copilot CLI 異常終了、明示エラー、ユーザ指示のいずれかがある時だけ許可する
 
@@ -112,10 +112,10 @@ description: AgenticProjectTemplates のワークフロー全 Phase を設計・
 
 ```bash
 REVIEW_MODEL="${REVIEW_MODEL:-claude-sonnet-4.6}"
-SESSION_NAME="agentic-project-templates-review-${TOPIC}"
+SESSION_NAME="agentic-review-${TOPIC}"
 MAIN_PROJECT_DIR=$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')
 
-~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh ensure \
+~/.agentic/bin/agentic-agent-cli-tmux.sh ensure \
   --session "${SESSION_NAME}" \
   --pane 0.0 \
   --cwd "${MAIN_PROJECT_DIR}" \
@@ -151,7 +151,7 @@ MAIN_PROJECT_DIR=$(git worktree list --porcelain | awk '/^worktree /{print $2; e
 mkdir -p "${MAIN_PROJECT_DIR}/tmp"
 PROMPT_FILE="${MAIN_PROJECT_DIR}/tmp/agentic_project_templates_copilot_review_prompt.txt"
 
-~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh send-prompt \
+~/.agentic/bin/agentic-agent-cli-tmux.sh send-prompt \
   --session "${SESSION_NAME}" \
   --pane 0.0 \
   --file "${PROMPT_FILE}" \
@@ -164,13 +164,13 @@ PROMPT_FILE="${MAIN_PROJECT_DIR}/tmp/agentic_project_templates_copilot_review_pr
 5. 一定間隔で出力を監視する
 
 ```bash
-~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh capture \
+~/.agentic/bin/agentic-agent-cli-tmux.sh capture \
   --session "${SESSION_NAME}" \
   --pane 0.0 \
   --lines 120 \
   --sleep-before 10
 
-~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh capture \
+~/.agentic/bin/agentic-agent-cli-tmux.sh capture \
   --session "${SESSION_NAME}" \
   --pane 0.0 \
   --lines 120 \
@@ -233,7 +233,7 @@ Phase 2-5 の review / 指摘対応 / follow-up の途中では tmux session を
 Phase 6 の main マージと後片付けが完了した後、またはユーザが終了を明示指示した時だけ session を削除する。
 
 ```bash
-~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh stop \
+~/.agentic/bin/agentic-agent-cli-tmux.sh stop \
   --session "${SESSION_NAME}" \
   --pane 0.0 \
   --agent copilot \

@@ -29,6 +29,10 @@ pwsh -File user-agent-assets/install/install_user_agent_assets.ps1 -Targets copi
 ## 既定動作
 
 - mode は `missing`
-- user-level skills は既存 file を上書きしない
+- `missing` では既存 file を上書きせず、未配置 file だけを補完する
+- `overwrite` は対象 skill directory を置き換えるため、手動追加ファイルも消える
 - helper / runtime directory がなければ作成する
+- 各 target には選択した skill 一式をまとめて配布する
+- review / orchestrator 系 suite skill は関連 workflow skill との同時 install を前提にする
 - `--dry-run` / `-DryRun` では変更を加えない
+- Windows では `AgentCliTmux.exe` が未配置でも、`python` / `python3` / `py -3` があれば PowerShell wrapper から Python runtime helper を利用できる
