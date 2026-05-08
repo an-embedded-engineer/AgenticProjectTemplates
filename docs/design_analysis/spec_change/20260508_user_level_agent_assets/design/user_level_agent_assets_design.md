@@ -5,6 +5,7 @@
 | 日時 | 対応内容 |
 |------|---------|
 | 2026-05-08 | 初版作成（Phase 3 pre-review） |
+| 2026-05-09 | root 正本の `instructions/skills` / `docs/procedure` 棚卸し結果を反映し、reference 移行ルールと shared common hydrate 方針を再定義 |
 
 ---
 
@@ -70,7 +71,6 @@ user-agent-assets/
 │           └── AgentCliTmux.exe
 ├── instructions/
 │   ├── common_agent_principles.md
-│   ├── workflow_selection.md
 │   └── language_policy.md
 ├── skills/
 │   ├── spec-change-workflow/
@@ -95,6 +95,12 @@ user-agent-assets/
 │       │   └── csharp/
 │       ├── references/
 │       └── bin/
+├── shared/
+│   └── references/
+│       └── procedure/
+│           ├── review_checkpoints.md
+│           └── workflow_phase_library/
+│               └── common/
 └── install/
     ├── install_user_agent_assets.sh
     ├── install_user_agent_assets.ps1
@@ -257,73 +263,114 @@ review / orchestration skill が共有利用する helper は `user-agent-assets
 - skill 個別 `bin/` は `project-doc-bootstrap` のような単独 skill 専用 wrapper に限定する
 - install script は PATH 追加を前提にせず、`$HOME/.agentic-project-templates/bin/...` を直接参照できる配置にする
 
-## 7. workflow skill self-contained 設計
+### 6.5 shared reference hydrate
 
-### 7.1 references 同梱ルール
+`workflow_phase_library/common` は root 正本の棚卸し結果から、phase library を使う全 skill の共通依存であると確定した。そのため、user-level 正本では各 skill 配下へ重複保持せず、次を正本とする。
 
-各 workflow skill は次の最小構成を持つ。
+- shared 正本: `user-agent-assets/shared/references/procedure/workflow_phase_library/common/*.md`
 
-```text
-<skill>/
-├── SKILL.md
-├── references/
-│   ├── procedure/
-│   │   ├── <workflow>.md
-│   │   ├── workflow_selection.md
-│   │   ├── review_checkpoints.md
-│   │   └── workflow_phase_library/
-│   └── rules/
-│       └── 共通参照が必要な場合のみ
-└── bin/
-    └── runtime 補助 wrapper が必要な場合のみ
-```
+`review_checkpoints.md` はレビュー用の共通文書だが、各 workflow skill が個別に読む前提にはしない。`ai_review_response_workflow.md` からのみ参照する shared 文書として、次を正本とする。
+
+- shared 正本: `user-agent-assets/shared/references/procedure/review_checkpoints.md`
+
+install script と repo 内 sync script は、phase library を必要とする skill をコピーした直後に shared common 6 ファイルを各 skill の `references/procedure/workflow_phase_library/common/` へ hydrate する。`review_checkpoints.md` は `ai-review-response-workflow` にだけ配置し、他 skill へは hydrate しない。
 
 設計判断:
 
-- `docs/procedure/` は skill 実行に必要な分だけ `references/procedure/` へ複製する
-- `SKILL.md` から project-level `docs/procedure/` を直接読ませない
-- workflow 間で共通の references は、install script 側で duplicate を許容する。Phase 4 では構造単純化を優先する
+- source 正本では common を 1 箇所だけに置く
+- hydrate 対象は、`workflow_phase_library/<type>/` を参照する skill に限定する
+- `research-analysis-workflow` と `ai-review-response-workflow` には common を配布しない
+- `review_checkpoints.md` は `ai-review-response-workflow` にだけ配布する
+- `workflow_selection.md` は user-level skill の初期移行対象から外す。将来必要なら standalone skill として別定義する
 
-### 7.2 `references/procedure/` の共通コピー対象
+## 7. workflow skill reference migration 設計
 
-phase 構造を持つ workflow skill は、少なくとも次を共通コピー対象にする。
+### 7.1 棚卸し範囲と設計原則
 
-- `workflow_selection.md`
-- `review_checkpoints.md`
-- `ai_review_response_workflow.md`
-- `workflow_phase_library/README.md`
-- `workflow_phase_library/common/phase_1_branch_and_meta.md`
-- `workflow_phase_library/common/phase_2_plan_review.md`
-- `workflow_phase_library/common/phase_3_design_review.md`
-- `workflow_phase_library/common/phase_4_impl_review.md`
-- `workflow_phase_library/common/phase_5_verification_and_docs.md`
-- `workflow_phase_library/common/phase_6_completion.md`
+2026-05-09 に、root 正本の次を棚卸しした。
 
-### 7.3 skill 固有コピー対象の例
+- `instructions/skills/**/SKILL.master.md`
+- `docs/procedure/*.md`
+- `docs/procedure/workflow_phase_library/**`
 
-`spec-change-workflow` は共通コピー対象に加えて次を持つ。
+この棚卸し結果に基づき、user-level skill の `references/` は次の原則で再構築する。
 
-- `spec_change_workflow.md`
-- `workflow_phase_library/spec_change/phase_0_item_definition.md`
-- `workflow_phase_library/spec_change/phase_2_plan_focus.md`
-- `workflow_phase_library/spec_change/phase_3_design_focus.md`
-- `workflow_phase_library/spec_change/phase_4_impl_focus.md`
-- `workflow_phase_library/spec_change/phase_5_sync_focus.md`
+1. 各 skill へコピーする起点文書は、root 正本の `SKILL.master.md` で参照される `docs/procedure` 配下のファイルを基準にする
+2. ただし `workflow_selection.md` は、skill が読み込まれた時点で役割を終えているため user-level skill ごとの `references/` には移さない
+3. `review_checkpoints.md` は各 workflow skill から直接読ませず、`ai_review_response_workflow.md` からのみ参照する shared 文書へ正規化する
+4. 起点となる workflow 本体文書が `workflow_phase_library` を参照している場合は、その下流依存を追加でコピーする
+5. `docs/procedure/README.md` のような索引文書や、直接・間接に参照されない別 workflow 文書はコピーしない
+6. `workflow_phase_library/common` だけは shared 正本に寄せ、install / sync 時に必要 skill へ hydrate する
 
-`copilot-review-automation` は workflow 選択と review automation を行うため、次を追加する。
+補足:
 
-- `spec_change_workflow.md`
-- `new_feature_workflow.md`
-- `bugfix_workflow.md`
-- `issue_resolution_workflow.md`
-- `refactoring_workflow.md`
-- automation 対象 workflow の `workflow_phase_library/<type>/phase_2..5_*.md`
+- `workflow_selection.md` は original skill では直接参照されているが、skill 選択済みの user-level 実行時には不要なので移行対象から外す
+- `review_checkpoints.md` は original skill では複数 skill から直接参照されているが、用途上は review response の補助文書なので `ai_review_response_workflow.md` 起点へ寄せる
 
-`autonomous-workflow-orchestrator` と `copilot-cli-workflow-orchestrator` も、複数 workflow を選択する skill として `copilot-review-automation` と同等の共通 / workflow 別 references を持つ。
+### 7.2 skill 別 dependency map
 
-### 7.4 `SKILL.master.md` からの移行
+| skill | user-level で保持する起点文書 | 追加で必要な下流依存 | user-level `references/` へ置くもの |
+|---|---|---|---|
+| `spec-change-workflow` | `spec_change_workflow.md` | `workflow_phase_library/spec_change/*`、shared common 6 files | 起点文書 1 件 + `workflow_phase_library/spec_change/` + hydrate された common |
+| `new-feature-workflow` | `new_feature_workflow.md` | `workflow_phase_library/new_feature/*`、shared common 6 files | 起点文書 1 件 + `workflow_phase_library/new_feature/` + hydrate された common |
+| `bugfix-workflow` | `bugfix_workflow.md` | `workflow_phase_library/bugfix/*`、shared common 6 files | 起点文書 1 件 + `workflow_phase_library/bugfix/` + hydrate された common |
+| `issue-resolution-workflow` | `issue_resolution_workflow.md` | `workflow_phase_library/issue_resolution/*`、shared common 6 files | 起点文書 1 件 + `workflow_phase_library/issue_resolution/` + hydrate された common |
+| `refactoring-workflow` | `refactoring_workflow.md` | `workflow_phase_library/refactoring/*`、shared common 6 files | 起点文書 1 件 + `workflow_phase_library/refactoring/` + hydrate された common |
+| `research-analysis-workflow` | `research_analysis_workflow.md` | なし | 起点文書 1 件のみ |
+| `ai-review-response-workflow` | `ai_review_response_workflow.md` | shared `review_checkpoints.md` | 起点文書 1 件 + hydrate された `review_checkpoints.md` |
+| `copilot-review-automation` | `workflow_phase_library/README.md`、5 種 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + `workflow_phase_library/README.md` + 5 workflow 分の phase library + hydrate された common |
+| `claude-review-automation` | 5 種 workflow 本体、`ai_review_response_workflow.md`、`autonomous_workflow_orchestrator.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + `autonomous_workflow_orchestrator.md` + 5 workflow 分の phase library + hydrate された common |
+| `autonomous-workflow-orchestrator` | `autonomous_workflow_orchestrator.md`、5 種 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + 5 workflow 分の phase library + hydrate された common |
+| `copilot-cli-workflow-orchestrator` | `autonomous_workflow_orchestrator_copilot_cli.md`、5 種 workflow 本体、`ai_review_response_workflow.md` | 5 workflow 分の `workflow_phase_library/<type>/*`、shared common 6 files | 起点文書一式 + 5 workflow 分の phase library + hydrate された common |
+
+### 7.3 shared common の対象と hydrate 条件
+
+shared 正本に置くのは次の 6 ファイルだけとする。
+
+- `phase_1_branch_and_meta.md`
+- `phase_2_plan_review.md`
+- `phase_3_design_review.md`
+- `phase_4_impl_review.md`
+- `phase_5_verification_and_docs.md`
+- `phase_6_completion.md`
+
+これらは root 正本の `docs/procedure/workflow_phase_library/common/` から移す。
+
+hydrate 対象 skill:
+
+- `spec-change-workflow`
+- `new-feature-workflow`
+- `bugfix-workflow`
+- `issue-resolution-workflow`
+- `refactoring-workflow`
+- `copilot-review-automation`
+- `claude-review-automation`
+- `autonomous-workflow-orchestrator`
+- `copilot-cli-workflow-orchestrator`
+
+hydrate 不要 skill:
+
+- `research-analysis-workflow`
+- `ai-review-response-workflow`
+- `project-doc-bootstrap`
+
+`review_checkpoints.md` は `user-agent-assets/shared/references/procedure/review_checkpoints.md` を正本にし、`ai-review-response-workflow` にだけ配置する。
+
+### 7.4 移行ルール
+
+- 各 skill の reference payload は、root 正本 `SKILL.master.md` を出発点にするが、`workflow_selection.md` 除外と `review_checkpoints.md` 正規化を明示例外として適用する
+- review automation / orchestrator 群は「複数 workflow を束ねる suite」とみなし、5 workflow 本体とその phase library を丸ごと持つ
+- core workflow skill と `research-analysis-workflow` には `workflow_selection.md` と `review_checkpoints.md` を持たせない
+- `review_checkpoints.md` は `ai-review-response-workflow` にのみ同梱し、その skill 内から参照する
+- `workflow_selection.md` は user-level skill の `references/` へ移さない。必要になった場合だけ standalone skill として再定義する
+- `workflow_phase_library/README.md` は root 正本で直接参照される `copilot-review-automation` にだけ置く
+- shared common 以外の `workflow_phase_library` は skill ごとに個別配置し、install 時に勝手に追加コピーしない
+- `docs/procedure/README.md` や未参照の別 workflow 文書は user-level skill の `references/` に持ち込まない
+
+### 7.5 `SKILL.master.md` からの移行
 
 - user-level 正本は placeholder を持たない `SKILL.md` に統一する
+- reference payload の選定根拠は template 側ではなく root 正本 `instructions/skills/` を優先する
 - project-level 生成用途が残る skill だけ、移行期間中は `SKILL.master.md` を温存してもよい
 - 移行完了後に template 側 `SKILL.master.md` を削除する対象は、Phase 4 実装で一覧化する
 
