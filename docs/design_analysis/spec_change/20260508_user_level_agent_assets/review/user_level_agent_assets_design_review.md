@@ -174,3 +174,16 @@ Phase 4 実装に支障をきたす未解決事項（Medium 指摘）:
     - Round 2 解消済み指摘の再発確認: Medium-1（orchestration skill 2 件）、Medium-2（agent_cli_tmux 配布方針）、Medium-3（agent_common_master After 構成）、Low-1（fallback 除外根拠）、Low-2（references 振り分け基準）—いずれも今回の変更で削除・上書きされた箇所はなく、Round 2 対応内容が維持されている。**OK**
   - 新規指摘: なし
   - 状態: **承認済み（Round 3 承認・Phase 4 実装への移行可）**
+- Round 4 (2026-05-09)
+  - レビュー担当: Claude Sonnet 4.6 (GitHub Copilot CLI)
+  - 対象コミット: 6d96e46（docs: simplify skill payload distribution）
+  - 変更概要
+    - 設計書: workspace fallback 設計を "no fallback・user-level 正本修正で対応" へ全面転換（Section 9 再構築、Section 3/11/12/13/14/15 関連箇所を一括更新）。`review_checkpoints.md` を shared 配布ではなく `ai-review-response-workflow` への直接同梱へ変更（Section 4.1 ツリー・6.5・7.1/7.2/7.3/7.4 を一貫更新）。sync script から fallback 再生成責務を削除。
+    - 調査レポート: `shared/` ツリーから `review_checkpoints.md` を削除。参照構造例を簡素化。補足・棚卸し結論 4・移行方針 rule 5・リスク 1 対策を一貫更新。
+  - 確認内容
+    - `review_checkpoints.md` の直接同梱方針（shared 経由なし）: 設計書 4.1 ツリー・6.5・7.1 原則 3・7.2 テーブル・7.3・7.4 移行ルール、レポート補足・棚卸し結論 4・移行方針 rule 5 すべてで "ai-review-response-workflow の references/procedure/ に最初から同梱する" に統一。`shared/` ツリーに `review_checkpoints.md` は残存しない。**OK**
+    - `shared` = common 6 files の hydrate のみ: 設計書・レポート両ツリーで `shared/references/procedure/` 配下が `workflow_phase_library/common/` のみになった。Section 6.5 設計判断・7.3 の shared 正本 6 ファイルリスト変更なし。`review_checkpoints.md` は "common と同様の shared hydrate 対象には含めない" と明記。**OK**
+    - workspace fallback なし・問題は user-level 正本修正で解決: Section 3 before/after・9.1・9.2・11.1 step 7・11.2 順序制約・12・13・14・15、レポートのリスク 1 対策すべてで "workspace fallback は持たず user-level 正本を修正して再検証する" が貫徹。sync script の fallback 再生成行も削除済み。**OK**
+    - Round 2〜3 指摘の再発確認: Medium-1（orchestration skill ツリー・設計判断）・Medium-2（Section 6.4 shared helper 配布）・Medium-3（Section 4.3 After 構成）は今回の diff に触れておらず維持。Low-1 は "fallback なし" 方針への転換により懸案自体が解消（fallback 除外根拠が不要になった）。Low-2（Section 7 dependency map）は変更なし。Section 4.3 item 5 の "fallback がある場合の参照先" → "install 済み資産の参照先" は fallback 廃止と整合した改善。**再発なし**
+  - 新規指摘: なし
+  - 状態: **承認済み（Round 4 承認・Phase 4 実装への移行可）**

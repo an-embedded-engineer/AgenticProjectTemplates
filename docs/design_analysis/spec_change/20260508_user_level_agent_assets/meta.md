@@ -28,6 +28,8 @@ related_commits:
   - c4171ce : Phase 3 post-review design fix
   - 2e68fd4 : Phase 3 design review Round 2 approval
   - cf4045b : Phase 3 post-review design refine (migration policy)
+  - 0b98917 : Phase 3 design review Round 3 approval
+  - 6d96e46 : Phase 3 post-review design simplify (no fallback)
 ---
 
 # メタ情報
