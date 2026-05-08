@@ -57,3 +57,4 @@ output/
 */.github/copilot-instructions.md
 */.claude/skills/
 */.github/skills/
+tmp/
