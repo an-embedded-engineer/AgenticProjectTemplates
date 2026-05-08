@@ -161,3 +161,16 @@ Phase 4 実装に支障をきたす未解決事項（Medium 指摘）:
     - Low-2: Section 7.2 に共通コピー対象 10 ファイルを列挙。Section 7.3 に `spec-change-workflow` および `copilot-review-automation` / orchestration skill の固有ファイル例を追記。OK
   - 新規指摘: なし
   - 状態: 承認済み（Phase 4 実装への移行可）
+- Round 3 (2026-05-09)
+  - レビュー担当: Claude Sonnet 4.6 (GitHub Copilot CLI)
+  - 対象コミット: cf4045b（docs: refine user-level agent asset migration policy）
+  - 変更概要
+    - 設計書: `workflow_selection.md` を `instructions/` ツリーから削除。`shared/references/procedure/` サブツリー（review_checkpoints.md + workflow_phase_library/common）を追加。Section 6.5（shared reference hydrate）新設。Section 7 を全面再構築（7.1 棚卸し原則 / 7.2 skill 別 dependency map / 7.3 shared common hydrate 条件 / 7.4 移行ルール 8 箇条）。
+    - 調査レポート: "original 正本棚卸し結果（2026-05-09 追補）" セクション追加。同内容の skill 別最小コピー集合表と移行方針補正 8 箇条を追記。
+  - 確認内容
+    - `workflow_selection.md` 除外の一貫性: Section 6.5 設計判断・Section 7.1 原則 2・Section 7.4 移行ルール・補足すべてで "user-level skill の references/ へ移さない / 必要なら standalone skill として再定義" が統一されている。調査レポート補足・移行方針補正 rule 4 も一致。**OK**
+    - `review_checkpoints.md` の ai-review-response-workflow 帰属: Section 6.5・7.1 原則 3・7.3・7.4 で "ai-review-response-workflow にだけ配置" が貫徹。調査レポート棚卸し結論 4・移行方針補正 rule 5 も一致。shared 正本パス（`user-agent-assets/shared/references/procedure/review_checkpoints.md`）が 6.5・7.3 で明示されトレース可能。**OK**
+    - dependency map と shared hydrate 方針の整合: Section 7.2 の skill 別 12 行テーブルと調査レポート追補の同テーブルが完全に一致。Section 7.3 の hydrate 対象 9 skill / 不要 3 skill の分類が 7.2 の dependency map と矛盾なし。`workflow_phase_library/README.md` を `copilot-review-automation` にのみ個別保持する規則が 7.2・7.4・レポート rule 6 で一致。**OK**
+    - Round 2 解消済み指摘の再発確認: Medium-1（orchestration skill 2 件）、Medium-2（agent_cli_tmux 配布方針）、Medium-3（agent_common_master After 構成）、Low-1（fallback 除外根拠）、Low-2（references 振り分け基準）—いずれも今回の変更で削除・上書きされた箇所はなく、Round 2 対応内容が維持されている。**OK**
+  - 新規指摘: なし
+  - 状態: **承認済み（Round 3 承認・Phase 4 実装への移行可）**
