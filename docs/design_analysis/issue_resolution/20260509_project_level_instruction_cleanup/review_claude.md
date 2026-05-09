@@ -122,6 +122,44 @@
 - `python3 -c 'from pathlib import Path; print(Path("instructions/agent_common_master.md").read_bytes().endswith(b"\n"))'`: `True`。
 - 削除 path / 旧スクリプトの参照 grep: 否定形の言及以外は無し。
 
+## 追加指摘（2026-05-10、修正コミット `5809f48` 確認時）
+
+5809f48 で root 側の指摘 5 件は解消されたことを確認した。一方、root と bootstrap template (`user-agent-assets/skills/project-doc-bootstrap/templates/common/`) の同期が今回の対応で崩れている。
+
+### [Medium] root 修正が `templates/common/` へ伝播していない
+
+- 対象:
+	- `scripts/sync_agent_instructions.sh` ↔ `user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.sh`
+	- `instructions/agent_sync_guide.md` ↔ `user-agent-assets/skills/project-doc-bootstrap/templates/common/instructions/agent_sync_guide.md`
+- 観測:
+	- `git ls-tree 5809f48 -- scripts/sync_agent_instructions.sh user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.sh` で確認:
+		- root: `100755 6a577d3` (新版、indent 修正済み)
+		- template: `100755 c2ed8bd` (旧版、indent 未修正)
+	- `diff` 結果でも、template 側の `usage()` ブロックは依然として `--copilot` / `--claude` / `--codex` 行が 4-space 始まりのままになっている。
+	- 同様に template 側 `agent_sync_guide.md` には `--all` / `-All` の実行例とオプション節が追記されておらず、root 側にだけ含まれている。
+	- 元コミット `ac93c7e` 時点では root と template の `.sh` / `.bat` / `.ps1` / `agent_sync_guide.md` は blob hash が完全に一致していた（mode 差を除く）ため、両者を byte-identical に保つ意図が読み取れる。
+- 影響:
+	- `project-doc-bootstrap` で新規 project を立ち上げた際、bootstrap 後に作成される `scripts/sync_agent_instructions.sh` と `instructions/agent_sync_guide.md` には今回 root で潰した issue が再混入する。
+	- root 側 CLAUDE.md (`instructions/agent_common_master.md:24`) で「Python / C# 向け bootstrap template の同等概念は、意図的な差異を除き同期する」と明示しているため、本リポジトリの保守ルールにも反する。
+	- template の `--all` 文書欠落は、bootstrap 直後の利用者が `script --help` 出力と guide を見比べた際の整合性を欠く。
+- 推奨対応:
+	- `templates/common/scripts/sync_agent_instructions.sh` を root と同一内容に更新する（indent 修正の反映）。
+	- `templates/common/instructions/agent_sync_guide.md` に `--all` / `-All` の実行例とオプション節を反映する。
+	- 反映後、`diff scripts/sync_agent_instructions.{sh,bat,ps1} user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.{sh,bat,ps1}` と `diff instructions/agent_sync_guide.md user-agent-assets/skills/project-doc-bootstrap/templates/common/instructions/agent_sync_guide.md` がいずれも空であることを検証に追加すると、今後の root-only 修正の再発を防げる。
+
+### 追加検証ログ
+
+- `git ls-tree 5809f48 scripts/sync_agent_instructions.sh`: `100755 6a577d3`（実行 bit / indent 修正）。
+- `./scripts/sync_agent_instructions.sh --help`: 成功（exit 0）。
+- master の末尾改行: `tail -c 1` で `0a` を確認。
+- `cmp` による master と生成物 3 種の一致: 修正後も維持。
+- `diff scripts/sync_agent_instructions.bat templates/common/scripts/sync_agent_instructions.bat`: 差分なし。
+- `diff scripts/sync_agent_instructions.ps1 templates/common/scripts/sync_agent_instructions.ps1`: 差分なし。
+- `diff scripts/sync_agent_instructions.sh templates/common/scripts/sync_agent_instructions.sh`: 21〜23 行で差分あり（追加指摘の根拠）。
+- `diff instructions/agent_sync_guide.md templates/common/instructions/agent_sync_guide.md`: 4 箇所で差分あり（追加指摘の根拠）。
+
 ## 結論
 
-責務境界の整理と root docs / generated instructions / sync source の整合は概ね達成されている。Medium 1 件（`sync_agent_instructions.sh` の実行 bit）を修正すれば、レビュー観点 1〜4 をすべて満たす状態になる。Low / Info は任意対応で問題ない。
+責務境界の整理と root docs / generated instructions / sync source の整合は達成されている。当初の Medium / Low / Info はいずれも 5809f48 で解消済み。
+
+ただし root のみで修正したことで、bootstrap template 側 (`templates/common/scripts/sync_agent_instructions.sh` と `templates/common/instructions/agent_sync_guide.md`) が同期から外れている。Medium 1 件として template 側へ同じ修正を反映し、`diff` を検証に組み込むことを推奨する。
