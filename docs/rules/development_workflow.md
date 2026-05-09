@@ -10,7 +10,8 @@
 
 ```bash
 # project-level instruction sync
-bash ./scripts/sync_agent_instructions.sh --help
+./scripts/sync_agent_instructions.sh --help
+./scripts/sync_agent_instructions.sh
 
 # Root の Agent CLI tmux 補助スクリプト
 python3 -m py_compile scripts/agent_cli_tmux.py
@@ -37,7 +38,7 @@ dotnet build user-agent-assets/skills/project-doc-bootstrap/templates/csharp/too
 ## 変更種別ごとの確認
 
 - root `docs/` / `user-agent-assets/` / `scripts/`: 関連リンク、workflow 参照、installer / bootstrap 契約の整合を確認し、root script は `py_compile` または `--help` で検証する
-- `instructions/` / root `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md`: `bash ./scripts/sync_agent_instructions.sh` で再生成し、同期元と生成物の責務を崩さない
+- `instructions/` / root `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md`: `./scripts/sync_agent_instructions.sh` で再生成し、同期元と生成物の責務を崩さない
 - `scripts/agent_cli_tmux.py`: root 側を正本とし、`tests/test_agent_cli_tmux.py` で直接検証する
 - `user-agent-assets/install/`: shell / PowerShell の `--help` と、必要に応じて `--dry-run` で install 挙動を確認する
 - `user-agent-assets/skills/`: workflow 手順の正本として扱い、skill 本文と `references/procedure/` の整合を確認する

@@ -9,6 +9,13 @@
 
 ## Findings
 
+## 対応状況（2026-05-09）
+
+- [Medium] macOS / Linux 向けの案内どおりに sync script を直接実行できない
+  - status: `resolved`
+  - 対応: `scripts/sync_agent_instructions.sh` に実行権限を付与し、`./scripts/sync_agent_instructions.sh --help` と `./scripts/sync_agent_instructions.sh` の直接実行を確認した
+  - 追加対応: `docs/rules/development_workflow.md` の検証コマンドを直接実行ベースへ更新し、`instructions/agent_sync_guide.md` に `--all` / `-All` を追記した
+
 ### [Medium] macOS / Linux 向けの案内どおりに sync script を直接実行できない
 
 - 対象:
@@ -31,6 +38,8 @@
 
 - `instructions/agent_common_master.md`、`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` は `cmp` で一致を確認した。
 - `bash ./scripts/sync_agent_instructions.sh --help` は成功した。
+- `./scripts/sync_agent_instructions.sh --help` は成功した。
+- `./scripts/sync_agent_instructions.sh` は成功し、git diff は発生しなかった。
 - `bash ./scripts/sync_agent_instructions.sh` は成功し、git diff は発生しなかった。
 - `pwsh -File scripts/sync_agent_instructions.ps1 -Help` は成功した。
 - active docs / instructions / user-level skill 導線に対する `docs/procedure`、`instructions/skills`、`rebuild_user_agent_skills.py`、`sync_agent_skills` の検索では、削除済み経路への実運用依存は確認されなかった。

@@ -23,6 +23,7 @@ macOS / Linux:
 
 ```bash
 ./scripts/sync_agent_instructions.sh
+./scripts/sync_agent_instructions.sh --all
 ./scripts/sync_agent_instructions.sh --copilot
 ./scripts/sync_agent_instructions.sh --claude --codex
 ```
@@ -31,6 +32,7 @@ Windows PowerShell:
 
 ```powershell
 .\scripts\sync_agent_instructions.ps1
+.\scripts\sync_agent_instructions.ps1 -All
 .\scripts\sync_agent_instructions.ps1 -Copilot
 .\scripts\sync_agent_instructions.ps1 -Claude -Codex
 ```
@@ -39,6 +41,7 @@ Windows Command Prompt:
 
 ```bat
 scripts\sync_agent_instructions.bat
+scripts\sync_agent_instructions.bat --all
 scripts\sync_agent_instructions.bat --copilot
 scripts\sync_agent_instructions.bat --claude --codex
 ```
@@ -48,6 +51,7 @@ scripts\sync_agent_instructions.bat --claude --codex
 - `--copilot`: `.github/copilot-instructions.md` を再生成する
 - `--claude`: `CLAUDE.md` を再生成する
 - `--codex`: `AGENTS.md` を再生成する
+- `--all` / `-All`: 全ターゲットを再生成する
 - オプション未指定時は全ターゲットを再生成する
 
 ## 運用ルール

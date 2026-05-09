@@ -15,6 +15,24 @@
 
 ## Findings
 
+## 対応状況（2026-05-09）
+
+- [Medium] `scripts/sync_agent_instructions.sh` の実行 bit が落ちている
+	- status: `resolved`
+	- 対応: `chmod +x scripts/sync_agent_instructions.sh` で実行権限を付与し、直接実行の検証を追加した
+- [Low] `scripts/sync_agent_instructions.sh` の `usage()` 出力にインデント不整合
+	- status: `resolved`
+	- 対応: shell script の help ブロックを再整形し、オプション行を 2-space 始まりに統一した
+- [Low] `instructions/agent_sync_guide.md` が `--all` / `-All` を案内していない
+	- status: `resolved`
+	- 対応: macOS / Linux、PowerShell、Command Prompt の実行例とオプション節へ `--all` / `-All` を追記した
+- [Low] `instructions/agent_common_master.md` に末尾改行がない
+	- status: `resolved`
+	- 対応: `instructions/agent_common_master.md` を更新して再同期し、生成物 3 種も含めて末尾改行ありの状態へ揃えた
+- [Info] root agent instructions の文面と「メタプロジェクト」表現について
+	- status: `noted`
+	- 対応: 任意改善として扱いつつ、片方向だった Python / C# の asset / tool 検討方針を双方向表現へ更新した
+
 ### [Medium] `scripts/sync_agent_instructions.sh` の実行 bit が落ちている（Codex 指摘と同件）
 
 - 対象:
@@ -98,8 +116,10 @@
 
 - `cmp -s instructions/agent_common_master.md AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md`: いずれも一致。
 - `bash ./scripts/sync_agent_instructions.sh --help`: 成功（usage 表示）。
-- `./scripts/sync_agent_instructions.sh --help`: `permission denied` で失敗（[Medium] 指摘の根拠）。
-- `git ls-tree ac93c7e -- scripts/`: `sync_agent_instructions.sh` は `100644`、template 側は `100755`。
+- `./scripts/sync_agent_instructions.sh --help`: 成功。
+- `./scripts/sync_agent_instructions.sh`: 成功。
+- `cmp -s instructions/agent_common_master.md AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md`: 修正後も一致。
+- `python3 -c 'from pathlib import Path; print(Path("instructions/agent_common_master.md").read_bytes().endswith(b"\n"))'`: `True`。
 - 削除 path / 旧スクリプトの参照 grep: 否定形の言及以外は無し。
 
 ## 結論

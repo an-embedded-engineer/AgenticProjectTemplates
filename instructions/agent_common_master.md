@@ -22,7 +22,7 @@
 - 内部思考は英語、チャット応答は日本語
 - コメント / Docstring / XML Doc は日本語、ログ / UI / エラー文字列は英語
 - Python / C# 向け bootstrap template の同等概念は、意図的な差異を除き同期する
-- Python 向け bootstrap asset や tool を追加した場合、C# 側でも同等の .NET asset / tool を優先して検討する
+- Python / C# のいずれかへ bootstrap asset や tool を追加した場合、もう一方でも同等の asset / tool を優先して検討する
 - workflow / review / orchestration skill は user-level install 済み assets を前提にする
 - 関連 ADR が存在する場合は、計画前・実装前・レビュー時に `docs/adr/README.md` の索引規則で対象 ADR を判定して先に参照する
 - 不要な後方互換レイヤーやフォールバックを追加しない
