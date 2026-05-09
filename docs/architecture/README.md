@@ -3,7 +3,7 @@
 ## 目的
 
 本ディレクトリは、AI Agent がコードを読み書きする際に必要なアーキテクチャ知識を集約します。
-各コンポーネントの詳細設計は `docs/components/<component>/basic_design.md` / `detail_design.md` を参照してください。
+project bootstrap 後のコンポーネント別文書は必要に応じて `docs/components/<component>/` を追加して扱います。現状の root repo では `overview.md` を主要入口とします。
 
 ## 構成
 

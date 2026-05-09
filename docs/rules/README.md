@@ -14,6 +14,6 @@
 
 ## 運用方針
 
-- `AGENTS.md` / `CLAUDE.md` / `copilot-instructions.md` には索引のみを記載する
+- `instructions/agent_common_master.md` を project-level instruction の同期元とし、`AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` は再生成物として扱う
 - 詳細ルールは本ディレクトリ配下へ集約する
-- ルール更新時は、関連する手順書（`docs/procedure/`）も整合確認する
+- ルール更新時は、関連する user-level skill 本文と `references/procedure/` も整合確認する
