@@ -11,7 +11,6 @@
 5. `docs/rules/development_workflow.md`
 6. `docs/rules/language_rules.md`
 7. `docs/rules/coding_rules.md`
-8. `docs/rules/skill_catalog.md`
 
 ## 運用方針
 

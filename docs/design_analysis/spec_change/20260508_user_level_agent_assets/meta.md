@@ -3,18 +3,18 @@ title: "ユーザレベル Agent 資産化（SC-20260508-001）"
 created_date: "2026-05-08"
 category: spec_change
 components:
-  - instructions
-  - skills
+  - user-agent-assets
   - docs
   - scripts
-  - python-project-template
-  - csharp-project-template
+  - tools
+  - tests
 status: in_progress
 plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
 design_status: done
 source_design_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md
 impl_status: done
+source_impl_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/impl/user_level_agent_assets_impl.md
 branch: feature/spec-user-level-agent-assets-20260508
 source_research_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 source_research_review_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/user_level_agent_assets_report_review.md
@@ -38,13 +38,14 @@ related_commits:
   - 5cc9ec2 : Record final PowerShell review confirmations
   - 787b3db : Phase 5 capture follow-up items
   - 09182e8 : Phase 5 docs review for user-level agent assets
+  - 993c65b : Address Phase 5 docs review feedback
 ---
 
 # メタ情報
 
 ## 変更目的
 
-Python / C# プロジェクトテンプレートに同梱している共通 Agent instructions、workflow skills、docs 雛形の正本をユーザレベル資産へ寄せ、各テンプレートには project-level の薄い索引と固有ルールだけを残す。
+Python / C# project 向けの共通 Agent instructions、workflow skills、docs 雛形の正本を user-level assets へ寄せ、repo 自体は project template 集ではなく bootstrap 資産、shared runtime、検証コードの保守 repo へ移行する。
 
 ## Phase 2 の入力
 
@@ -73,3 +74,7 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 - 2026-05-09: `bash user-agent-assets/install/install_user_agent_assets.sh --mode overwrite` により実ユーザールートへ install を実施し、`~/.copilot/skills`、`~/.agents/skills`、`~/.claude/skills`、`~/.codex/skills`、`~/.agentic-project-templates` への展開と wrapper mode `-rwxr-xr-x` を確認した
 - 2026-05-09: 新規 Python サンプルプロジェクトで `project-doc-bootstrap`、`copilot-review-automation`、`new-feature-workflow` を実地検証し、改善メモを `docs/design_analysis/spec_change/20260508_user_level_agent_assets/skill_improvement_memo.md` に記録した
 - 2026-05-09: 改善メモの内容を `docs/issues/cross/issues.md` の `C-2026-001` 〜 `C-2026-008` として follow-up issue 化した
+- 2026-05-09: AgentCliTmux は `user-agent-assets/runtime/agent-cli-tmux/csharp/` へ、ExtractGitDiff 系は `project-doc-bootstrap` の Python / C# template `tools/` へ移設し、runtime / bootstrap の責務に沿って再配置した
+- 2026-05-09: 旧 root / template `instructions/`、`scripts/sync_agent_skills.*`、repo-local `.github/skills/` / `.claude/skills/` を削除し、`python-project-template/` と `csharp-project-template/` を repo から撤去した
+- 2026-05-09: system `dotnet` に `.NET 9` SDK / runtime が見えることを確認し、`tests/AgentCliTmux.Tests` が repo-local `.dotnet9` なしで成功する状態へ揃えた
+- 2026-05-09: 追加実装記録として `impl/user_level_agent_assets_impl.md` を作成し、runtime / bootstrap 再配置と system-dotnet-only validation 前提を文書化した

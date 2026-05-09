@@ -1,55 +1,62 @@
 # AgenticProjectTemplates
 
-AI コーディングエージェント（Claude Code / GitHub Copilot / Codex）と協働するためのプロジェクトテンプレート集です。
+AI コーディングエージェント（Claude Code / GitHub Copilot / Codex）向けの user-level assets と project bootstrap 資産を管理するリポジトリです。
 
 ## 概要
 
-新規プロジェクトを立ち上げる際に、AI エージェント向けのインストラクション・ワークフロー・ドキュメント構成を一式コピーしてすぐに使い始められるテンプレートを提供します。
+新規プロジェクトを立ち上げる際に、user-level workflow skills を install し、`project-doc-bootstrap` で言語別 docs / instructions / sync script を初期配置するための正本を提供します。
 
 ### 特徴
 
-- **マルチエージェント対応** — `AGENTS.md`（Codex）・`CLAUDE.md`（Claude Code）・`copilot-instructions.md`（GitHub Copilot）を単一マスターファイルからの symlink で一元管理
-- **構造化ワークフロー** — 仕様変更・新機能追加・不具合修正・リファクタリングなど、タスク種別ごとの skill を定義済み
+- **user-level assets 正本化** — workflow / review / orchestration skill は `user-agent-assets/` を正本として管理
+- **project bootstrap 対応** — `project-doc-bootstrap` で target project に docs / instructions / sync script を配布
 - **型安全性重視** — 静的解析ゼロエラーを完了条件とするコーディングルール（Python: Pyright / C#: dotnet build --warnaserrors）
 - **ドキュメント駆動** — アーキテクチャ・設計・手順書・テスト戦略のテンプレートを同梱
 
-## テンプレート一覧
+## 提供資産
 
-| テンプレート | 対象 | 説明 |
+| 資産 | 対象 | 説明 |
 |---|---|---|
-| [python-project-template](python-project-template/) | Python 3.10+ | Pyright 型チェック・pytest・構造化ワークフローを備えた Python プロジェクトテンプレート |
-| [csharp-project-template](csharp-project-template/) | C# / .NET 8.0+ | dotnet build 警告ゼロ・dotnet test・構造化ワークフローを備えた C# プロジェクトテンプレート |
+| `user-agent-assets/skills/` | user-level skills | workflow / review / orchestration skill の正本 |
+| `user-agent-assets/skills/project-doc-bootstrap/` | project bootstrap | Python / C# 向け docs / instructions / sync script template |
+| `user-agent-assets/runtime/` | shared runtime | Agent CLI tmux wrapper 用の runtime helper と native payload |
+| `tests/` | repo validation | Python pytest と C# test runner |
 
 ## 使い方
 
-### 1. テンプレートをコピー
+### 1. user-level assets を install
 
 ```bash
-# Python プロジェクトの場合
-cp -r python-project-template/ /path/to/your-new-project/
-
-# C# プロジェクトの場合
-cp -r csharp-project-template/ /path/to/your-new-project/
-
-cd /path/to/your-new-project/
+bash user-agent-assets/install/install_user_agent_assets.sh --mode overwrite
 ```
 
-### 2. プレースホルダを埋める
+PowerShell を使う場合:
+
+```powershell
+pwsh -File user-agent-assets/install/install_user_agent_assets.ps1 -Mode overwrite
+```
+
+### 2. target project を bootstrap
+
+- install 済みの `project-doc-bootstrap` を使って、target project に docs / project-level instructions / `scripts/sync_agent_instructions.*` を配置する
+- Python / C# の言語差分は `user-agent-assets/skills/project-doc-bootstrap/templates/` 配下の template で吸収する
+
+### 3. プレースホルダを埋める
 
 - `instructions/agent_common_master.md` 内の `{{PROJECT_NAME}}` をプロジェクト名に置換
 - `docs/rules/project_overview.md` にプロジェクト概要を記述
 - `docs/architecture/overview.md` にアーキテクチャを記述
 - 各 `docs/` 配下の `<!-- TODO: ... -->` を埋める
 
-### 3. skills を同期
+### 4. project-level instructions を同期
 
 ```bash
-./scripts/sync_agent_skills.sh
+./scripts/sync_agent_instructions.sh
 ```
 
-`.claude/skills/`・`.github/skills/` に symlink、`~/.codex/skills/` に実体コピーが配布されます。
+この sync は target project の `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` 再生成だけを扱います。
 
-### 4. 開発開始
+### 5. 開発開始
 
 ```bash
 # Python の場合
@@ -63,25 +70,22 @@ dotnet restore
 
 ## ディレクトリ構成（共通）
 
-各テンプレートは同一のディレクトリ構成を持ちます。言語固有の内容（ビルド・静的解析・テスト・落とし穴など）のみが異なります。
+この repo は user-level assets と bootstrap templates を正本として保持します。
 
 ```
-<template>/
-├── instructions/           # エージェント共通インストラクション（マスター）
-│   ├── agent_common_master.md
-│   └── skills/             # ワークフロー skill 定義
+AgenticProjectTemplates/
+├── user-agent-assets/
+│   ├── install/
+│   ├── skills/
+│   │   └── project-doc-bootstrap/
+│   │       └── templates/
+│   │           ├── python/
+│   │           └── csharp/
+│   ├── runtime/
+│   └── bin/
 ├── docs/
-│   ├── rules/              # 開発ルール（コーディング・言語・ワークフロー）
-│   ├── architecture/       # アーキテクチャ・コードパターン・落とし穴
-│   ├── procedure/          # ワークフロー手順書
-│   ├── components/         # コンポーネント別設計文書
-│   ├── design_analysis/    # 設計/レビュー追跡
-│   └── tests/              # テスト戦略
 ├── scripts/
-│   └── sync_agent_skills.sh
-└── tools/
-    ├── extract_git_diff.py     # git 差分抽出・レポート生成ツール（Python版）
-    └── ExtractGitDiff/         # git 差分抽出・レポート生成ツール（C#版）
+└── tests/
 ```
 
 ## ワークフロー skills
@@ -99,15 +103,15 @@ dotnet restore
 
 ### extract_git_diff
 
-git コミット履歴から指定範囲の差分を抽出し、before/after ソース・unified diff・レポートを出力します。Python テンプレートは Python スクリプト版、C# テンプレートは dotnet コンソールアプリ版を同梱しています。
+git コミット履歴から指定範囲の差分を抽出し、before/after ソース・unified diff・レポートを出力します。Python / C# project へ配る正本は `project-doc-bootstrap` の language template 配下で管理します。
 
 ```bash
-# Python テンプレート
+# Python project template
 python tools/extract_git_diff.py --date-from 2024-01-01 --date-to 2024-02-01
 python tools/extract_git_diff.py --commit-from abc1234 --commit-to def5678
 python tools/extract_git_diff.py --date-from 2024-01-01 --date-to 2024-02-01 -d src -e .py
 
-# C# テンプレート
+# C# project template
 dotnet run --project tools/ExtractGitDiff -- --date-from 2024-01-01 --date-to 2024-02-01
 dotnet run --project tools/ExtractGitDiff -- --commit-from abc1234 --commit-to def5678
 dotnet run --project tools/ExtractGitDiff -- --date-from 2024-01-01 --date-to 2024-02-01 -d src -e .cs

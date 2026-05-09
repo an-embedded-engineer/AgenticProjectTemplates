@@ -36,7 +36,8 @@ pwsh -File user-agent-assets/install/install_user_agent_assets.ps1 -Targets copi
 - 各 target には選択した skill 一式をまとめて配布する
 - review / orchestrator 系 suite skill は関連 workflow skill との同時 install を前提にする
 - `--dry-run` / `-DryRun` では変更を加えない
-- Windows では `AgentCliTmux.exe` が未配置でも、`python` / `python3` / `py -3` があれば PowerShell wrapper から Python runtime helper を利用できる
+- shell / PowerShell wrapper は `runtime/agent-cli-tmux/csharp/<rid>/AgentCliTmux(.exe)` を優先し、未配置時は Python runtime helper へ fallback する
+- Windows では `csharp/win-x64/AgentCliTmux.exe` が未配置でも、`python` / `python3` / `py -3` があれば PowerShell wrapper から Python runtime helper を利用できる
 
 ## 移行時の推奨
 

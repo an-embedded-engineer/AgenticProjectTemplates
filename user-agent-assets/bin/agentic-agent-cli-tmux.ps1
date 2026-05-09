@@ -4,15 +4,21 @@ $RuntimeRoot = if ($env:AGENTIC_PROJECT_TEMPLATES_RUNTIME) {
     Join-Path $HOME '.agentic-project-templates/runtime/agent-cli-tmux'
 }
 
-$ExePath = Join-Path $RuntimeRoot 'win-x64/AgentCliTmux.exe'
-if (Test-Path $ExePath) {
-    & $ExePath @args
-    exit $LASTEXITCODE
+$NativeCandidates = @(
+    (Join-Path $RuntimeRoot 'csharp/win-x64/AgentCliTmux.exe'),
+    (Join-Path $RuntimeRoot 'csharp/osx-arm64/AgentCliTmux')
+)
+
+foreach ($nativeCandidate in $NativeCandidates) {
+    if (Test-Path $nativeCandidate) {
+        & $nativeCandidate @args
+        exit $LASTEXITCODE
+    }
 }
 
 $PythonEntry = Join-Path $RuntimeRoot 'python/agent_cli_tmux.py'
 if (-not (Test-Path $PythonEntry)) {
-    Write-Error "runtime helper not found: $ExePath or $PythonEntry"
+    Write-Error "runtime helper not found: $($NativeCandidates -join ', ') or $PythonEntry"
     exit 1
 }
 
