@@ -27,6 +27,13 @@
 
 ## 追加レビュー（2026-05-10, `9b248112` 確認）
 
+## 追加レビュー対応状況（2026-05-10, `9b248112` 確認）
+
+- [Low] review 文書の結論が解消済み指摘を未解消として残している
+  - status: `resolved`
+  - 対応: `review_codex.md` の総評を解消済み前提の文面へ更新し、`review_claude.md` は `6efe0a6` 時点で解消済みであることを確認した
+  - 検証: review 文書の結論部が、現在の resolved 状態と矛盾しないことを確認した
+
 ### [Low] review 文書の結論が解消済み指摘を未解消として残している
 
 - 対象:
@@ -92,6 +99,6 @@
 
 ## 総評
 
-責務境界の整理自体は、`user-agent-assets/skills/*/references/procedure/` を正本とする方針に沿っている。root docs / generated instructions / sync source の関係も概ね一貫している。
+責務境界の整理は、`user-agent-assets/skills/*/references/procedure/` を正本とする方針に沿って完了している。root docs / generated instructions / sync source の関係も一貫しており、初回 review と follow-up review で挙がった root 側および template common 側の差分は解消済みである。
 
-ただし、追加された root shell script の file mode だけが template 側および README / sync guide の実行例と食い違っているため、修正後に再確認するのがよい。
+`scripts/sync_agent_instructions.sh` の実行権限、help 表示、`instructions/agent_sync_guide.md` の `--all` / `-All` 案内、template common への横展開、review 文書の結論整合まで反映されており、この review で追加の未解消事項はない。
