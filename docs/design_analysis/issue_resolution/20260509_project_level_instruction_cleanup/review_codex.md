@@ -25,6 +25,22 @@
   - 対応: `templates/common/scripts/sync_agent_instructions.sh` の help インデントと `templates/common/instructions/agent_sync_guide.md` の `--all` / `-All` 案内を root と同一内容へ更新した
   - 検証: root と template common の対象ファイルに対する `diff` が空であることを確認した
 
+## 追加レビュー（2026-05-10, `9b248112` 確認）
+
+### [Low] review 文書の結論が解消済み指摘を未解消として残している
+
+- 対象:
+  - `docs/design_analysis/issue_resolution/20260509_project_level_instruction_cleanup/review_codex.md:81`
+  - `docs/design_analysis/issue_resolution/20260509_project_level_instruction_cleanup/review_claude.md:172`
+- 内容:
+  - `9b2481126a18ab16ed342fd8d6f55eceb697a381` で root / template common の `sync_agent_instructions.sh` と `agent_sync_guide.md` は内容一致し、`review_codex.md` と `review_claude.md` の対応状況も `resolved` に更新されている。
+  - しかし、`review_codex.md` の総評は root shell script の file mode 不整合を未解消として読める文のまま残っている。
+  - 同様に、`review_claude.md` の結論も bootstrap template 側が同期から外れているとして Medium 指摘の対応を推奨する文のまま残っている。
+- 影響:
+  - 対応状況では resolved、結論では未解消という状態になり、後続レビューや完了判定時に現在の残課題を誤読しやすい。
+- 推奨対応:
+  - 対応済みの結論へ更新するか、元の結論は「初回レビュー時点の結論」であることが分かる見出しへ分離する。
+
 ### [Low] root の sync guide / shell help 修正が bootstrap template 側へ反映されていない
 
 - 対象:
