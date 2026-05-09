@@ -1,6 +1,7 @@
 ---
 name: copilot-review-automation
-description: AgenticProjectTemplates のワークフロー全 Phase を設計・実装 Agent（Copilot Chat または Copilot CLI）が自律実行し、各 Phase のレビューを Copilot CLI（デフォルト: claude-sonnet-4.6）に委任して完了させる手順。spec-change/new-feature/bugfix/issue-resolution/refactoring の Phase 2/3/4/5 レビューと指摘対応確認を自動化する。Codex ではなく Copilot が設計・実装担当として直接動作する構成。
+description: >-
+   AgenticProjectTemplates のワークフロー全 Phase を設計・実装 Agent（Copilot Chat または Copilot CLI）が自律実行し、各 Phase のレビューを Copilot CLI（デフォルト: claude-sonnet-4.6）に委任して完了させる手順。spec-change/new-feature/bugfix/issue-resolution/refactoring の Phase 2/3/4/5 レビューと指摘対応確認を自動化する。Codex ではなく Copilot が設計・実装担当として直接動作する構成。
 ---
 
 # copilot-review-automation
