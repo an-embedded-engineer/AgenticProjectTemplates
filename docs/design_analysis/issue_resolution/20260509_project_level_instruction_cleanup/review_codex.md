@@ -16,6 +16,26 @@
   - 対応: `scripts/sync_agent_instructions.sh` に実行権限を付与し、`./scripts/sync_agent_instructions.sh --help` と `./scripts/sync_agent_instructions.sh` の直接実行を確認した
   - 追加対応: `docs/rules/development_workflow.md` の検証コマンドを直接実行ベースへ更新し、`instructions/agent_sync_guide.md` に `--all` / `-All` を追記した
 
+## 追加レビュー（2026-05-10）
+
+### [Low] root の sync guide / shell help 修正が bootstrap template 側へ反映されていない
+
+- 対象:
+  - `instructions/agent_sync_guide.md:25-54`
+  - `user-agent-assets/skills/project-doc-bootstrap/templates/common/instructions/agent_sync_guide.md:25-51`
+  - `scripts/sync_agent_instructions.sh:20-24`
+  - `user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.sh:20-24`
+- 内容:
+  - 対応コミット `5809f487aa305a7d30f02af74ad4fdd961071570` では、root の `instructions/agent_sync_guide.md` に `--all` / `-All` の実行例とオプション説明が追加され、root の shell script help も 2-space インデントへ整形された。
+  - しかし、project bootstrap で target project へ配布される `user-agent-assets/skills/project-doc-bootstrap/templates/common/instructions/agent_sync_guide.md` と `templates/common/scripts/sync_agent_instructions.sh` は旧記述のままである。
+  - そのため root では解消済みの guide / help 表示の不整合が、bootstrap 後の target project には残る。
+- 影響:
+  - 実行機能には影響しないが、`project-doc-bootstrap` が配布する sync guide / script と root の正本運用が乖離する。
+  - README は `project-doc-bootstrap` で docs / instructions / sync script を配布すると説明しているため、共通 sync 資産の説明差分は利用者に見える。
+- 推奨対応:
+  - root の `instructions/agent_sync_guide.md` と `scripts/sync_agent_instructions.sh` の今回修正分を、`user-agent-assets/skills/project-doc-bootstrap/templates/common/` 側の対応ファイルにも横展開する。
+  - もしくは root 専用差分として残す理由があるなら、今回の report へ意図的差異として明記する。
+
 ### [Medium] macOS / Linux 向けの案内どおりに sync script を直接実行できない
 
 - 対象:
