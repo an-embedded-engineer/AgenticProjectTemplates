@@ -232,6 +232,35 @@ status: review_findings
 
   なし。Low-7 の未実施項目は解消した。
 
+  ### 1.6.3 Claude による独立 PowerShell 実行検証（2026-05-09、`pwsh 7.6.1`）
+
+  ローカルに `pwsh 7.6.1` が導入されたため、設計・実装 Agent 側の成功報告と独立に検証を行った。
+
+  | 検証項目 | 結果 | 検証根拠 |
+  |---|---|---|
+  | `pwsh -File user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.ps1 -Language python -ProjectRoot <tmp>` | ✅ 成功 | 27 file 配置、placeholder scan が docs / instructions の `{{PROJECT_NAME}}` と `<!-- TODO: -->` を出力。`[info] sync 実行後に...` hint と `[warn] docs/components/_example_component が残っています` warn も出力 |
+  | `pwsh -File <tmp>/scripts/sync_agent_instructions.ps1 -Help` | ✅ 成功 | Usage / Options が正しく出力。`param()` を script 先頭へ移動した修正により、PowerShell parser を通過することを実証（修正前は parse error 必至だった） |
+  | `pwsh -File <tmp>/scripts/sync_agent_instructions.ps1`（既定 = `-All` 相当） | ✅ 成功 | `=== Agent Sync Start ===` から `=== Agent Sync Complete ===` まで通り、`AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` がいずれも `instruction copied` で出力される |
+  | sync 後の再 scan（Low-6 確認） | ✅ 成功 | bootstrap を再実行すると `instructions/agent_common_master.md`、`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` の `{{PROJECT_NAME}}` がいずれも報告される |
+  | `pwsh -File user-agent-assets/install/install_user_agent_assets.ps1 -DryRun` | ✅ 成功 | helper root 作成、wrapper / instructions / runtime の copy plan、3 target × 全 skill の copy plan、core workflow skill への shared common hydrate plan を計 101 行出力 |
+  | `pwsh -File install_user_agent_assets.ps1 -DryRun -Targets claude`（target 絞り込み） | ✅ 成功 | `~/.claude/skills/` のみへの copy plan が出力され、`~/.copilot/skills` / `~/.agents/skills` / `~/.codex/skills` のいずれも触らない |
+  | `pwsh -File install_user_agent_assets.ps1 -DryRun -Targets bogus`（不正 target validation） | ✅ 成功 | helper root への copy 前に `Validate-Targets` が `Unsupported target: bogus` を throw して終了。helper root を汚さない順序が保たれている |
+  | `pwsh -File install_user_agent_assets.ps1 -DryRun -Targets 'copilot, claude'`（空白吸収） | ✅ 成功 | `Get-NormalizedTargets` の `.Trim()` により空白を吸収し、両 target の install plan を出力 |
+  | `pwsh -File install_user_agent_assets.ps1 -Targets claude` の実 install（HOME を `mktemp -d` へ redirect） | ✅ 成功 | `install complete` を出力。配布された `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` のモードが `-rwxr-xr-x`、つまり PowerShell の `Copy-Item` が source の +x bit を保持することを確認 |
+
+  ### 1.6.4 観察事項（finding 化はしない）
+
+  - **`install_user_agent_assets.ps1` には明示的な chmod 処理が無い**。一方 `install_user_agent_assets.sh` には `ensure_shell_wrapper_executable` で defensive に `chmod 755` を行うコードがある。POSIX 環境で `pwsh` 経由で実行した場合、PowerShell の `Copy-Item` が source の `-rwxr-xr-x` を保持するため、現状は実動作上問題ないことを実 install で確認した。ただし、source 側で何らかの理由で +x が外れた場合 `.sh` 版は復帰できるが `.ps1` 版は復帰できないという非対称が残る。**Phase 5 完了後の follow-up メモ**として記録するに留める
+  - `param()` 位置修正により `Set-StrictMode` が `param()` の後に評価される動線が成立し、未定義変数の早期検出も期待どおり機能する
+  - PowerShell の `throw` メッセージは色付きで stderr へ出力され、`Validate-Targets` の error path でも本文 (`Unsupported target: bogus`) は読みやすい
+
+  ### 1.6.5 結論
+
+  - Low-7 の構造修正は PowerShell parser を実通過し、Phase 5 持ち越し項目だった `.ps1` 系の動作検証が完了
+  - bootstrap / sync / install の全 PowerShell スクリプトが期待どおり動作することを実機で確認
+  - 構造的な追加指摘なし。`.ps1` installer に chmod が無い点は Phase 5 完了後の follow-up メモとして記録
+  - **Phase 4 残オープン項目はゼロ**になり、Phase 5 へそのまま進める
+
   ## 1.3 再検証で発見した新規 finding（対応前記録）
 
   ### [Critical-2] generator の置換ルールが wrapper install path を破壊し、orchestrator/review skill から wrapper を呼べない（regression）
@@ -627,3 +656,15 @@ status: review_findings
 - **End-to-end smoke test**: 隔離 target project で bootstrap → sync → 再 scan が期待どおり動作。bootstrap 直後に `instructions/agent_common_master.md` の placeholder が、sync 後に `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の placeholder がそれぞれ報告される
 - **新規 finding**: なし
 - **結論**: 当初の Critical 1 / High 3 / Medium 5 / Low 4 / Design-Doc-Update 1 と、再検証で発生した Critical-2 / Low-5 / Low-6 / Low-7 / Low-8 の **すべてが解消済み**。Phase 4 完了条件を満たした状態で Phase 5 smoke test に進める
+
+### PowerShell 実行検証後の判定（2026-05-09 Claude、`pwsh 7.6.1` 導入後）
+
+- Phase 5 持ち越しだった Low-7 の実行検証を、ローカル `pwsh 7.6.1` で独立実施した
+- 検証項目（§ 1.6.3）の 9 件すべてが期待どおり成功:
+  - bootstrap (`copy_doc_templates.ps1`)
+  - sync (`sync_agent_instructions.ps1 -Help` / 既定 -All)
+  - sync 後再 scan による Low-6 動作確認
+  - install dry-run（既定 / target 絞り込み / 不正 target validation / whitespace tolerance）
+  - 実 install での wrapper +x bit 保持確認
+- 観察事項として、`install_user_agent_assets.ps1` には `.sh` 版にある defensive な `chmod 755` 相当が無く、source の mode に依存する点を記録（POSIX で source が +x を失った場合の復帰能力に非対称が残る）。Phase 5 完了後の follow-up メモとして残し、blocking finding にはしない
+- **結論**: PowerShell 系もすべて実動作確認済み。**Phase 4 のオープン項目はゼロ**となり、Phase 5 smoke test 完了 → Phase 6 完了処理へ進める状態
