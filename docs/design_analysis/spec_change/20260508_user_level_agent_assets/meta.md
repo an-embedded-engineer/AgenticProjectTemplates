@@ -39,6 +39,9 @@ related_commits:
   - 787b3db : Phase 5 capture follow-up items
   - 09182e8 : Phase 5 docs review for user-level agent assets
   - 993c65b : Address Phase 5 docs review feedback
+  - 3ededef : Finalize asset migration and dotnet validation
+  - b16fc01 : Phase 4 impl review approval by Copilot CLI
+  - 8259889 : Fix Copilot skill frontmatter YAML parsing
 ---
 
 # メタ情報
@@ -62,7 +65,7 @@ Python / C# project 向けの共通 Agent instructions、workflow skills、docs 
 
 ## 未着手の後続 Phase
 
-- Phase 6: 完了処理、マージ、archive、history 反映
+- Phase 6: 最終マージ承認、archive、history 反映
 
 ## 最新検証メモ
 
@@ -78,3 +81,5 @@ Python / C# project 向けの共通 Agent instructions、workflow skills、docs 
 - 2026-05-09: 旧 root / template `instructions/`、`scripts/sync_agent_skills.*`、repo-local `.github/skills/` / `.claude/skills/` を削除し、`python-project-template/` と `csharp-project-template/` を repo から撤去した
 - 2026-05-09: system `dotnet` に `.NET 9` SDK / runtime が見えることを確認し、`tests/AgentCliTmux.Tests` が repo-local `.dotnet9` なしで成功する状態へ揃えた
 - 2026-05-09: 追加実装記録として `impl/user_level_agent_assets_impl.md` を作成し、runtime / bootstrap 再配置と system-dotnet-only validation 前提を文書化した
+- 2026-05-09: `user-agent-assets/runtime/agent-cli-tmux/win-x64` の空ディレクトリは source payload の残骸だったため削除し、clean な fake HOME への再 install で runtime 直下が `csharp` / `python` のみになること、既存 user root も `--mode overwrite` で stale な `win-x64` を除去できることを確認した
+- 2026-05-09: `user-agent-assets/skills/copilot-review-automation/SKILL.md` の frontmatter `description` を YAML block scalar へ修正し、`.copilot` / `.agents` 配置先の `SKILL.md` が YAML として parse できること、およびユーザ確認で Copilot CLI 起動時の skill load error が解消したことを確認した

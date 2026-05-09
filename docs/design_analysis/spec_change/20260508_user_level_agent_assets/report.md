@@ -7,7 +7,7 @@
 - branch: `feature/spec-user-level-agent-assets-20260508`
 - compare_base_branch: `main`
 - merge_base: `61c9863801734cef6dd4893129e8d1683aca4390`
-- target_head: `working tree (HEAD=993c65b)`
+- target_head: `working tree (HEAD=8259889)`
 
 ## 収集方法
 
@@ -23,9 +23,9 @@ git diff --name-only $(git merge-base main HEAD)
 
 ## 差分サマリ
 
-- 変更ファイル数: `293`
-- 追加行数: `4660`
-- 削除行数: `11682`
+- 変更ファイル数: `298`
+- 追加行数: `4986`
+- 削除行数: `8273`
 
 ## 主な変更グループ
 
@@ -59,6 +59,7 @@ git diff --name-only $(git merge-base main HEAD)
 - `user-agent-assets/skills/` に workflow / review / orchestrator skills を追加した
 - 各 skill で `references/procedure/` を同梱し、project-level `docs/procedure/` 依存を外す方向へ整理した
 - `copilot-review-automation`、`claude-review-automation`、`ai-review-response-workflow` などの review 系 skill を user-level assets 側へ集約した
+- `copilot-review-automation/SKILL.md` の frontmatter `description` は YAML block scalar へ修正し、Copilot CLI 起動時の skill load error を解消した
 
 ### 6. project-doc-bootstrap と project-level docs 雛形
 
@@ -97,12 +98,14 @@ git diff --name-only $(git merge-base main HEAD)
 
 - shell / PowerShell の bootstrap、sync、installer dry-run
 - 実ユーザールートへの install と wrapper 実行権限
+- fake HOME への clean install で runtime 直下に不要な `win-x64` が再生成されないことと、実ユーザールートでも `--mode overwrite` により stale な `win-x64` を除去できること
 - 新規 Python サンプルプロジェクトでの `project-doc-bootstrap`、`copilot-review-automation`、`new-feature-workflow` 実地検証
 - Phase 5 docs review と follow-up review の承認
 - repo root へ移設した Python files の `py_compile`
 - repo root へ移設した C# tool / test runner の `dotnet build`
 - system `dotnet` による `dotnet run --project tests/AgentCliTmux.Tests/AgentCliTmux.Tests.csproj` の成功
 - repo-local `.dotnet9` 削除後も同 test runner が成功すること
+- `copilot-review-automation` の source / install 済み `SKILL.md` frontmatter が YAML parse できることと、ユーザ確認で Copilot CLI 起動時の skill load error が消えたこと
 
 ## 補足
 
