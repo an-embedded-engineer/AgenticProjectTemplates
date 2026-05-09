@@ -36,6 +36,7 @@ related_commits:
   - 986c735 : Address latest user-level agent assets review findings
   - 398bb58 : Record PowerShell validation for user-level agent assets
   - 5cc9ec2 : Record final PowerShell review confirmations
+  - 787b3db : Phase 5 capture follow-up items
 ---
 
 # メタ情報
