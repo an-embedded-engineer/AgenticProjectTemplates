@@ -58,16 +58,44 @@ copy_tree() {
 
 list_placeholders() {
     local docs_root="${PROJECT_ROOT}/docs"
-    if [ ! -d "${docs_root}" ]; then
+    local instructions_root="${PROJECT_ROOT}/instructions"
+    local scan_targets=()
+
+    if [ -d "${docs_root}" ]; then
+        scan_targets+=("${docs_root}")
+    fi
+    if [ -d "${instructions_root}" ]; then
+        scan_targets+=("${instructions_root}")
+    fi
+    if [ -f "${PROJECT_ROOT}/AGENTS.md" ]; then
+        scan_targets+=("${PROJECT_ROOT}/AGENTS.md")
+    fi
+    if [ -f "${PROJECT_ROOT}/CLAUDE.md" ]; then
+        scan_targets+=("${PROJECT_ROOT}/CLAUDE.md")
+    fi
+    if [ -f "${PROJECT_ROOT}/.github/copilot-instructions.md" ]; then
+        scan_targets+=("${PROJECT_ROOT}/.github/copilot-instructions.md")
+    fi
+
+    if [ "${#scan_targets[@]}" -eq 0 ]; then
         return
     fi
 
     log "=== Placeholder scan ==="
     if command -v rg >/dev/null 2>&1; then
-        rg -n '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--\s*TODO:' "${docs_root}" || true
+        rg -n '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--\s*TODO:' "${scan_targets[@]}" || true
     else
-        grep -R -n -E '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--[[:space:]]*TODO:' "${docs_root}" || true
+        local scan_target
+        for scan_target in "${scan_targets[@]}"; do
+            if [ -d "${scan_target}" ]; then
+                grep -R -n -E '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--[[:space:]]*TODO:' "${scan_target}" || true
+            else
+                grep -n -E '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--[[:space:]]*TODO:' "${scan_target}" || true
+            fi
+        done
     fi
+
+    log "[info] sync 実行後に本 wrapper を再実行すると、生成済み Agent 向けファイルも再 scan されます"
 
     if [ -d "${docs_root}/components/_example_component" ]; then
         log "[warn] docs/components/_example_component が残っています"

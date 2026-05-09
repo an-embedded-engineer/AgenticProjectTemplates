@@ -58,17 +58,50 @@ function Copy-TemplateTree {
 
 function Show-Placeholders {
     $docsRoot = Join-Path $ProjectRoot 'docs'
-    if (-not (Test-Path $docsRoot)) {
+    $instructionsRoot = Join-Path $ProjectRoot 'instructions'
+    $scanTargets = [System.Collections.Generic.List[string]]::new()
+
+    if (Test-Path $docsRoot) {
+        $scanTargets.Add($docsRoot)
+    }
+    if (Test-Path $instructionsRoot) {
+        $scanTargets.Add($instructionsRoot)
+    }
+
+    $generatedFiles = @(
+        (Join-Path $ProjectRoot 'AGENTS.md'),
+        (Join-Path $ProjectRoot 'CLAUDE.md'),
+        (Join-Path $ProjectRoot '.github/copilot-instructions.md')
+    )
+    foreach ($generatedFile in $generatedFiles) {
+        if (Test-Path $generatedFile) {
+            $scanTargets.Add($generatedFile)
+        }
+    }
+
+    if ($scanTargets.Count -eq 0) {
         return
     }
 
     Write-Plan '=== Placeholder scan ==='
-    Get-ChildItem -Path $docsRoot -Recurse -File -Include *.md | ForEach-Object {
-        $matches = Select-String -Path $_.FullName -Pattern '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--\s*TODO:' -AllMatches
+    foreach ($scanTarget in $scanTargets) {
+        if (Test-Path $scanTarget -PathType Container) {
+            Get-ChildItem -Path $scanTarget -Recurse -File -Include *.md | ForEach-Object {
+                $matches = Select-String -Path $_.FullName -Pattern '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--\s*TODO:' -AllMatches
+                foreach ($match in $matches) {
+                    Write-Host ("{0}:{1}:{2}" -f $_.FullName, $match.LineNumber, $match.Line.Trim())
+                }
+            }
+            continue
+        }
+
+        $matches = Select-String -Path $scanTarget -Pattern '\{\{PROJECT_NAME(_LOWER)?\}\}|<!--\s*TODO:' -AllMatches
         foreach ($match in $matches) {
-            Write-Host ("{0}:{1}:{2}" -f $_.FullName, $match.LineNumber, $match.Line.Trim())
+            Write-Host ("{0}:{1}:{2}" -f $scanTarget, $match.LineNumber, $match.Line.Trim())
         }
     }
+
+    Write-Plan '[info] sync 実行後に本 wrapper を再実行すると、生成済み Agent 向けファイルも再 scan されます'
 
     $exampleComponentDir = Join-Path $docsRoot 'components/_example_component'
     if (Test-Path $exampleComponentDir) {

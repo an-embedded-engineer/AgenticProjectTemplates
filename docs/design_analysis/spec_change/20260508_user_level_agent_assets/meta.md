@@ -61,4 +61,6 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 
 - 2026-05-09: 隔離した Python target project へ `project-doc-bootstrap` を実行し、docs 雛形、`instructions/agent_common_master.md`、`instructions/agent_sync_guide.md`、`scripts/sync_agent_instructions.*` が配置されることを確認した
 - 2026-05-09: 同 target project で `scripts/sync_agent_instructions.sh --help` と `scripts/sync_agent_instructions.sh` の直接実行が成功し、`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` が再生成されることを確認した
+- 2026-05-09: `copy_doc_templates.sh` の placeholder scan を `docs` に加えて `instructions` と既存生成物 3 種へ拡張し、sync 後の再 scan ガイドを追加した
+- 2026-05-09: `sync_agent_instructions.ps1` の `param(...)` を script 先頭へ移動し、PowerShell script としての parameter binding に合わせた
 - 2026-05-09: PowerShell 系の bootstrap / sync script 実行確認は `pwsh` 不在のため未実施

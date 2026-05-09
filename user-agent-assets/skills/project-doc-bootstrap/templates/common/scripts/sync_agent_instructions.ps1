@@ -2,9 +2,6 @@
 # Agent 向け instruction 同期スクリプト
 # instructions/ 配下の同期元を AGENTS.md / CLAUDE.md / .github/copilot-instructions.md へコピーする
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-
 param(
     [switch]$Copilot,
     [switch]$Claude,
@@ -12,6 +9,9 @@ param(
     [switch]$All,
     [switch]$Help
 )
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 function Show-Usage {
     Write-Output "Usage:"

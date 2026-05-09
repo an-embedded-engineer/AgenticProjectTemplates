@@ -174,6 +174,12 @@ status: review_findings
     - SKILL.md または `agent_sync_guide.md` で「生成物 3 種を直接編集しない」契約を明記する（user 補足の step 5 に対応する文章）
     - 必要なら `sync_agent_instructions.sh --check` モード（差分があれば exit 1）を follow-up として検討
 
+  ### 1.4.4 追加指摘対応後の補足（2026-05-09）
+
+  - Low-6 は対応済み。`copy_doc_templates.sh` / `.ps1` の placeholder scan 対象を `docs` から `docs` + `instructions` + 既存生成物 3 種へ拡張し、wrapper 出力末尾に sync 後の再 scan ガイドを追加した
+  - Low-8 は対応済み。`agent_sync_guide.md` に「sync 実行時は生成物 3 種を上書きする」契約を追加し、生成物 3 種の直接編集を避ける運用を明示した
+  - Low-7 は継続。`pwsh` 不在のため PowerShell 実行検証は未実施
+
   ## 1.3 再検証で発見した新規 finding（対応前記録）
 
   ### [Critical-2] generator の置換ルールが wrapper install path を破壊し、orchestrator/review skill から wrapper を呼べない（regression）
@@ -554,10 +560,8 @@ status: review_findings
 - **High-2 方針更新で閉じ**: design.md Section 4.1 / 4.2 / 5.3 / 6.3 / 8.1 / 8.3 / 8.4 / 10 / 11.1 / 11.2 / 12.2 / 12.3 / 14 / 15 を `current phase` と `移行完了後 follow-up` に分けて再構成。新 Section 8.4「想定ユーザフロー」がユーザ補足の 1〜5 ステップを明文化
 - **新ユースケースの実証**: 隔離 target project に対する `bash copy_doc_templates.sh --language python` → `bash sync_agent_instructions.sh` のパイプラインが手動 smoke test で成立。docs / instructions / scripts の配布、placeholder scan 動作、sync 実行による生成物 3 種の再生成までを確認
 - **rebuild 副作用の解消**: `preserve_manual_skills` / `restore_manual_skills` により、`project-doc-bootstrap` のような generator 対象外 skill が再 build で消えないことを md5 一致で検証
-- **新規 Low 3 件**:
-  - Low-6: `copy_doc_templates.sh` の placeholder scan が `instructions/` を含めず、`{{PROJECT_NAME}}` 残件が見落とされる
+- **残 Low**:
   - Low-7: PowerShell 版 wrapper / installer の実検証が `pwsh` 不在のため未実施
-  - Low-8: sync スクリプトが生成物 3 種を静かに上書きするため、契約を SKILL.md / agent_sync_guide.md に明記する余地がある
 - **結論**: blocking issue は解消済み。**Phase 5 smoke test に進める**。残 Low は Phase 5 / 6 の中で順次解消すれば足りる。Phase 5 の smoke test に下記の追加を推奨:
   - `grep -rn '~/.agentic[^-]' user-agent-assets/skills/` が 0 件であることを CI / local で確認
   - `pwsh` 環境での `bin/copy_doc_templates.ps1` 動作と `install_user_agent_assets.ps1 -DryRun` 動作確認

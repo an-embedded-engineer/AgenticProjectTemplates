@@ -21,7 +21,7 @@ description: 既存プロジェクトへ docs 雛形を流し込み、missing-on
 
 1. 対象言語を `python` または `csharp` で決める
 2. 対象プロジェクト root で wrapper を実行し、docs 雛形をコピーする
-3. copy 後に placeholder 一覧を確認し、残件を整理する
+3. copy 後に docs / instructions の placeholder 一覧を確認し、残件を整理する
 4. language-specific reference を読み、優先度の高い文書から埋める
 
 ## wrapper の基本例
@@ -45,5 +45,5 @@ pwsh -File bin/copy_doc_templates.ps1 -Language csharp -ProjectRoot C:\path\to\p
 1. `--language` を明示する
 2. `missing` では既存 file を壊さず、未配置 file だけが入ることを確認する
 3. `overwrite` の影響範囲を理解してから実行する
-4. copy 後に placeholder 一覧を確認する
+4. copy 後に docs / instructions の placeholder 一覧を確認する
 5. `docs/components/_example_component` が残る場合は実コンポーネント化の要否を判断する

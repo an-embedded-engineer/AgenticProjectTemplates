@@ -53,5 +53,6 @@ scripts\sync_agent_instructions.bat --claude --codex
 ## 運用ルール
 
 - `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` は手編集せず、`instructions/agent_common_master.md` を更新して再同期する
+- sync 実行時は生成物 3 種を上書きするため、手編集した差分は保持されない
 - 同期スクリプトは project-level instruction 生成物 3 種だけを扱う
 - user-level workflow skill の配布は別途 user-level install で行い、このスクリプトでは扱わない

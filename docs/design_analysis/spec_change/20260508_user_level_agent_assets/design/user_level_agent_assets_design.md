@@ -441,7 +441,7 @@ project-doc-bootstrap/
 - `templates/common` を先にコピーし、その後 `templates/python|csharp` を追加適用する
 - `templates/common` には `instructions/agent_sync_guide.md` と project-level `scripts/sync_agent_instructions.*` を含める
 - `templates/python|csharp` には `docs/` に加えて `instructions/agent_common_master.md` を含める
-- コピー後に placeholder / TODO 残存一覧を出力する
+- コピー後に docs / instructions / 既存生成物の placeholder / TODO 残存一覧を出力する
 - `templates/common` は shared docs を抽出できた時だけ使い、Phase 4 時点では空ディレクトリのままでもよい
 - 既存 docs を上書きするのは明示 `overwrite` 時のみ
 
@@ -548,11 +548,12 @@ Copilot user-level skill の smoke test は Phase 5 までに実施する。
 1. `install_user_agent_assets.sh --dry-run`
 2. `install_user_agent_assets.ps1 -DryRun`
 3. bootstrap 後の target project で `scripts/sync_agent_instructions.sh --help`
-4. Python template の既存 py_compile / pytest
-5. C# template の既存 `dotnet build` / test
-6. Copilot user-level skill smoke test
-7. workflow skill の `references/` 参照 smoke test
-8. docs bootstrap missing-only / overwrite / placeholder listing 確認
+4. `pwsh -File scripts/sync_agent_instructions.ps1 -Help`
+5. Python template の既存 py_compile / pytest
+6. C# template の既存 `dotnet build` / test
+7. Copilot user-level skill smoke test
+8. workflow skill の `references/` 参照 smoke test
+9. docs bootstrap missing-only / overwrite / placeholder listing 確認
 
 ### 13.2 実装時の完了判断
 
