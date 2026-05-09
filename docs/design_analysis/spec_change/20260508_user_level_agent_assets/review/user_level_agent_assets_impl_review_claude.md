@@ -36,6 +36,7 @@ status: review_findings
   - `bin/` ディレクトリが既存 `.gitignore` の `bin/` ルールに巻き込まれており、コミット時に wrapper が消失する致命的な問題がある
 - 総合判定: Critical 1 / High 3 / Medium 5 / Low 4 / Design-Doc Update 1（旧 High-3 を分離）
 - 再検証後の判定（2026-05-09 Claude 再検証・方針更新反映）: 当初 Critical 1 / High 3 / Medium 5 / Design-Doc-Update 1 のうち Critical-1 と High-1 / High-3 / Medium 1〜5 / Design-Doc-Update-1 を解消。High-2 は repo 直下 / 既存 template を即時変更する項目ではなく、`project-doc-bootstrap` を起点に target project へ project-level files を配る staged migration へ設計更新したため、current phase の blocking から外した。現時点の残課題は `pwsh` 不在による PowerShell 実行検証未了と、Low-1 / Low-2 / Low-4 の非 blocking 項目のみ。
+- 再々検証後の判定（2026-05-09 Claude、コミット `c2334032f...`）: 当初指摘した Critical-2 と Low-5 をいずれも解消（REPLACEMENT_GUARDS による wrapper path 保護 + 境界付き session 名置換、設計書 Section 7.4 の残骸削除）。新規発見は Low-6 / Low-7 / Low-8（placeholder scan の scope、PowerShell 動作検証、sync 上書き告知）でいずれも non-blocking。**Phase 5 smoke test へ進める状態と判断する**
 
   ## 1.1 対応状況（2026-05-09 更新）
 
@@ -84,6 +85,94 @@ status: review_findings
   | Low-2 | 未対応 | ⚠️ 残置 | overwrite mode の `rm -rf` 挙動は変わらず（一方で missing mode は `merge_missing_dir` / `Sync-MissingDirectory` で file 単位 merge へ改善され、Codex finding #1 と High-1 の install 動作は強化された） |
   | Low-3 | 対応済み | ✅ 確認 | tmux session 名は短縮しつつ、wrapper path は placeholder 保護 + 境界付き置換により `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` を維持するよう修正済み |
   | Low-4 | 未対応 | ⚠️ 残置 | `common_agent_principles.md` を実際にどの runtime が consume するかは未明示（実害は限定的） |
+
+  ## 1.4 再々検証（2026-05-09 Claude、コミット `c2334032f693d9221463c1cc1175713643e6749f`）
+
+  対象コミット: `c2334032f693d9221463c1cc1175713643e6749f`（"Finalize review fixes for user-level agent assets"）。
+
+  ### 1.4.1 検証コマンドと結果
+
+  - **Critical-2 修正の確認**:
+    - `grep -rn '~/.agentic[^-]' user-agent-assets/skills/` → **0 件**（regression 解消）
+    - `grep -rn '~/.agentic-project-templates/bin' user-agent-assets/skills/` → 67 件すべて `~/.agentic-project-templates/` を維持
+    - `python3 scripts/rebuild_user_agent_skills.py` 実行後も上記が維持されることを確認
+  - **置換ガード実装の確認**:
+    - `rebuild_user_agent_skills.py:24-26` に `REPLACEMENT_GUARDS = {"~/.agentic-project-templates/": "__AGENTIC_WRAPPER_ROOT__"}` を導入
+    - `rewrite_text:95-97` と `122-124` で前後に placeholder へ退避 / 戻しを行い、`~/.agentic-project-templates/` を全置換から保護
+    - session 名置換は境界付きへ書き換え (`agentic-project-templates-review-` → `agentic-review-`、`agentic-project-templates-claude-` → `agentic-claude-`、`agentic-project-templates-orchestrator` → `agentic-orchestrator`)
+    - 結果: SKILL.md / procedure 内に `agentic-orchestrator` / `agentic-review-${TOPIC}` / `agentic-claude-${TOPIC}` の短縮 session 名と、`~/.agentic-project-templates/bin/...` の wrapper パスが共存。**Critical-2 は構造的に再発しない**
+  - **Low-5 修正の確認**:
+    - `grep -nE 'workflow_phase_library/README' docs/.../design.md` → 0 件（残骸削除済み）
+    - 該当行は `suite skill には workflow_phase_library を追加配置しない` へ書き換え済み
+  - **manual skill 保護機構の確認**:
+    - `rebuild_user_agent_skills.py:141-167` に `preserve_manual_skills` / `restore_manual_skills` を追加
+    - `rebuild()` 実行前に `WORKFLOW_SKILLS` に含まれない skill ディレクトリを `tempfile.mkdtemp` 配下へ退避し、再生成後に戻す
+    - 検証: 再 build 前後の `user-agent-assets/skills/project-doc-bootstrap/SKILL.md` の md5 が一致 (`b95857b8bcd223a44335f0a4ff29c2ca`)。templates / bin / references すべて維持
+    - 結果: 当初指摘した「rmtree が手動編集を消す」リスクは解消
+  - **設計書 staged migration への更新**:
+    - design.md Section 4.1 / 4.2 / 5.3 / 6.3 / 8.1 / 8.3 / 8.4 / 10 / 11.1 / 11.2 / 12.2 / 12.3 / 14 / 15 を `current phase` と `移行完了後 follow-up` に分けて再構成
+    - 新 Section 8.4「想定ユーザフロー」が、ユーザ補足の 1〜4 ステップに沿って明文化されている
+    - 結果: High-2 は方針変更により **本 phase の対象外**として閉じる根拠が設計書側で明示された
+
+  ### 1.4.2 End-to-end smoke test 結果
+
+  隔離した `mktemp -d` の target project で次を実行し、ユースケース全段（user 補足の 1〜5 ステップに対応）が通ることを確認:
+
+  1. `bash user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.sh --language python --project-root <tmp>` で
+     - `docs/{adr,architecture,components/_example_component,design_analysis/{spec_change,new_feature,fix_issues,issue_resolution,refactoring,research_analysis},history,issues,rules,tests,todo}/...` 一式
+     - `instructions/agent_common_master.md`、`instructions/agent_sync_guide.md`
+     - `scripts/sync_agent_instructions.{sh,ps1,bat}`
+     が配置される
+  2. placeholder scan が `<!-- TODO: -->` と `{{PROJECT_NAME}}` のいずれもヒット報告し、`docs/components/_example_component が残っています` を warn 表示する
+  3. target project で `bash scripts/sync_agent_instructions.sh` を実行すると、`AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` が `instructions/agent_common_master.md` から再生成される
+  4. 再 build (`python3 scripts/rebuild_user_agent_skills.py`) 後も `project-doc-bootstrap` skill が消失しない（manual preservation が機能）
+
+  ### 1.4.3 再々検証で発見した残課題
+
+  ### [Low-6] `copy_doc_templates.sh` の placeholder scan が `instructions/` 配下を見ない
+
+  - 対象箇所
+    - `user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.sh:60-75`
+    - `templates/python/instructions/agent_common_master.md:1`、`templates/csharp/instructions/agent_common_master.md:1` の `# {{PROJECT_NAME}} Agent Project Instructions (Sync Source)`
+  - 確認結果
+    - `list_placeholders` は `${PROJECT_ROOT}/docs` のみを scan し、`${PROJECT_ROOT}/instructions/` を含めない
+    - bootstrap で配置される `instructions/agent_common_master.md` 冒頭の `{{PROJECT_NAME}}` placeholder は scan 対象外
+    - sync 後の `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` も同じ placeholder が残る
+  - 影響
+    - 設計 Section 8.4 step 4「Agent が copied docs / instructions の placeholder を記入する」を遂行する Agent が、`docs/` 以外の placeholder 残件を一覧で取得できない
+    - 実害: Agent が能動的に instructions / sync 出力を確認しない限り、`{{PROJECT_NAME}}` が runtime 文書に残ったままになる
+  - 推奨対応
+    - `list_placeholders` の scan target を `docs` のみから `docs` + `instructions` + sync 出力 3 種へ拡張する。具体的には:
+      - `${PROJECT_ROOT}/docs`
+      - `${PROJECT_ROOT}/instructions`
+      - `${PROJECT_ROOT}/AGENTS.md`、`${PROJECT_ROOT}/CLAUDE.md`、`${PROJECT_ROOT}/.github/copilot-instructions.md`（存在する場合のみ）
+    - `bin/copy_doc_templates.ps1` 側にも同等の調整を入れる
+    - 副次的に、placeholder scan の出力末尾に「sync 後に再 scan する」一行ガイドを足すと、Agent が sync を忘れにくくなる
+
+  ### [Low-7] `bin/copy_doc_templates.ps1` の挙動が `.sh` 版と完全一致するかは未検証
+
+  - 対象箇所
+    - `user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.ps1`
+  - 確認結果
+    - `pwsh` がローカル環境にないため、PowerShell 版の dry-run / overwrite / placeholder 一覧は確認できていない
+    - 設計上は `.sh` 版と equivalent semantics が要求されている（design.md Section 8.2）
+  - 推奨対応
+    - Phase 5 の smoke test に「macOS / Linux で `pwsh` を導入したうえで `bin/copy_doc_templates.ps1` の同一動作を確認する」を組み込む
+    - 確認項目: `--language` 必須、`missing` default、placeholder scan 出力フォーマット、`_example_component` 警告
+
+  ### [Low-8] sync スクリプト群がドキュメント更新時に静かに dest を上書きする
+
+  - 対象箇所
+    - `templates/common/scripts/sync_agent_instructions.sh:66-74`（`copy_instruction_file` が `rm -f` → `cp` する）
+    - `templates/common/scripts/sync_agent_instructions.ps1` 同等処理
+  - 確認結果
+    - sync は `--mode` の概念を持たず、常に `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` を上書きする
+    - target project で生成物 3 種を手書き編集している場合、sync 実行時に何の警告もなく上書きされる
+  - 影響
+    - 設計上、生成物 3 種は直接編集禁止（agent_common_master.md を sync source とする）になっているため期待通りの挙動。ただし誤って編集していたユーザは差分を失う
+  - 推奨対応
+    - SKILL.md または `agent_sync_guide.md` で「生成物 3 種を直接編集しない」契約を明記する（user 補足の step 5 に対応する文章）
+    - 必要なら `sync_agent_instructions.sh --check` モード（差分があれば exit 1）を follow-up として検討
 
   ## 1.3 再検証で発見した新規 finding（対応前記録）
 
@@ -457,3 +546,19 @@ status: review_findings
 - current phase は `project-doc-bootstrap` を起点に target project へ docs / instructions / sync script を初期配置する流れでまとまり、repo 直下 / 既存 template の ripple は follow-up に分離された
 - user-level assets 側の blocking finding は解消済みで、残課題は `pwsh` 不在による PowerShell 実行検証未了と Low-1 / Low-2 / Low-4 の非 blocking 項目が中心である
 - 結論: **Phase 5 では bootstrap 済み target project を用いた導線確認を優先する**。repo 直下 / template の薄化や script rename は、移行完了後に別変更系列で扱うのが妥当
+
+### 再々検証後の判定（2026-05-09 Claude、コミット `c2334032f...`）
+
+- **Critical-2 解消**: `rebuild_user_agent_skills.py` に `REPLACEMENT_GUARDS` placeholder 退避方式を導入し、`~/.agentic-project-templates/` を保護したまま session 名のみ短縮（`agentic-orchestrator` / `agentic-review-${TOPIC}` / `agentic-claude-${TOPIC}`）。再 build 後の `grep -rn '~/.agentic[^-]' user-agent-assets/skills/` も 0 件で、構造的に regression が再発しない設計
+- **Low-5 解消**: 設計書 Section 7.4 line 366 の `workflow_phase_library/README.md` 残骸を `suite skill には workflow_phase_library を追加配置しない` へ書き換え
+- **High-2 方針更新で閉じ**: design.md Section 4.1 / 4.2 / 5.3 / 6.3 / 8.1 / 8.3 / 8.4 / 10 / 11.1 / 11.2 / 12.2 / 12.3 / 14 / 15 を `current phase` と `移行完了後 follow-up` に分けて再構成。新 Section 8.4「想定ユーザフロー」がユーザ補足の 1〜5 ステップを明文化
+- **新ユースケースの実証**: 隔離 target project に対する `bash copy_doc_templates.sh --language python` → `bash sync_agent_instructions.sh` のパイプラインが手動 smoke test で成立。docs / instructions / scripts の配布、placeholder scan 動作、sync 実行による生成物 3 種の再生成までを確認
+- **rebuild 副作用の解消**: `preserve_manual_skills` / `restore_manual_skills` により、`project-doc-bootstrap` のような generator 対象外 skill が再 build で消えないことを md5 一致で検証
+- **新規 Low 3 件**:
+  - Low-6: `copy_doc_templates.sh` の placeholder scan が `instructions/` を含めず、`{{PROJECT_NAME}}` 残件が見落とされる
+  - Low-7: PowerShell 版 wrapper / installer の実検証が `pwsh` 不在のため未実施
+  - Low-8: sync スクリプトが生成物 3 種を静かに上書きするため、契約を SKILL.md / agent_sync_guide.md に明記する余地がある
+- **結論**: blocking issue は解消済み。**Phase 5 smoke test に進める**。残 Low は Phase 5 / 6 の中で順次解消すれば足りる。Phase 5 の smoke test に下記の追加を推奨:
+  - `grep -rn '~/.agentic[^-]' user-agent-assets/skills/` が 0 件であることを CI / local で確認
+  - `pwsh` 環境での `bin/copy_doc_templates.ps1` 動作と `install_user_agent_assets.ps1 -DryRun` 動作確認
+  - target project の bootstrap → sync 往復が `--mode missing` の前提下で idempotent であること（Low-2 の挙動明文化と併せる）

@@ -15,9 +15,9 @@
 現状の実装は、workflow skill の user-level 正本化と `references/` 化の土台はできているが、移行先構成としては未完了である。
 特に installer の default 挙動、tmux wrapper の実行権限、Windows runtime、`project-doc-bootstrap` 欠落は、実際の user-level 利用で破綻する可能性が高い。
 
-2026-05-09 追加指摘対応後の確認では、open の追加指摘は解消済みと判断する。
-ただし High-2 相当の repo 直下 / 既存 template ripple は current phase の即時変更ではなく、`project-doc-bootstrap` を起点に target project へ project-level files と `sync_agent_instructions.*` を配る staged migration へ設計更新したうえで、移行完了後の follow-up に移した。
-残課題は `pwsh` 不在による PowerShell 実行検証未了だけで、実装差分としての blocking finding は残っていない。
+2026-05-09 commit `c233403` の再確認では、既存の追加指摘は概ね解消済みである。
+High-2 相当の repo 直下 / 既存 template ripple は current phase の即時変更ではなく、`project-doc-bootstrap` を起点に target project へ project-level files と `sync_agent_instructions.*` を配る staged migration へ設計更新したうえで、移行完了後の follow-up に移した。
+一方で、bootstrap の placeholder scan 範囲不足と PowerShell sync script の `param` 位置について追加指摘が残る。
 
 ## 対応状況（2026-05-09 更新）
 
@@ -31,10 +31,63 @@
 | 6. 不正 `--targets` でも helper 先書き込み | 対応済み | target validation を runtime/helper copy より前へ移動した |
 | 7. `reference/` 混入 | 対応済み | `.gitignore` へ `reference/` を追加し、作業用 clone 混入を避けた |
 | 追加1. Claude 側 High-2 対応状況の実態不一致 | 方針更新で current phase 対象外 | repo 直下 / 既存 template は移行完了まで無変更とし、`project-doc-bootstrap` から target project へ docs、project-level `agent_common_master.md`、`agent_sync_guide.md`、`sync_agent_instructions.*` をコピーする staged migration に設計更新した |
+| 追加2. bootstrap の placeholder scan 範囲不足 | 未対応 | docs だけを scan しており、同時にコピーする `instructions/agent_common_master.md` の `{{PROJECT_NAME}}` が一覧に出ない |
+| 追加3. PowerShell sync script の `param` 位置 | 未対応 | `Set-StrictMode` が `param(...)` より前にあり、PowerShell script としての起動に失敗する可能性が高い |
 
 備考:
 
 - `pwsh` がローカル環境に無いため、PowerShell wrapper / installer の実行検証だけは未実施
+
+## 指摘対応確認（commit c233403）
+
+対象コミット: `c2334032f693d9221463c1cc1175713643e6749f`
+
+### 対応済み確認
+
+- `project-doc-bootstrap/templates/*/docs/rules/skill_catalog.md` は削除済み
+- `references/*-target-docs.md` から `instructions/skills/**/*.md` の置換案内は削除済み
+- 設計は、repo 直下 / 既存 template を current phase で直接変更せず、`project-doc-bootstrap` から target project へ docs / project-level instructions / sync script を配る staged migration 方針へ更新済み
+- 隔離した Python target project で `copy_doc_templates.sh` を実行し、docs 雛形、`instructions/agent_common_master.md`、`instructions/agent_sync_guide.md`、`scripts/sync_agent_instructions.*` が配置されることを確認済み
+- 同 target project で `scripts/sync_agent_instructions.sh --help` と `scripts/sync_agent_instructions.sh` の直接実行が成功し、`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` が再生成されることを確認済み
+- `rg` 上、bootstrap 生成先には旧 `skill_catalog` / `instructions/skills` / `scripts/agent_cli_tmux.py` / `tools/AgentCliTmux` / `SKILL.master` / template-doc-filler / `docs/procedure` 参照は残っていない
+- `python3 -m py_compile scripts/rebuild_user_agent_skills.py user-agent-assets/runtime/agent-cli-tmux/python/agent_cli_tmux.py` は成功
+- `bash -n user-agent-assets/install/install_user_agent_assets.sh user-agent-assets/bin/agentic-agent-cli-tmux.sh user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.sh user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.sh` は成功
+
+### 追加指摘
+
+#### D. [Medium] bootstrap の placeholder scan が `docs/` だけを対象にしており、コピー済み instructions の `{{PROJECT_NAME}}` を見落とす
+
+`project-doc-bootstrap` は docs だけでなく `instructions/agent_common_master.md` も target project へコピーする。
+しかし `copy_doc_templates.sh` / `.ps1` の placeholder scan は `docs/` 配下だけを対象にしている。
+
+- `user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.sh:59-69`
+- `user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.ps1:59-68`
+- `user-agent-assets/skills/project-doc-bootstrap/templates/python/instructions/agent_common_master.md:1`
+- `user-agent-assets/skills/project-doc-bootstrap/templates/csharp/instructions/agent_common_master.md:1`
+
+隔離 target project で bootstrap 後に `sync_agent_instructions.sh` を実行すると、`AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` に `# {{PROJECT_NAME}} Agent Project Instructions` がそのまま同期された。
+`references/python-target-docs.md` / `csharp-target-docs.md` では `instructions/agent_common_master.md` の `{{PROJECT_NAME}}` 置換を高優先度で案内しているが、wrapper の一覧に出ないため見落としやすい。
+
+対応案:
+
+- placeholder scan 対象を `docs/` だけでなく、少なくとも `instructions/` と生成済み `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` まで広げる
+- `project-doc-bootstrap/SKILL.md` の「copy 後に placeholder 一覧を確認」を「docs / instructions の placeholder 一覧」と明記する
+- `sync_agent_instructions.*` 実行前に `instructions/agent_common_master.md` の placeholder が解消済みであることを check する
+
+#### E. [Medium] `sync_agent_instructions.ps1` の `param` block が先頭にない
+
+PowerShell の script parameter block は、コメント等を除いて script の先頭に置く必要がある。
+現在の `sync_agent_instructions.ps1` は `Set-StrictMode` と `$ErrorActionPreference` の後に `param(...)` がある。
+
+- `user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.ps1:5-14`
+
+この配置では `pwsh -File scripts/sync_agent_instructions.ps1 -Help` 等が PowerShell script として正常に parameter binding されない可能性が高い。
+ローカル環境には `pwsh` が無いため実行検証は未実施だが、同じ `project-doc-bootstrap/bin/copy_doc_templates.ps1` や install script は `param(...)` を先頭に置いており、こちらへ揃えるべきである。
+
+対応案:
+
+- `param(...)` を shebang / コメント直後へ移動し、その後に `Set-StrictMode` と `$ErrorActionPreference` を置く
+- `pwsh -File scripts/sync_agent_instructions.ps1 -Help` と `pwsh -File scripts/sync_agent_instructions.ps1 -All` を Phase 5 検証項目に追加する
 
 ## 追加指摘対応後の確認（2026-05-09）
 
