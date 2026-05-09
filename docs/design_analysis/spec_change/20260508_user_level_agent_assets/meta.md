@@ -31,6 +31,9 @@ related_commits:
   - 0b98917 : Phase 3 design review Round 3 approval
   - 6d96e46 : Phase 3 post-review design simplify (no fallback)
   - d115d62 : Phase 4 user-level assets foundation
+  - c233403 : Finalize review fixes for user-level agent assets
+  - 05ce753 : Record latest user-level agent assets review results
+  - 986c735 : Address latest user-level agent assets review findings
 ---
 
 # メタ情報
@@ -63,4 +66,4 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 - 2026-05-09: 同 target project で `scripts/sync_agent_instructions.sh --help` と `scripts/sync_agent_instructions.sh` の直接実行が成功し、`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` が再生成されることを確認した
 - 2026-05-09: `copy_doc_templates.sh` の placeholder scan を `docs` に加えて `instructions` と既存生成物 3 種へ拡張し、sync 後の再 scan ガイドを追加した
 - 2026-05-09: `sync_agent_instructions.ps1` の `param(...)` を script 先頭へ移動し、PowerShell script としての parameter binding に合わせた
-- 2026-05-09: PowerShell 系の bootstrap / sync script 実行確認は `pwsh` 不在のため未実施
+- 2026-05-09: `pwsh -File user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.ps1 -Language python`、`pwsh -File <tmp>/scripts/sync_agent_instructions.ps1 -Help/-All`、`install_user_agent_assets.ps1 -DryRun` が成功し、PowerShell 系の bootstrap / sync / installer dry-run を確認した

@@ -180,6 +180,58 @@ status: review_findings
   - Low-8 は対応済み。`agent_sync_guide.md` に「sync 実行時は生成物 3 種を上書きする」契約を追加し、生成物 3 種の直接編集を避ける運用を明示した
   - Low-7 は継続。`pwsh` 不在のため PowerShell 実行検証は未実施
 
+  ## 1.5 再々々検証（2026-05-09 Claude、コミット `986c735a620147eff2cf9e11f0308515cbc97f0d`）
+
+  対象コミット: `986c735a620147eff2cf9e11f0308515cbc97f0d`（"Address latest user-level agent assets review findings"）。Low-6 / Low-7 / Low-8 の対応確認に絞って独立に再検証した。
+
+  ### 1.5.1 検証結果
+
+  | finding | 申告 | 検証結果 | 検証根拠 |
+  |---|---|---|---|
+  | Low-6 | 対応済み | ✅ 確認 | `bin/copy_doc_templates.sh:60-100` の `list_placeholders` を `${PROJECT_ROOT}/docs` から、`docs` + `instructions` + `AGENTS.md` + `CLAUDE.md` + `.github/copilot-instructions.md` を選択的に scan する `scan_targets` 配列ベースに書き換え。`rg` / `grep -R` どちらの分岐でも directory / file 双方を扱える。`[info] sync 実行後に本 wrapper を再実行すると、生成済み Agent 向けファイルも再 scan されます` の hint も末尾に追加。SKILL.md の進め方 #3 と最低限のチェック #4 も `docs / instructions の placeholder` へ更新済み |
+  | Low-7 | 部分対応 | ✅ 構造確認 / ⚠️ 実行検証は未了 | `bin/copy_doc_templates.ps1:58-105` も `.sh` 版と同等の scan target 拡張へ書き換え（`Test-Path -PathType Container` で directory / file を分岐）。さらに **隠れた critical bug** として、`templates/common/scripts/sync_agent_instructions.ps1` の `param()` ブロックが `Set-StrictMode` / `$ErrorActionPreference` の後ろに置かれていた問題を修正。PowerShell では `param()` は先頭コメント直後にしか書けないため、修正前のスクリプトは parse error で起動できなかった可能性が高い。design.md Section 13.1 #4 に `pwsh -File scripts/sync_agent_instructions.ps1 -Help` を追加。実行検証は引き続き `pwsh` 不在のため未実施 |
+  | Low-8 | 対応済み | ✅ 確認 | `templates/common/instructions/agent_sync_guide.md:56` に `sync 実行時は生成物 3 種を上書きするため、手編集した差分は保持されない` を追加。同 file 既存 line 5 / 55 にも「生成物は手編集しない」契約があり、ダブル念押しで明文化された |
+
+  ### 1.5.2 End-to-end 再 smoke test 結果
+
+  隔離 target project で `bash copy_doc_templates.sh --language python` → `bash sync_agent_instructions.sh` → 再 `copy_doc_templates.sh` を実行し、次を確認した:
+
+  - **bootstrap 直後**: `instructions/agent_common_master.md:1` の `{{PROJECT_NAME}}` を scan が報告（旧 scan は docs だけだったため見落としていたもの）
+  - **sync 後の再 scan**: 上記に加え `AGENTS.md:1` / `CLAUDE.md:1` / `.github/copilot-instructions.md:1` の `{{PROJECT_NAME}}` も新たに報告
+  - `[info] sync 実行後に本 wrapper を再実行すると...` の案内が末尾に出力
+  - `[warn] docs/components/_example_component が残っています` の警告は維持
+
+  期待どおりの動作を確認した。
+
+  ### 1.5.3 新規 finding
+
+  なし。Low-6 / Low-7 / Low-8 の対応はいずれも趣旨に合致し、追加の構造的問題は発見されなかった。
+
+  Phase 5 で残るオープン項目は次のみ:
+
+  - `pwsh` 環境での `bin/copy_doc_templates.ps1` および `scripts/sync_agent_instructions.ps1 -Help` 実行確認
+  - その際に param() 並び順修正が PowerShell parser を通過すること（Low-7 の hidden bug 修正の検証）
+
+  ## 1.6 PowerShell 実行確認（2026-05-09 Claude、コミット `986c735a620147eff2cf9e11f0308515cbc97f0d` 後）
+
+  `pwsh` 導入後に、未実施だった PowerShell 経路の実行確認を追加で行った。
+
+  ### 1.6.1 実行コマンドと結果
+
+  - `pwsh -NoLogo -NoProfile -File user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.ps1 -Language python -ProjectRoot <tmp>`
+    - 成功。`instructions/agent_common_master.md`、`instructions/agent_sync_guide.md`、`scripts/sync_agent_instructions.ps1` を含む bootstrap 配置を確認
+    - placeholder scan は `instructions/agent_common_master.md:1` の `{{PROJECT_NAME}}` を報告し、末尾の `[info] sync 実行後に本 wrapper を再実行すると...` ガイドも出力
+  - `pwsh -NoLogo -NoProfile -File <tmp>/scripts/sync_agent_instructions.ps1 -Help`
+    - 成功。usage と option 一覧を正常表示し、`param()` 位置修正後の parser 通過を確認
+  - `pwsh -NoLogo -NoProfile -File <tmp>/scripts/sync_agent_instructions.ps1 -All`
+    - 成功。`.github/copilot-instructions.md`、`CLAUDE.md`、`AGENTS.md` の 3 生成物が再生成されることを確認
+  - `pwsh -NoLogo -NoProfile -File user-agent-assets/install/install_user_agent_assets.ps1 -DryRun`
+    - 成功。既存 skill に対する `[skip]` と未配置資産への `[dry-run] copy` を出力し、install 完了まで到達
+
+  ### 1.6.2 新規 finding
+
+  なし。Low-7 の未実施項目は解消した。
+
   ## 1.3 再検証で発見した新規 finding（対応前記録）
 
   ### [Critical-2] generator の置換ルールが wrapper install path を破壊し、orchestrator/review skill から wrapper を呼べない（regression）
@@ -566,3 +618,12 @@ status: review_findings
   - `grep -rn '~/.agentic[^-]' user-agent-assets/skills/` が 0 件であることを CI / local で確認
   - `pwsh` 環境での `bin/copy_doc_templates.ps1` 動作と `install_user_agent_assets.ps1 -DryRun` 動作確認
   - target project の bootstrap → sync 往復が `--mode missing` の前提下で idempotent であること（Low-2 の挙動明文化と併せる）
+
+### 再々々検証後の判定（2026-05-09 Claude、コミット `986c735a...`）
+
+- **Low-6 解消**: `copy_doc_templates.{sh,ps1}` の placeholder scan を `docs` のみから `docs` + `instructions` + 既存生成物 3 種へ拡張。`scan_targets` 配列ベースで存在する対象だけを走査し、末尾に sync 後の再 scan ガイドを出力。SKILL.md のチェック文言も `docs / instructions` へ更新済み
+- **Low-7 構造解消（実行検証は Phase 5 へ持ち越し）**: PowerShell 版 placeholder scan を `.sh` 版と等価に書き換え。さらに `sync_agent_instructions.ps1` の `param()` が `Set-StrictMode` / `$ErrorActionPreference` の後ろに置かれていた **PowerShell parse error 必至の hidden bug** を修正（`param()` を script 先頭コメント直後へ移動）。design.md Section 13.1 #4 に `pwsh -File scripts/sync_agent_instructions.ps1 -Help` の検証項目も追加
+- **Low-8 解消**: `agent_sync_guide.md:56` に `sync 実行時は生成物 3 種を上書きするため、手編集した差分は保持されない` を追加し、契約を明文化
+- **End-to-end smoke test**: 隔離 target project で bootstrap → sync → 再 scan が期待どおり動作。bootstrap 直後に `instructions/agent_common_master.md` の placeholder が、sync 後に `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の placeholder がそれぞれ報告される
+- **新規 finding**: なし
+- **結論**: 当初の Critical 1 / High 3 / Medium 5 / Low 4 / Design-Doc-Update 1 と、再検証で発生した Critical-2 / Low-5 / Low-6 / Low-7 / Low-8 の **すべてが解消済み**。Phase 4 完了条件を満たした状態で Phase 5 smoke test に進める
