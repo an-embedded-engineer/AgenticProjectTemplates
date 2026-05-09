@@ -13,6 +13,10 @@
 - meta: `docs/design_analysis/spec_change/20260508_user_level_agent_assets/meta.md`
 - plan: `docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md`
 - design: `docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md`
+- impl_reviews:
+	- `docs/design_analysis/spec_change/20260508_user_level_agent_assets/review/user_level_agent_assets_impl_review_codex.md`
+	- `docs/design_analysis/spec_change/20260508_user_level_agent_assets/review/user_level_agent_assets_impl_review_claude.md`
+- docs_review: `docs/design_analysis/spec_change/20260508_user_level_agent_assets/review/user_level_agent_assets_docs_review.md`
 - improvement_memo: `docs/design_analysis/spec_change/20260508_user_level_agent_assets/skill_improvement_memo.md`
 - follow_up_issues:
 	- `docs/issues/cross/issues.md#c-2026-001-review-automation-preflight-標準化`
