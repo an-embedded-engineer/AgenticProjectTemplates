@@ -8,7 +8,7 @@ components:
   - scripts
   - tools
   - tests
-status: in_progress
+status: merged
 plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
 design_status: done
@@ -42,6 +42,8 @@ related_commits:
   - 3ededef : Finalize asset migration and dotnet validation
   - b16fc01 : Phase 4 impl review approval by Copilot CLI
   - 8259889 : Fix Copilot skill frontmatter YAML parsing
+  - 73fb1cc : Refresh Phase 6 pre-merge status
+  - 55075be : Merge feature/spec-user-level-agent-assets-20260508 into main
 ---
 
 # メタ情報
@@ -63,9 +65,9 @@ Python / C# project 向けの共通 Agent instructions、workflow skills、docs 
 - プロジェクト固有の検証コマンド、責務境界、docs 実体は project-level に残す
 - `docs/procedure/` は project-level 依存を外し、workflow skill 同梱 `references/` へ移す方向で設計する
 
-## 未着手の後続 Phase
+## 後続対応
 
-- Phase 6: 最終マージ承認、archive、history 反映
+- follow-up は `docs/issues/cross/issues.md` の `C-2026-001` 〜 `C-2026-008` で継続管理する
 
 ## 最新検証メモ
 
@@ -83,3 +85,4 @@ Python / C# project 向けの共通 Agent instructions、workflow skills、docs 
 - 2026-05-09: 追加実装記録として `impl/user_level_agent_assets_impl.md` を作成し、runtime / bootstrap 再配置と system-dotnet-only validation 前提を文書化した
 - 2026-05-09: `user-agent-assets/runtime/agent-cli-tmux/win-x64` の空ディレクトリは source payload の残骸だったため削除し、clean な fake HOME への再 install で runtime 直下が `csharp` / `python` のみになること、既存 user root も `--mode overwrite` で stale な `win-x64` を除去できることを確認した
 - 2026-05-09: `user-agent-assets/skills/copilot-review-automation/SKILL.md` の frontmatter `description` を YAML block scalar へ修正し、`.copilot` / `.agents` 配置先の `SKILL.md` が YAML として parse できること、およびユーザ確認で Copilot CLI 起動時の skill load error が解消したことを確認した
+- 2026-05-09: `main` へ `--no-ff` マージし、merge commit `55075be` を確定した。以降の継続事項は cross issue と change history で管理する
