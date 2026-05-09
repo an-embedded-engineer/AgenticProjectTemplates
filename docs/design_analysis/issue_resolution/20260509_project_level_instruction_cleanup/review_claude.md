@@ -169,4 +169,4 @@
 
 責務境界の整理と root docs / generated instructions / sync source の整合は達成されている。当初の Medium / Low / Info はいずれも 5809f48 で解消済み。
 
-ただし root のみで修正したことで、bootstrap template 側 (`templates/common/scripts/sync_agent_instructions.sh` と `templates/common/instructions/agent_sync_guide.md`) が同期から外れている。Medium 1 件として template 側へ同じ修正を反映し、`diff` を検証に組み込むことを推奨する。
+follow-up Medium（root only 修正による template common との分岐）も 9b24811 で template common 側へ同じ修正が反映され、対象 4 ファイル (`scripts/sync_agent_instructions.{sh,bat,ps1}` / `instructions/agent_sync_guide.md`) について root と `templates/common/` の `diff` が空であることを確認した。レビュー観点 1〜4 と指摘した issue はすべて解消済み。追加の指摘はない。
