@@ -14,7 +14,7 @@ plan_status: done
 source_plan_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/plan/user_level_agent_assets_plan.md
 design_status: done
 source_design_path: docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md
-impl_status: in_progress
+impl_status: done
 branch: feature/spec-user-level-agent-assets-20260508
 source_research_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/report.md
 source_research_review_path: docs/design_analysis/research_analysis/20260507_user_level_agent_assets/user_level_agent_assets_report_review.md
@@ -34,6 +34,8 @@ related_commits:
   - c233403 : Finalize review fixes for user-level agent assets
   - 05ce753 : Record latest user-level agent assets review results
   - 986c735 : Address latest user-level agent assets review findings
+  - 398bb58 : Record PowerShell validation for user-level agent assets
+  - 5cc9ec2 : Record final PowerShell review confirmations
 ---
 
 # メタ情報
@@ -57,8 +59,7 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 
 ## 未着手の後続 Phase
 
-- Phase 4: user-level assets / bootstrap skill / sync source 再編の実装
-- Phase 5: smoke test、テンプレート検証、恒久ドキュメント同期
+- Phase 6: 完了処理、マージ、archive、history 反映
 
 ## 最新検証メモ
 
@@ -67,3 +68,6 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 - 2026-05-09: `copy_doc_templates.sh` の placeholder scan を `docs` に加えて `instructions` と既存生成物 3 種へ拡張し、sync 後の再 scan ガイドを追加した
 - 2026-05-09: `sync_agent_instructions.ps1` の `param(...)` を script 先頭へ移動し、PowerShell script としての parameter binding に合わせた
 - 2026-05-09: `pwsh -File user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.ps1 -Language python`、`pwsh -File <tmp>/scripts/sync_agent_instructions.ps1 -Help/-All`、`install_user_agent_assets.ps1 -DryRun` が成功し、PowerShell 系の bootstrap / sync / installer dry-run を確認した
+- 2026-05-09: `bash user-agent-assets/install/install_user_agent_assets.sh --mode overwrite` により実ユーザールートへ install を実施し、`~/.copilot/skills`、`~/.agents/skills`、`~/.claude/skills`、`~/.codex/skills`、`~/.agentic-project-templates` への展開と wrapper mode `-rwxr-xr-x` を確認した
+- 2026-05-09: 新規 Python サンプルプロジェクトで `project-doc-bootstrap`、`copilot-review-automation`、`new-feature-workflow` を実地検証し、改善メモを `docs/design_analysis/spec_change/20260508_user_level_agent_assets/skill_improvement_memo.md` に記録した
+- 2026-05-09: 改善メモの内容を `docs/issues/cross/issues.md` の `C-2026-001` 〜 `C-2026-008` として follow-up issue 化した
