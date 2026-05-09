@@ -2,8 +2,8 @@
 
 ## 1. テンプレートと root infra の混同
 
-- root `docs/` / `instructions/` は AgenticProjectTemplates 自体の運用向け
-- `python-project-template/docs/` と `csharp-project-template/docs/` はコピー先プロジェクトへ渡るテンプレート
+- root `docs/` / `user-agent-assets/` は AgenticProjectTemplates 自体の運用向け
+- `user-agent-assets/skills/project-doc-bootstrap/templates/python/docs/` と `templates/csharp/docs/` はコピー先プロジェクトへ渡るテンプレート
 - root の都合だけでテンプレート内文書を変えない
 
 ## 2. C# テンプレートへ Python 実行前提を持ち込む

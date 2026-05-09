@@ -10,12 +10,13 @@
 ## 必須ルール
 
 1. テンプレート境界
-   - `python-project-template/` と `csharp-project-template/` の片方だけを変更する場合、差異が意図的かを文書または実装記録に残す
-   - C# テンプレートに Python 実行前提の保守ツールを追加しない。必要な場合は .NET tool として実装する
-   - root `scripts/agent_cli_tmux.py` と `python-project-template/scripts/agent_cli_tmux.py` は意図的な重複として同一内容を保持し、変更時は両方を同期する
+   - `user-agent-assets/skills/project-doc-bootstrap/templates/python/` と `templates/csharp/` の片方だけを変更する場合、差異が意図的かを文書または実装記録に残す
+   - C# 向け bootstrap asset に Python 実行前提の保守ツールを追加しない。必要な場合は .NET tool として実装する
+   - repo 共通の review 補助と検証コードは root `scripts/` と `tests/` を正本とし、shared runtime / bootstrap template へ不要な重複を持ち込まない
 2. Agent instructions
-   - Agent 向け同期元は `instructions/agent_common_master.md` と `instructions/skills/` を正本とする
-   - テンプレート内の生成物は直接編集しない
+   - workflow / review / orchestration skill の正本は `user-agent-assets/skills/` とする
+   - root `.github/copilot-instructions.md`、`AGENTS.md`、`CLAUDE.md` と template 側 `AGENTS.md` / `CLAUDE.md` は checked-in canonical docs として扱う
+   - 削除済みの root / template `instructions/`、`scripts/sync_agent_skills.*`、repo-local `.github/skills` / `.claude/skills` を再導入しない
 3. 型安全性
    - Python コードは型注釈を付け、`Any` / `dict[str, Any]` / `getattr` / `setattr` の使用は局所化する
    - C# コードは nullable reference types を前提にし、`dynamic` / reflection / `Dictionary<string, object?>` の乱用を避ける
@@ -30,6 +31,6 @@
 
 ## 完了前チェック
 
-1. 変更対象テンプレートの検証コマンドを実行する
-2. root 側 docs とテンプレート側 docs の整合を確認する
+1. 変更対象の bootstrap template / toolchain の検証コマンドを実行する
+2. root 側 docs と `user-agent-assets/` 配下 template の整合を確認する
 3. `reference/` や生成物を誤って commit 対象に含めていないか確認する

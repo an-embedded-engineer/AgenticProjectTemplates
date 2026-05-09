@@ -2,17 +2,17 @@
 
 ## コアコンポーネント
 
-### Python テンプレート (`python-project-template/`)
+### Python bootstrap template
 
-Python プロジェクト向けの Agent instructions、workflow docs、Python tool / pytest 構成を保持する。
+`user-agent-assets/skills/project-doc-bootstrap/templates/python/` に Python project 向け docs / rules / instructions template を保持する。
 
-### C# テンプレート (`csharp-project-template/`)
+### C# bootstrap template
 
-C# / .NET プロジェクト向けの Agent instructions、workflow docs、.NET tool / C# test runner 構成を保持する。
+`user-agent-assets/skills/project-doc-bootstrap/templates/csharp/` に C# / .NET project 向け docs / rules / instructions template を保持する。
 
-### Root infra (`docs/`, `instructions/`, `scripts/`)
+### Root infra (`docs/`, `user-agent-assets/`, `scripts/`)
 
-AgenticProjectTemplates 自体の保守 workflow、レビュー運用、ADR、Claude review 自動化を保持する。テンプレート内 infra の横展開前に root infra で方針を固定する。
+AgenticProjectTemplates 自体の保守 workflow、レビュー運用、ADR、user-level assets、bootstrap templates を保持する。テンプレート内 infra の横展開前に root infra で方針を固定する。
 
 ### Reference (`reference/`)
 
@@ -21,23 +21,24 @@ AgenticProjectTemplates 自体の保守 workflow、レビュー運用、ADR、Cl
 ## 基本フロー
 
 1. `reference/` または既存テンプレートから変更候補を調査する
-2. root `docs/` / `instructions/` で方針と workflow を整理する
-3. `python-project-template/` と `csharp-project-template/` へ言語特性に合わせて横展開する
-4. 各テンプレート固有の検証を実行する
+2. root `docs/` / `user-agent-assets/` で方針と workflow を整理する
+3. `project-doc-bootstrap` の Python / C# template へ言語特性に合わせて横展開する
+4. 各 language variant と repo toolchain の検証を実行する
 5. design analysis / history / tracking docs を同期する
 
 ## 主要ファイルリファレンス
 
-- Root instructions: `instructions/agent_common_master.md`
-- Root skills: `instructions/skills/`
+- user-level skill 正本: `user-agent-assets/skills/`
+- user-level install / bootstrap: `user-agent-assets/install/`, `user-agent-assets/skills/project-doc-bootstrap/`
+- shared Agent CLI tmux runtime: `user-agent-assets/runtime/agent-cli-tmux/`
 - Root workflow docs: `docs/procedure/`
 - Root Agent CLI tmux tool: `scripts/agent_cli_tmux.py`
-- Python template instructions: `python-project-template/instructions/`
-- C# template instructions: `csharp-project-template/instructions/`
-- Python Agent CLI tmux tool: `python-project-template/scripts/agent_cli_tmux.py`
-- C# Agent CLI tmux tool: `csharp-project-template/tools/AgentCliTmux/`
+- Python / pytest tests: `tests/`
+- Python bootstrap tools: `user-agent-assets/skills/project-doc-bootstrap/templates/python/tools/`
+- C# bootstrap tools: `user-agent-assets/skills/project-doc-bootstrap/templates/csharp/tools/`
+- C# tests: `tests/AgentCliTmux.Tests/`
 
-`scripts/agent_cli_tmux.py` と `python-project-template/scripts/agent_cli_tmux.py` は、root のレビュー運用と Python テンプレート利用者向けに同一内容を保持する。変更時は両ファイルを同時に更新し、`docs/rules/development_workflow.md` の root / Python template 両方の検証を通す。
+`scripts/agent_cli_tmux.py` は root のレビュー運用向け正本であり、Python 側の検証は `tests/test_agent_cli_tmux.py` で直接行う。
 
 ## ドキュメント構成
 

@@ -2,15 +2,14 @@
 
 ## 概要
 
-AgenticProjectTemplates では、テンプレートごとに自然なテスト実行方式を使う。root 直下に単一のアプリケーションテストスイートは置かず、変更対象テンプレートの検証を実行する。
+AgenticProjectTemplates では、repo root の scripts、user-level runtime、bootstrap template 同梱 tool を Python pytest と C# test runner で検証する。
 
 ## テスト構成
 
 ```
-python-project-template/tests/
-└── test_agent_cli_tmux_python_template.py
-
-csharp-project-template/tests/
+tests/
+├── test_agent_cli_tmux.py
+├── test_extract_git_diff.py
 └── AgentCliTmux.Tests/
     ├── AgentCliTmux.Tests.csproj
     └── Program.cs
@@ -18,8 +17,9 @@ csharp-project-template/tests/
 
 ## 実行方法
 
-- Python テンプレート: `python3 -m pytest python-project-template/tests/test_agent_cli_tmux_python_template.py`
-- C# テンプレート: `dotnet run --project csharp-project-template/tests/AgentCliTmux.Tests/AgentCliTmux.Tests.csproj`
+- Python: `python3 -m pytest tests/test_agent_cli_tmux.py tests/test_extract_git_diff.py`
+- C#: `dotnet run --project tests/AgentCliTmux.Tests/AgentCliTmux.Tests.csproj`
+    - 前提: system の `dotnet` で .NET 9 SDK / runtime が利用可能であること
 - 詳細: `docs/rules/development_workflow.md` を参照
 
 ## ドキュメント構成
