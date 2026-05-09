@@ -60,6 +60,8 @@ project-level instructions の再初期化後、生成物である `AGENTS.md` /
 - `instructions/agent_sync_guide.md` に `--all` / `-All` の実行例とオプション説明を追加した
 - `instructions/agent_common_master.md` の Python / C# 同期方針を双方向の表現へ揃えた
 - 追加検証として `./scripts/sync_agent_instructions.sh --help` と `./scripts/sync_agent_instructions.sh` の直接実行を確認する
+- follow-up review の指摘に対応し、`user-agent-assets/skills/project-doc-bootstrap/templates/common/` 配下の `scripts/sync_agent_instructions.sh` と `instructions/agent_sync_guide.md` へ同じ修正を横展開した
+- root と template common の対応ファイルに対して `diff` を実行し、差分が空であることを確認する
 
 ## レビュー観点
 

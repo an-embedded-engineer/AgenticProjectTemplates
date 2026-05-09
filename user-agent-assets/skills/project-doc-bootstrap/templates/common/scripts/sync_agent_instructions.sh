@@ -18,9 +18,9 @@ Usage:
   ./scripts/sync_agent_instructions.sh --all
 
 Options:
-    --copilot  Sync .github/copilot-instructions.md
-    --claude   Sync CLAUDE.md
-    --codex    Sync AGENTS.md
+  --copilot  Sync .github/copilot-instructions.md
+  --claude   Sync CLAUDE.md
+  --codex    Sync AGENTS.md
   --all      Sync every supported target (default when no option is given)
   -h, --help Show this help
 EOF

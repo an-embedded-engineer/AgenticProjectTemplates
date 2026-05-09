@@ -124,6 +124,13 @@
 
 ## 追加指摘（2026-05-10、修正コミット `5809f48` 確認時）
 
+## 追加指摘対応状況（2026-05-10）
+
+- [Medium] root 修正が `templates/common/` へ伝播していない
+	- status: `resolved`
+	- 対応: `user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.sh` と `user-agent-assets/skills/project-doc-bootstrap/templates/common/instructions/agent_sync_guide.md` を root と同一内容へ更新した
+	- 検証: root / template common の対象ファイルに対する `diff` が空であることを確認した
+
 5809f48 で root 側の指摘 5 件は解消されたことを確認した。一方、root と bootstrap template (`user-agent-assets/skills/project-doc-bootstrap/templates/common/`) の同期が今回の対応で崩れている。
 
 ### [Medium] root 修正が `templates/common/` へ伝播していない
@@ -155,8 +162,8 @@
 - `cmp` による master と生成物 3 種の一致: 修正後も維持。
 - `diff scripts/sync_agent_instructions.bat templates/common/scripts/sync_agent_instructions.bat`: 差分なし。
 - `diff scripts/sync_agent_instructions.ps1 templates/common/scripts/sync_agent_instructions.ps1`: 差分なし。
-- `diff scripts/sync_agent_instructions.sh templates/common/scripts/sync_agent_instructions.sh`: 21〜23 行で差分あり（追加指摘の根拠）。
-- `diff instructions/agent_sync_guide.md templates/common/instructions/agent_sync_guide.md`: 4 箇所で差分あり（追加指摘の根拠）。
+- `diff scripts/sync_agent_instructions.sh templates/common/scripts/sync_agent_instructions.sh`: 差分なし。
+- `diff instructions/agent_sync_guide.md templates/common/instructions/agent_sync_guide.md`: 差分なし。
 
 ## 結論
 

@@ -18,6 +18,13 @@
 
 ## 追加レビュー（2026-05-10）
 
+## 追加レビュー対応状況（2026-05-10）
+
+- [Low] root の sync guide / shell help 修正が bootstrap template 側へ反映されていない
+  - status: `resolved`
+  - 対応: `templates/common/scripts/sync_agent_instructions.sh` の help インデントと `templates/common/instructions/agent_sync_guide.md` の `--all` / `-All` 案内を root と同一内容へ更新した
+  - 検証: root と template common の対象ファイルに対する `diff` が空であることを確認した
+
 ### [Low] root の sync guide / shell help 修正が bootstrap template 側へ反映されていない
 
 - 対象:
@@ -64,6 +71,8 @@
 - `pwsh -File scripts/sync_agent_instructions.ps1 -Help` は成功した。
 - active docs / instructions / user-level skill 導線に対する `docs/procedure`、`instructions/skills`、`rebuild_user_agent_skills.py`、`sync_agent_skills` の検索では、削除済み経路への実運用依存は確認されなかった。
 - `docs/design_analysis/` 配下の過去文書には旧 path が残っているが、今回の report の補足どおり履歴文脈として扱える範囲と判断した。
+- `diff scripts/sync_agent_instructions.sh user-agent-assets/skills/project-doc-bootstrap/templates/common/scripts/sync_agent_instructions.sh`: 差分なし。
+- `diff instructions/agent_sync_guide.md user-agent-assets/skills/project-doc-bootstrap/templates/common/instructions/agent_sync_guide.md`: 差分なし。
 
 ## 総評
 
