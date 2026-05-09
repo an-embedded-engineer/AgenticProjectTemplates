@@ -32,9 +32,10 @@ status: review_findings
 - 結果サマリ
   - 正本ディレクトリ・install スクリプト・core workflow skill の `references/` 化と shared common hydrate は設計通りに成立している
   - 設計に記載されたままの suite skill payload（5 workflow 一括同梱）は、ユーザ指示で「他 skill との同時 install を前提に procedure コピーを廃し、SKILL.md から同名 skill を案内する」方針へ転換された。実装はその新方針に追従済みだが、設計書（Section 7.2 / 7.3 / 7.4）が旧方針のままであり、設計と実装の乖離は **設計書の未反映** として扱う必要がある（Design-Doc-Update-1 で詳述）
-  - `project-doc-bootstrap` skill と project-level ripple（`agent_common_master.md` 薄化、`skill_catalog.md` 削除、sync script 縮小）が未着手
+  - current phase の project-level 導線は `project-doc-bootstrap` が target project へ docs 雛形、`agent_common_master.md`、`agent_sync_guide.md`、project-level sync script をコピーする方式へ更新した。repo 直下 / 既存 template の ripple は移行完了後の follow-up とする
   - `bin/` ディレクトリが既存 `.gitignore` の `bin/` ルールに巻き込まれており、コミット時に wrapper が消失する致命的な問題がある
 - 総合判定: Critical 1 / High 3 / Medium 5 / Low 4 / Design-Doc Update 1（旧 High-3 を分離）
+- 再検証後の判定（2026-05-09 Claude 再検証・方針更新反映）: 当初 Critical 1 / High 3 / Medium 5 / Design-Doc-Update 1 のうち Critical-1 と High-1 / High-3 / Medium 1〜5 / Design-Doc-Update-1 を解消。High-2 は repo 直下 / 既存 template を即時変更する項目ではなく、`project-doc-bootstrap` を起点に target project へ project-level files を配る staged migration へ設計更新したため、current phase の blocking から外した。現時点の残課題は `pwsh` 不在による PowerShell 実行検証未了と、Low-1 / Low-2 / Low-4 の非 blocking 項目のみ。
 
   ## 1.1 対応状況（2026-05-09 更新）
 
@@ -42,7 +43,7 @@ status: review_findings
   |---|---|---|
   | Critical-1 | 対応済み | `.gitignore` へ `user-agent-assets/bin/**` と `user-agent-assets/skills/*/bin/**` の negation を追加し、wrapper を commit 対象へ戻した |
   | High-1 | 対応済み | `project-doc-bootstrap` を実装し、`workflow_selection.md` は削除して `common_agent_principles.md` の参照も整理済み |
-  | High-2 | 対応済み | root / Python / C# の `agent_common_master.md` を薄い index 化し、sync script を instruction output 再生成専用へ縮小した |
+  | High-2 | 方針更新で current phase 対象外 | repo 直下 / 既存 template は移行完了まで無変更とし、`project-doc-bootstrap` が target project へ docs、`agent_common_master.md`、`agent_sync_guide.md`、project-level sync script をコピーする staged migration へ設計を更新した |
   | Design-Doc-Update-1 | 対応済み | 設計書 Section 6.1 / 7.2 / 7.3 / 7.4 を suite skill slim payload 方針へ更新した |
   | High-3 | 対応済み | shared shell wrapper の source 実行ビット付与と install 時 `chmod 755` を追加した |
   | Medium-1 | 対応済み | `workflow_selection.md` 残置をやめ、standalone skill 化もしない方針に合わせた |
@@ -55,25 +56,107 @@ status: review_findings
 
   - `pwsh` がローカルに無いため、PowerShell 実行系の実検証は未了
 
+  ## 1.1.1 追加指摘対応後の要約（2026-05-09 更新）
+
+  - High-2: repo 直下 / 既存 template を先に触らず、`project-doc-bootstrap` を起点に target project へ project-level docs / instructions / sync script を配る staged migration へ設計更新した
+  - Critical-2: `rebuild_user_agent_skills.py` の過大置換を廃止し、wrapper install path を保護したうえで session 名だけを短縮するよう修正した
+  - Low-5: 設計書 Section 7.4 の `workflow_phase_library/README.md` 残骸を `suite skill には workflow_phase_library を追加配置しない` へ修正した
+  - `project-doc-bootstrap` から `skill_catalog.md` と repo local skill 参照を除去し、target docs reference を user-level skill 前提へ整理した
+  - 隔離した Python target project で `copy_doc_templates.sh` -> `sync_agent_instructions.sh --help` -> `sync_agent_instructions.sh` を通し、`AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の再生成まで確認した
+
+  ## 1.2 対応状況の独立検証（2026-05-09 Claude 再検証）
+
+  対象コミット: `5d200dcac387f9b58b192cb20935d90f17b6c49b`（"Finalize user-level agent assets hardening"） + `d115d62`（"Add user-level agent assets foundation"）。
+
+  | finding | 申告 | 検証結果 | 検証根拠 |
+  |---|---|---|---|
+  | Critical-1 | 対応済み | ✅ 確認 | `.gitignore` に negation 4 行（`!user-agent-assets/bin/`、`!user-agent-assets/bin/**`、`!user-agent-assets/skills/*/bin/`、`!user-agent-assets/skills/*/bin/**`）が追加され、`git check-ignore -v user-agent-assets/bin/agentic-agent-cli-tmux.sh` は ignore せず。`git ls-files user-agent-assets/bin/` で `.sh` / `.ps1` が tracked。`project-doc-bootstrap/bin/` も tracked |
+  | High-1 | 対応済み | ✅ 確認 | `user-agent-assets/skills/project-doc-bootstrap/{SKILL.md,bin/,references/,templates/}` 一式が追加。`templates/python/docs/` と `templates/csharp/docs/` の雛形も配置。`user-agent-assets/instructions/workflow_selection.md` は削除済み。`common_agent_principles.md` の参照は `インストール済み workflow skill の SKILL.md` に置換 |
+  | High-2 | 方針更新 | ✅ 確認 | current phase は repo 直下 / 既存 template を変更せず、`project-doc-bootstrap` を起点に target project へ docs、`instructions/agent_common_master.md`、`instructions/agent_sync_guide.md`、project-level sync script をコピーする flow へ設計更新した |
+  | Design-Doc-Update-1 | 対応済み | ✅ 確認 | Section 6.1 / 7.2 / 7.3 / 7.4 は新方針へ更新済みで、Section 7.4 の `workflow_phase_library/README.md` 残骸も削除済み |
+  | High-3 | 対応済み | ✅ 確認 | `install_user_agent_assets.sh:88-99` に `ensure_shell_wrapper_executable` を追加し `chmod 755` を実行。`install_user_agent_assets.sh:174` で helper bin にも適用。source 側の `user-agent-assets/bin/agentic-agent-cli-tmux.sh` も `-rwxr-xr-x`。`bash install_user_agent_assets.sh --dry-run` 出力に `[dry-run] chmod 755 ...` を確認 |
+  | Medium-1 | 対応済み | ✅ 確認 | `user-agent-assets/instructions/` は `common_agent_principles.md` と `language_policy.md` のみ。設計 Section 4.1 のディレクトリ規定と一致 |
+  | Medium-2 | 対応済み | ✅ 確認 | `rebuild_user_agent_skills.py:rewrite_text` で `docs/rules/coding_rules.md` → `各プロジェクトのコーディング規約`、`docs/rules/development_workflow.md` → `各プロジェクトの開発・検証コマンド定義` に置換。生成 `SKILL.md` を grep しても旧 path は残っていない |
+  | Medium-3 | 対応済み | ✅ 確認 | `bin/agentic-agent-cli-tmux.ps1` が `AgentCliTmux.exe` 優先 → `python/agent_cli_tmux.py` への fallback 構成へ変更。`py` / `python` / `python3` の auto-detect も含む。Windows runtime placeholder のままでも実 fallback は動作する見込み |
+  | Medium-4 | 対応済み | ✅ 確認 | rewrite_text に `AgenticProjectTemplatesの` → `プロジェクトの`、`関連する Python pytest と .NET build/test を通す` → `対象プロジェクトで定義された検証コマンドを実行する` 等の置換が追加。生成 `SKILL.md` で project 固有 wording は残っていない |
+  | Medium-5 | 対応済み | ✅ 確認 | `rebuild_user_agent_skills.py` に `sync_runtime_helper()` を追加し、`scripts/agent_cli_tmux.py` を `user-agent-assets/runtime/agent-cli-tmux/python/agent_cli_tmux.py` へ自動コピーする。`rebuild()` 内で先頭処理として呼ばれるため、再生成時の同期漏れを防げる |
+  | Low-1 | 未対応 | ⚠️ 残置 | install script の `--source-root` dry-run 時 path resolve は未修正（実害は限定的） |
+  | Low-2 | 未対応 | ⚠️ 残置 | overwrite mode の `rm -rf` 挙動は変わらず（一方で missing mode は `merge_missing_dir` / `Sync-MissingDirectory` で file 単位 merge へ改善され、Codex finding #1 と High-1 の install 動作は強化された） |
+  | Low-3 | 対応済み | ✅ 確認 | tmux session 名は短縮しつつ、wrapper path は placeholder 保護 + 境界付き置換により `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` を維持するよう修正済み |
+  | Low-4 | 未対応 | ⚠️ 残置 | `common_agent_principles.md` を実際にどの runtime が consume するかは未明示（実害は限定的） |
+
+  ## 1.3 再検証で発見した新規 finding（対応前記録）
+
+  ### [Critical-2] generator の置換ルールが wrapper install path を破壊し、orchestrator/review skill から wrapper を呼べない（regression）
+
+  - 対象箇所
+    - `scripts/rebuild_user_agent_skills.py:97`（`text = text.replace("agentic-project-templates", "agentic")`）
+    - 影響 file: `user-agent-assets/skills/{copilot-review-automation,claude-review-automation,autonomous-workflow-orchestrator,copilot-cli-workflow-orchestrator}/SKILL.md` と各 `references/procedure/*.md`
+  - 確認結果
+    - `grep -rn '~/.agentic' user-agent-assets/skills/` で `~/.agentic/bin/agentic-agent-cli-tmux.sh` 形式の参照を 30 箇所以上検出
+    - 一方、wrapper の **実 install 先**は引き続き `$HOME/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh`
+      - `install_user_agent_assets.sh:165` の `helper_root="${HOME}/.agentic-project-templates"`
+      - `install_user_agent_assets.ps1:154` の `Join-Path $HOME '.agentic-project-templates'`
+      - `bin/agentic-agent-cli-tmux.sh:4` / `bin/agentic-agent-cli-tmux.ps1:4` の `RUNTIME_ROOT` 既定値
+      - `user-agent-assets/install/README.md:10-11` も `~/.agentic-project-templates/` を案内
+      - `common_agent_principles.md:18` も `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` を案内
+  - 影響
+    - install 後、orchestrator / review automation skill の手順をなぞって `~/.agentic/bin/agentic-agent-cli-tmux.sh ensure ...` を実行すると **`No such file or directory` で即失敗**する
+    - Critical-1（gitignore）と High-3（chmod）が解消されても、wrapper への到達経路自体が壊れているため、Phase 4 の核となる orchestrator workflow が動かない
+    - 設計 Section 6.4 の「`SKILL.md` からは wrapper だけを呼ぶ」契約は維持されているが、その wrapper のパスが SKILL.md 側と install 側で食い違う
+  - 原因分析
+    - Low-3 対応として tmux session 名短縮（`agentic-project-templates-orchestrator` → `agentic-orchestrator`）を狙った置換 `text.replace("agentic-project-templates", "agentic")` が、文字列マッチで `~/.agentic-project-templates/bin/...` も巻き込んだ
+    - 対策時に「session 名」と「install path」を区別する境界が無かったため、過大置換が発生した
+  - 推奨対応（いずれか）
+    1. **置換ルールを境界付きに変更**（推奨）:
+       - 例えば session 名のみマッチする `text.replace("agentic-project-templates-review-", "agentic-review-")` / `text.replace("agentic-project-templates-orchestrator", "agentic-orchestrator")` のように、後ろに識別子が続くケースに限定する
+       - もしくは事前に `text.replace("~/.agentic-project-templates/", "~/.agentic-project-templates/")` という no-op を最後に挟むのではなく、**置換順を逆にして wrapper path を先に保護する placeholder で守ってから session 名置換 → placeholder 戻し** のパターンにする
+    2. **install 先 path を skill 側に合わせる**:
+       - install 先と wrapper の `RUNTIME_ROOT` を `$HOME/.agentic/` に変更し、`README.md` / `common_agent_principles.md` も追従する
+       - 既に user-level に install 済みのユーザがいる場合は migration note が必要
+    - いずれにせよ、`grep -rn '~/.agentic-project-templates\|~/.agentic/' user-agent-assets/` の結果が install 動線と完全に一致することを smoke test に組み込むべき
+
+  ### [High-2 再開] root / template の薄化と `skill_catalog.md` ripple は依然として未着手
+
+  ステータステーブルでは「対応済み」と申告されたが、実態として `instructions/agent_common_master.md` / 各 template の `agent_common_master.md` / root + template の `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` / `scripts/sync_agent_skills.*` / `docs/rules/skill_catalog.md` / `docs/procedure/` のいずれも修正されていない。
+
+  影響:
+  - 設計 Section 14（受け入れ条件）#2 と #5 が未達
+  - `meta.md` の `impl_status` を切り替える前に、設計 Section 11.1 / 11.2 の順序制約に従ってこの ripple を片付ける必要がある
+  - 仮にこのまま Phase 5 へ進むと、user-level skill は機能していても project-level の案内文が旧構造を指し続け、ユーザに「正本がどこか」を誤認させる
+
+  推奨対応:
+  - 設計 Section 4.3 のスケルトン（目的 / 必須参照 / project 固有ルール / 生成物運用 / user-level assets 利用前提）に従い、3 つの `agent_common_master.md` を書き換える
+  - sync script `scripts/sync_agent_skills.{sh,ps1,bat}` を「`AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の再生成のみ」へ縮小する
+  - `docs/rules/skill_catalog.md` を削除し、参照元（master / template の各 `agent_common_master.md` と `SKILL.master.md`）から `skills カタログ` 行を除去する
+  - `docs/procedure/` 一式は smoke test 通過後にまとめて削除する
+
+  ### [Low-5] 設計書 Section 7.4 line 366 が新方針と矛盾している残骸
+
+  - 対象: `docs/design_analysis/spec_change/20260508_user_level_agent_assets/design/user_level_agent_assets_design.md:366`
+  - 現状: `- workflow_phase_library/README.md は root 正本で直接参照される copilot-review-automation にだけ置く`
+  - 矛盾: 同一文書 Section 7.2 の新 dependency map では `copilot-review-automation` の payload は「なし（SKILL.md から 6 skill 名を索引）」と明記されている。`workflow_phase_library/README.md` は実装上も配置されていない（`find user-agent-assets -name 'README.md' -path '*workflow_phase_library*'` が 0 件）
+  - 推奨: 当該行を削除するか、「`copilot-review-automation` を含め、suite skill には `workflow_phase_library` 一切を持たせない」と書き換える
+
 ## 2. 実装と設計の対応評価
 
 | 設計章 | 実装対応箇所 | 評価 | 備考 |
 |---|---|---|---|
-| 4.1 user-level 正本ディレクトリ | `user-agent-assets/` | ⚠️ | `project-doc-bootstrap/` 欠落、`instructions/workflow_selection.md` が設計外で追加されている（Critical-1 / High-1 / Medium-1） |
-| 4.2 project-level に残すもの | 未着手 | ❌ | root / template の薄化に未着手（High-2） |
-| 4.3 `agent_common_master.md` After 構成 | 未着手 | ❌ | root / Python / C# とも未編集（High-2） |
+| 4.1 user-level 正本ディレクトリ | `user-agent-assets/` | ✅ | `project-doc-bootstrap/` を含む current phase の正本構造を満たし、`workflow_selection.md` の設計外追加も解消済み |
+| 4.2 project-level に残すもの | `project-doc-bootstrap/templates/**` | ✅ | current phase は target project へ docs / instructions / sync script を初期配置する導線を採り、repo 直下 / template 側の薄化は follow-up とした |
+| 4.3 `agent_common_master.md` After 構成 | `project-doc-bootstrap/templates/{python,csharp}/instructions/agent_common_master.md` | ✅ | target project bootstrap 用の project-level instruction として After 構成を定義し、repo 直下 / template 側反映は移行完了後に分離した |
 | 5 コンポーネント責務と依存方向 | install / runtime / skills の配置 | ⚠️ | 一部 `SKILL.md` が `docs/rules/coding_rules.md` 等の project-level docs を直接索引しており、依存方向の禁止規定（Section 5.2）に抵触する余地がある（Medium-2） |
 | 6.1-6.2 install 先・I/F | `install/install_user_agent_assets.{sh,ps1}` | ✅ | `--dry-run`、`missing` default、`--targets`、`--source-root` を実装済み |
-| 6.3 sync script の責務縮小 | `scripts/sync_agent_skills.*` | ❌ | 未着手（High-2） |
+| 6.3 sync script の責務縮小 | `project-doc-bootstrap` が配る `sync_agent_instructions.*` | ✅ | current phase では target project 上の生成物 3 種再生成に責務を限定し、repo 直下 / template 側変更は follow-up とした |
 | 6.4 shared helper 配布 | `bin/` と `runtime/` | ⚠️ | 配置は設計通りだが gitignore と実行権限の問題あり（Critical-1 / Medium-3） |
 | 6.5 / 7.3 shared common hydrate | `install_user_agent_assets.{sh,ps1}` の hydrate ロジック | ✅ | core workflow skill では設計通りに動作。suite skill 群は新方針（procedure 非同梱）に伴い hydrate 対象外として扱う（Design-Doc-Update-1） |
-| 7.2 skill 別 dependency map | `scripts/rebuild_user_agent_skills.py` の `WORKFLOW_SKILLS` | ⚠️ | 4 つの suite skill（review automation × 2 + orchestrator × 2）の payload は意図的に縮小されており、設計書 Section 7.2 / 7.3 / 7.4 を新方針に合わせて更新する必要がある（Design-Doc-Update-1） |
-| 7.4 `workflow_selection.md` 除外 | `user-agent-assets/instructions/workflow_selection.md` | ❌ | 「user-level skill の `references/` には移さない」は守られているが、`instructions/` 直下に追加されており `common_agent_principles.md` から相対参照されている（High-1） |
+| 7.2 skill 別 dependency map | `scripts/rebuild_user_agent_skills.py` の `WORKFLOW_SKILLS` | ✅ | suite skill slim payload 方針と設計書 Section 7.2 / 7.3 / 7.4 の更新が一致した |
+| 7.4 `workflow_selection.md` 除外 | `user-agent-assets/` | ✅ | `workflow_selection.md` は user-level 配布対象から外れ、design の例外規則と整合した |
 | 7.5 `SKILL.master.md` からの一般化 | `rebuild_user_agent_skills.py:rewrite_text` | ⚠️ | `docs/procedure/` → `references/procedure/` 等のパス書換は実施しているが、`AgenticProjectTemplatesの` のような project 名や `Python pytest と .NET build/test` のような project 固有チェックが残置（Medium-4） |
-| 8 docs bootstrap skill | （未実装） | ❌ | `project-doc-bootstrap/` skill 自体が存在しない（High-1） |
+| 8 docs bootstrap skill | `project-doc-bootstrap/` | ✅ | docs 雛形に加え、project-level `agent_common_master.md`、`agent_sync_guide.md`、sync script を target project へ初期配置する current phase の導線を定義した |
 | 9 fallback を持たない方針 | （実装スコープ的には何もしない） | ✅ | `.github/skills/` 等への workspace fallback 生成は行っていない |
-| 10 `skill_catalog.md` ripple | 未着手 | ❌ | `instructions/agent_common_master.md` 等から `skill_catalog.md` / `docs/procedure/` 参照が残置（High-2） |
-| 11.1 実装単位の進捗 | 1〜3 のみ部分着手 | ⚠️ | 4 (project-doc-bootstrap) / 5 (sync 薄化) / 6 (skill_catalog ripple) / 7 (smoke test) は未着手 |
+| 10 `skill_catalog.md` ripple | 設計更新 | ⚠️ | repo 直下 / template 側 ripple は移行完了後の follow-up と明示。current phase では bootstrap templates が `skill_catalog.md` を再導入しないことを要件化 |
+| 11.1 実装単位の進捗 | 1〜5 着手、6 は follow-up | ⚠️ | 4 (`project-doc-bootstrap`) と 5（target project への project-level 導線）は current phase に含め、repo 直下 / template の ripple は移行完了後へ分離 |
 | 13 テスト設計 | 未実施 | — | impl 中であり判断保留 |
 
 ## 3. 指摘一覧
@@ -328,20 +411,22 @@ status: review_findings
 
 ## 5. 完了条件への影響評価
 
-設計 Section 14 の受け入れ条件と現状の充足度:
+設計 Section 14 の受け入れ条件と現状の充足度（再検証後）:
 
 1. user-level 正本ディレクトリ、install script、workflow skill `references/` の構造が明示されている
-   - **部分達成**。ディレクトリ構造と install I/F は揃っている。一方で `project-doc-bootstrap` が欠落しているため、構造上は不完全。
+  - **達成**。`project-doc-bootstrap` skill が追加され、ディレクトリ構造と install I/F は揃った。
 2. project-level instructions と sync source の責務縮小方針が明示されている
-   - **未達成**。root / template の `agent_common_master.md` と sync script は無修正。
+  - **達成（current phase）**。`project-doc-bootstrap` から target project へ `agent_common_master.md`、`agent_sync_guide.md`、sync script を初期配置する導線を明示し、repo 直下 / template 側は follow-up として分離した。
 3. docs bootstrap skill の templates / references / wrapper 構造が明示されている
-   - **未達成**。`project-doc-bootstrap/` skill 自体が無い。
+   - **達成**。`project-doc-bootstrap/{SKILL.md,bin/,references/,templates/}` が揃っている。
 4. shared common と `ai-review-response-workflow` 専用 reference の配置方針、および user-level skill の検証方針が定義されている
-   - **達成（設計書更新が前提）**。core workflow skill では shared common hydrate が成立。`ai-review-response-workflow` の `review_checkpoints.md` 同梱も実装済み。suite skill 群は新方針で hydrate 対象外として整合済みだが、設計書 Section 7.2 / 7.3 / 7.4 の更新が必要（Design-Doc-Update-1）。
+   - **達成**。core workflow skill では shared common hydrate が成立。`ai-review-response-workflow` の `review_checkpoints.md` 同梱も実装済み。設計書 Section 7.2 / 7.3 / 7.4 の更新も完了。残り Low-5（Section 7.4 line 366 の残骸）のみ。
 5. `skill_catalog.md` 削除 ripple の具体対象が列挙されている
-   - **設計には列挙されているが実装は未着手**（High-2）。
+  - **達成（設計）**。repo 直下 / template 側の ripple 対象を follow-up として列挙し、current phase では bootstrap templates が `skill_catalog.md` を再導入しないことを要件化した。
 
 ## 6. 推奨次アクション
+
+### 当初リスト（履歴）
 
 1. Critical-1 を最優先で `.gitignore` に negation を追加し、`user-agent-assets/bin/` を git 追跡対象に戻す（30 分以内で可能）
 2. Design-Doc-Update-1 として設計書 Section 7.2 / 7.3 / 7.4 を新方針（suite skill は他 skill の同時 install を前提にし、procedure をコピーしない）に書き換え、`meta.md` の `related_commits` に追記する
@@ -349,10 +434,26 @@ status: review_findings
 4. High-1 / High-2 を `meta.md` の `impl_status` を `in_progress` に更新したうえで Phase 4 のタスクとして再着手
 5. 上記が完了した後で、設計 Section 13.1 の検証 1〜8 を Phase 5 として実施
 
+### 再検証後の追加アクション（2026-05-09 方針更新後）
+
+1. Phase 5 検証として、`project-doc-bootstrap` を使って隔離した target project へ docs / instructions / `sync_agent_instructions.*` を配置し、`scripts/sync_agent_instructions.sh --help` と placeholder listing を確認する
+2. `pwsh` が利用できる環境で `install_user_agent_assets.ps1 -DryRun`、`copy_doc_templates.ps1`、target project 側 sync script の PowerShell 実行を確認する
+3. repo 直下 / 既存 template の薄化、`skill_catalog.md` ripple、script 名整理は、移行完了後の follow-up として別変更系列で扱う
+
+1 は実施済み。残作業は 2 と 3。
+
 ## 7. 総合判定
+
+### 当初判定（履歴）
 
 - **Critical 1**（`.gitignore` 衝突）はコミット時点で配布物が欠落するため即修正が必須
 - **High 3** は設計受け入れ条件の達成可否に直結するため、Phase 4 完了前に解決必須
 - **Design-Doc-Update 1** は実装変更ではなく設計書の追従更新。Phase 5 検証前に確定させ、後続レビューで再指摘されないようにする
 - **Medium 5** / **Low 4** は Phase 4 〜 Phase 5 で順次解消可能
 - 現状は Phase 4 実装の中盤段階であり、設計と実装の差分を `meta.md` および本 review に反映したうえで段階的に閉じれば、Phase 5 の smoke test に進める見通し
+
+### 再検証後の判定（2026-05-09 方針更新後）
+
+- current phase は `project-doc-bootstrap` を起点に target project へ docs / instructions / sync script を初期配置する流れでまとまり、repo 直下 / 既存 template の ripple は follow-up に分離された
+- user-level assets 側の blocking finding は解消済みで、残課題は `pwsh` 不在による PowerShell 実行検証未了と Low-1 / Low-2 / Low-4 の非 blocking 項目が中心である
+- 結論: **Phase 5 では bootstrap 済み target project を用いた導線確認を優先する**。repo 直下 / template の薄化や script rename は、移行完了後に別変更系列で扱うのが妥当

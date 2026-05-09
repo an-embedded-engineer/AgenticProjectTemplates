@@ -56,3 +56,9 @@ Python / C# プロジェクトテンプレートに同梱している共通 Agen
 
 - Phase 4: user-level assets / bootstrap skill / sync source 再編の実装
 - Phase 5: smoke test、テンプレート検証、恒久ドキュメント同期
+
+## 最新検証メモ
+
+- 2026-05-09: 隔離した Python target project へ `project-doc-bootstrap` を実行し、docs 雛形、`instructions/agent_common_master.md`、`instructions/agent_sync_guide.md`、`scripts/sync_agent_instructions.*` が配置されることを確認した
+- 2026-05-09: 同 target project で `scripts/sync_agent_instructions.sh --help` と `scripts/sync_agent_instructions.sh` の直接実行が成功し、`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` が再生成されることを確認した
+- 2026-05-09: PowerShell 系の bootstrap / sync script 実行確認は `pwsh` 不在のため未実施

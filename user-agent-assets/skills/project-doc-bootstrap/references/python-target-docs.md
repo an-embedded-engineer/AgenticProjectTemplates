@@ -12,7 +12,7 @@
 
 - `instructions/agent_common_master.md`
   - 根拠: プロジェクト名, 実際の docs パス, 開発ルール
-  - 作業: `{{PROJECT_NAME}}` を正式名称へ置換する。`instructions/skills/**/*.md` 内の `{{PROJECT_NAME}}` / `{{PROJECT_NAME_LOWER}}` も同時に置換する
+  - 作業: `{{PROJECT_NAME}}` を正式名称へ置換する。生成物は `instructions/agent_common_master.md` を正として再同期する
 
 - `docs/rules/project_overview.md`
   - 根拠: ルート `README.md`, `src/` 配下, 主要ディレクトリ構成
@@ -84,8 +84,8 @@
 
 ## 注意事項
 
-- `instructions/skills/**/*.md` を置換対象に含めてよい
 - `AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` は同期スクリプトで生成される。更新時は `instructions/agent_common_master.md` を編集し、再同期する
+- user-level workflow skill は project 側へコピーせず、install 済み skill を参照する前提で運用する
 
 ## プロジェクト形状ごとの補助観点
 

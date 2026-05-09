@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import tempfile
 from pathlib import Path
 from typing import TypedDict
 
@@ -21,6 +22,9 @@ EXTERNAL_REVIEW_CHECKPOINTS = (
 )
 PROJECT_RULES_LABEL = "各プロジェクトのコーディング規約"
 PROJECT_COMMANDS_LABEL = "各プロジェクトの開発・検証コマンド定義"
+REPLACEMENT_GUARDS = {
+    "~/.agentic-project-templates/": "__AGENTIC_WRAPPER_ROOT__",
+}
 
 class SkillDefinition(TypedDict):
     procedures: list[str]
@@ -88,6 +92,9 @@ WORKFLOW_SKILLS: dict[str, SkillDefinition] = {
 
 
 def rewrite_text(text: str, *, local_review_checkpoints: bool) -> str:
+    for original, placeholder in REPLACEMENT_GUARDS.items():
+        text = text.replace(original, placeholder)
+
     text = text.replace("python scripts/agent_cli_tmux.py", WRAPPER_PATH)
     text = text.replace("scripts/agent_cli_tmux.py", WRAPPER_PATH)
     text = text.replace("`docs/procedure/workflow_selection.md`", WORKFLOW_SELECTION_LABEL)
@@ -96,7 +103,9 @@ def rewrite_text(text: str, *, local_review_checkpoints: bool) -> str:
     text = text.replace("docs/rules/development_workflow.md", PROJECT_COMMANDS_LABEL)
     text = text.replace("関連する Python pytest と .NET build/test を通し、検証エラーを 0 件にする", "対象プロジェクトで定義された検証コマンドを実行し、失敗を残さない")
     text = text.replace("関連する Python pytest と .NET build/test を通す", "対象プロジェクトで定義された検証コマンドを実行する")
-    text = text.replace("agentic-project-templates", "agentic")
+    text = text.replace("agentic-project-templates-review-", "agentic-review-")
+    text = text.replace("agentic-project-templates-claude-", "agentic-claude-")
+    text = text.replace("agentic-project-templates-orchestrator", "agentic-orchestrator")
 
     if local_review_checkpoints:
         text = text.replace(
@@ -113,6 +122,9 @@ def rewrite_text(text: str, *, local_review_checkpoints: bool) -> str:
 
     text = text.replace("docs/procedure/", "references/procedure/")
 
+    for original, placeholder in REPLACEMENT_GUARDS.items():
+        text = text.replace(placeholder, original)
+
     return text
 
 
@@ -124,6 +136,33 @@ def write_text(path: Path, text: str) -> None:
 def sync_runtime_helper() -> None:
     RUNTIME_HELPER_DESTINATION.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(RUNTIME_HELPER_SOURCE, RUNTIME_HELPER_DESTINATION)
+
+
+def preserve_manual_skills() -> Path | None:
+    if not SKILL_OUTPUT_ROOT.exists():
+        return None
+
+    manual_skills = [
+        skill_dir
+        for skill_dir in SKILL_OUTPUT_ROOT.iterdir()
+        if skill_dir.is_dir() and skill_dir.name not in WORKFLOW_SKILLS
+    ]
+    if not manual_skills:
+        return None
+
+    backup_root = Path(tempfile.mkdtemp(prefix="agentic-user-skills-"))
+    for skill_dir in manual_skills:
+        shutil.copytree(skill_dir, backup_root / skill_dir.name)
+    return backup_root
+
+
+def restore_manual_skills(backup_root: Path | None) -> None:
+    if backup_root is None or not backup_root.exists():
+        return
+
+    for skill_dir in backup_root.iterdir():
+        shutil.copytree(skill_dir, SKILL_OUTPUT_ROOT / skill_dir.name, dirs_exist_ok=True)
+    shutil.rmtree(backup_root)
 
 
 def copy_skill_master(skill_name: str, *, local_review_checkpoints: bool) -> None:
@@ -166,6 +205,7 @@ def apply_per_skill_fixes(skill_name: str) -> None:
 
 
 def rebuild() -> None:
+    backup_root = preserve_manual_skills()
     if SKILL_OUTPUT_ROOT.exists():
         shutil.rmtree(SKILL_OUTPUT_ROOT)
     SKILL_OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -189,6 +229,8 @@ def rebuild() -> None:
                 local_review_checkpoints=definition["local_review_checkpoints"],
             )
         apply_per_skill_fixes(skill_name)
+
+    restore_manual_skills(backup_root)
 
 
 if __name__ == "__main__":

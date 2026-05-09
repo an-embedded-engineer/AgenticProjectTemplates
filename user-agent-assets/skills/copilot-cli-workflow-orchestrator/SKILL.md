@@ -22,7 +22,7 @@ description: CopilotがCopilot CLI（実装Agent・レビューAgent）を指揮
 ## 実行ルール（索引）
 
 - 手順本体: `references/procedure/autonomous_workflow_orchestrator_copilot_cli.md`
-- tmux / Agent CLI 共通スクリプト: `~/.agentic/bin/agentic-agent-cli-tmux.sh`
+- tmux / Agent CLI 共通スクリプト: `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh`
 - workflow 選択: workflow 判定ルール
 - 実装ワークフロー
   - `references/procedure/spec_change_workflow.md`
@@ -47,7 +47,7 @@ description: CopilotがCopilot CLI（実装Agent・レビューAgent）を指揮
 2. 判定結果に応じて対応 skill を選択する
 3. `git worktree list` でメインプロジェクトディレクトリを特定し、実装 Agent の作業先として指定する
 4. モデル構成を確定する（デフォルト: 実装 `gpt-5.3-codex` / レビュー `claude-opus-4.6`）
-5. `~/.agentic/bin/agentic-agent-cli-tmux.sh` で tmux セッション `agentic-orchestrator` を作成し、実装 Agent をペイン 0・レビュー Agent をペイン 1 に起動する
+5. `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` で tmux セッション `agentic-orchestrator` を作成し、実装 Agent をペイン 0・レビュー Agent をペイン 1 に起動する
 6. 各 Phase 完了後に待機メッセージを検知してから次の指示を送る
 7. 各 Phase のレビュー後に open 指摘が 0 になるまで修正ループを継続する
 8. Phase 5 ではユーザ動作確認を必ず要求し、結果を待つ

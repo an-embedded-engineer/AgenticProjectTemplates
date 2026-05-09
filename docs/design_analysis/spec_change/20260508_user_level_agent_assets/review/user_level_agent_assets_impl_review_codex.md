@@ -15,21 +15,104 @@
 現状の実装は、workflow skill の user-level 正本化と `references/` 化の土台はできているが、移行先構成としては未完了である。
 特に installer の default 挙動、tmux wrapper の実行権限、Windows runtime、`project-doc-bootstrap` 欠落は、実際の user-level 利用で破綻する可能性が高い。
 
+2026-05-09 追加指摘対応後の確認では、open の追加指摘は解消済みと判断する。
+ただし High-2 相当の repo 直下 / 既存 template ripple は current phase の即時変更ではなく、`project-doc-bootstrap` を起点に target project へ project-level files と `sync_agent_instructions.*` を配る staged migration へ設計更新したうえで、移行完了後の follow-up に移した。
+残課題は `pwsh` 不在による PowerShell 実行検証未了だけで、実装差分としての blocking finding は残っていない。
+
 ## 対応状況（2026-05-09 更新）
 
 | 指摘 | 状況 | 対応メモ |
 |---|---|---|
-| 1. existing skill への missing install 不備 | 対応済み | installer を file 単位 merge へ修正し、既存 skill dir 配下の未配置 `SKILL.md` / references を補完できるようにした |
+| 1. existing skill への missing install 不備 | 対応済み | installer の file 単位 merge は維持しつつ、`missing` では既存 `SKILL.md` を更新しないため移行時は `--mode overwrite` 必須であることを install README へ明記した |
 | 2. macOS / Linux tmux wrapper 実行権限 | 対応済み | source 側の実行ビット付与と install 時 `chmod 755` を追加した |
 | 3. Windows runtime placeholder | 対応済み | `.ps1` wrapper を exe 優先 + Python fallback に変更し、placeholder 単体で即失敗しない契約へ寄せた |
-| 4. `project-doc-bootstrap` 未実装 | 対応済み | `user-agent-assets/skills/project-doc-bootstrap/` を追加し、templates / references / shell / PowerShell wrapper を実装した |
+| 4. `project-doc-bootstrap` 未実装 | 対応済み | skill 本体と wrapper に加え、template から `skill_catalog.md` を削除し、target docs reference も user-level skill 前提へ整理した |
 | 5. suite skill payload 方針の設計未反映 | 対応済み | 設計書 Section 6.1 / 7.2 / 7.3 / 7.4 を現実装の slim payload 方針へ更新した |
 | 6. 不正 `--targets` でも helper 先書き込み | 対応済み | target validation を runtime/helper copy より前へ移動した |
 | 7. `reference/` 混入 | 対応済み | `.gitignore` へ `reference/` を追加し、作業用 clone 混入を避けた |
+| 追加1. Claude 側 High-2 対応状況の実態不一致 | 方針更新で current phase 対象外 | repo 直下 / 既存 template は移行完了まで無変更とし、`project-doc-bootstrap` から target project へ docs、project-level `agent_common_master.md`、`agent_sync_guide.md`、`sync_agent_instructions.*` をコピーする staged migration に設計更新した |
 
 備考:
 
 - `pwsh` がローカル環境に無いため、PowerShell wrapper / installer の実行検証だけは未実施
+
+## 追加指摘対応後の確認（2026-05-09）
+
+- A は `user-agent-assets/install/README.md` に移行時の `--mode overwrite` 必須を追記して解消した
+- B は repo 直下 / 既存 template を先に変えず、`project-doc-bootstrap` が target project へ project-level files と `sync_agent_instructions.*` を供給する staged migration を設計へ反映して current phase の blocking から外した
+- C は `project-doc-bootstrap` template から `skill_catalog.md` を削除し、target docs reference から `instructions/skills/**/*.md` 置換案内を除去して解消した
+
+## 指摘対応確認（commit 5d200dc）
+
+対象コミット: `5d200dcac387f9b58b192cb20935d90f17b6c49b`
+
+### 未解決 / 追加指摘（対応前記録）
+
+#### A. [High] 既存 `SKILL.md` は default `missing` install では更新されない
+
+`install_user_agent_assets.sh` / `.ps1` は directory については file 単位 merge するよう修正された。
+ただし、既存 file は `missing` mode で skip されるため、既存 user-level skill の `SKILL.md` は更新されない。
+
+- `user-agent-assets/install/install_user_agent_assets.sh:66-73`
+- `user-agent-assets/install/install_user_agent_assets.ps1:45-52`
+
+隔離した `HOME` に古い `~/.codex/skills/spec-change-workflow/SKILL.md` を置いて install したところ、`old docs/procedure/spec_change_workflow.md scripts/agent_cli_tmux.py` が残り続けた。
+したがって、既存環境の移行には `--mode overwrite` が必須である。
+
+対応案:
+
+- README とレビュー対応状況に「既存 `SKILL.md` の移行は `--mode overwrite` 必須」と明記する
+- もしくは `--mode merge` / `--mode migrate` のような移行用 mode を追加し、managed file は更新、ユーザ追加 file は維持する
+
+#### B. [High] Claude 側レビューの `High-2` は対応済み表示だが、実装は未対応
+
+Claude レビュー文書では `High-2` が「root / Python / C# の `agent_common_master.md` を薄い index 化し、sync script を instruction output 再生成専用へ縮小した」として対応済みになっている。
+しかし、対象コミットには `instructions/`、`python-project-template/instructions/`、`csharp-project-template/instructions/`、`scripts/sync_agent_skills.*` の変更が含まれていない。
+
+- `docs/design_analysis/spec_change/20260508_user_level_agent_assets/review/user_level_agent_assets_impl_review_claude.md:43-46`
+- `instructions/agent_common_master.md:18-19`
+- `python-project-template/instructions/agent_common_master.md:18-19`
+- `csharp-project-template/instructions/agent_common_master.md:18-19`
+
+現状でも `skill_catalog.md` / `docs/procedure/README.md` / `docs/procedure/` 参照が残っているため、project-level 薄化と sync script 縮小は未完了として扱う必要がある。
+
+対応案:
+
+- 実装側で root / template の薄化と sync script 縮小を行う
+- まだ Phase 4 の後続作業として残すなら、Claude レビュー文書の対応状況を「未対応 / 後続対応」に戻す
+
+#### C. [Medium] `project-doc-bootstrap` が削除方針の `skill_catalog.md` と旧参照を再導入している
+
+`project-doc-bootstrap` は追加されたが、テンプレート配下に `docs/rules/skill_catalog.md` が含まれている。
+さらに、その内容には旧 workspace skill / repo-local helper 前提の参照が残っている。
+
+- `user-agent-assets/skills/project-doc-bootstrap/templates/python/docs/rules/skill_catalog.md:43-67`
+- `user-agent-assets/skills/project-doc-bootstrap/templates/csharp/docs/rules/skill_catalog.md:43-67`
+- `user-agent-assets/skills/project-doc-bootstrap/references/python-target-docs.md:13-15`
+- `user-agent-assets/skills/project-doc-bootstrap/references/python-target-docs.md:85-88`
+- `user-agent-assets/skills/project-doc-bootstrap/references/csharp-target-docs.md:13-16`
+
+特に `scripts/agent_cli_tmux.py`、`tools/AgentCliTmux`、`instructions/skills/*/SKILL.master.md`、`python-template-doc-filler` / `csharp-template-doc-filler` は、user-level assets 正本化後の導線と矛盾する。
+また、設計書では `skill_catalog.md` は削除方向であり、project docs 雛形として再配布すると削除 ripple を打ち消す。
+
+対応案:
+
+- `project-doc-bootstrap/templates/*/docs/rules/skill_catalog.md` を削除する
+- bootstrap 後の workflow 案内は `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の薄い index と user-level skill 名に寄せる
+- `references/*-target-docs.md` から `instructions/skills/**/*.md` の置換案内を削除し、user-level skill は置換対象外であることを明記する
+
+### 対応済み確認
+
+- `.gitignore` の `user-agent-assets/bin/**` / `user-agent-assets/skills/*/bin/**` unignore は有効で、`git check-ignore` でも wrapper は無視されない
+- `user-agent-assets/bin/agentic-agent-cli-tmux.sh` と `project-doc-bootstrap/bin/copy_doc_templates.sh` は `100755` で commit されている
+- invalid `--targets unknown` は helper / runtime 書き込み前に終了する
+- `project-doc-bootstrap` skill、shell wrapper、PowerShell wrapper、templates / references は追加済み
+- 隔離した Python target project で `copy_doc_templates.sh` を実行し、docs 雛形、`instructions/agent_common_master.md`、`instructions/agent_sync_guide.md`、`scripts/sync_agent_instructions.*` が配置されることを確認した
+- 同 target project で `scripts/sync_agent_instructions.sh --help` と `scripts/sync_agent_instructions.sh` の直接実行が成功し、`AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md` が再生成されることを確認した
+- `reference/` は `.gitignore` 対象になっている
+- `python3 -m py_compile scripts/rebuild_user_agent_skills.py user-agent-assets/runtime/agent-cli-tmux/python/agent_cli_tmux.py` は成功
+- `bash -n user-agent-assets/install/install_user_agent_assets.sh user-agent-assets/bin/agentic-agent-cli-tmux.sh user-agent-assets/skills/project-doc-bootstrap/bin/copy_doc_templates.sh` は成功
+- 隔離した `HOME` への `--targets codex` 実 install は成功し、shared common hydrate と shell wrapper 実行権限付与も確認済み
 
 ## 指摘
 
