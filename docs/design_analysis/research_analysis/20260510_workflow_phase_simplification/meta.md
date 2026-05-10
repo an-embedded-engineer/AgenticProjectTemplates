@@ -22,6 +22,7 @@ related_commits:
   - 2bb1911 : Phase 4 Claude 再レビュー承認
   - cf4801d : Phase 4 追加 Minor 指摘対応
   - 0964e6c : Phase 4 追加 Minor 指摘 Claude レビュー承認
+  - bc1f997 : Phase 5 次 workflow 引き継ぎ TODO 起票
 source_design_path: docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md
 ---
 
