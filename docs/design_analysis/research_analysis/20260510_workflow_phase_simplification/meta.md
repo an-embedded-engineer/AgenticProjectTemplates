@@ -21,6 +21,7 @@ related_commits:
   - 86a4be3 : Phase 4 Claude review 指摘対応
   - 2bb1911 : Phase 4 Claude 再レビュー承認
   - cf4801d : Phase 4 追加 Minor 指摘対応
+  - 0964e6c : Phase 4 追加 Minor 指摘 Claude レビュー承認
 source_design_path: docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md
 ---
 
