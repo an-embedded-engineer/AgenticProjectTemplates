@@ -200,6 +200,24 @@ status: "<draft|implemented|merged>"
 
 ---
 
+## 8. 指摘対応再確認（commit `aebc053`）
+
+**確認日**: 2026-05-10
+**対象 commit**: `aebc053dd2fbe080a26ea4891bee388a0fb16c4e`（`docs: address workflow phase review comments`）
+
+| 指摘 | 確認結果 |
+|------|----------|
+| §1.1 bootstrap template の `diff.zip` 表記統一 | ✓ 解消（`templates/python/docs/design_analysis/README.md` と `templates/csharp/docs/design_analysis/README.md` の第 4 項が「`report.md` を課題ディレクトリ直下に配置し、必要に応じて `diff.zip` も追加する」へ更新され、標準ファイル構成の `diff.zip` に `# optional` を付与。project-level `docs/design_analysis/README.md` の標準ファイル構成も `diff.zip  # optional` へ揃った） |
+| §1.2 meta.md テンプレートの `status` / `components` 追加 | ✓ 解消（project-level / Python / C# の 3 か所すべての meta.md テンプレートに `components: []` と `status: "<draft|implemented|merged>"` が追加された） |
+| §3.1 `phase_4_completion_focus.md` レビュー観点の文言整理 | ✓ 解消（spec-change の `phase_4_completion_focus.md:19` が「Phase 3 で更新した恒久ドキュメントと、archive / history / report の追跡が一貫しているか」へ更新され、Phase 境界の誤読リスクが解消した） |
+| §3.2 `related_commits` 集約実例 | 申し送り維持（Phase 4-b で自然解消する情報提供） |
+
+未解決指摘なし。本実装レビューは **承認** とする。
+
+> **APPROVED**: 全要対応指摘（§1.1 / §1.2 / §3.1）が解消済み。本 spec-change は Phase 4-a 動作確認 STOP へ進んでよい。
+
+---
+
 ## 7. 参考: 確認に用いたコマンド・チェック
 
 - `git show --stat 262e7e0838fe2c7d60c46d0499fe9ad1f5127df7`（変更 62 ファイル / +836 / -648）
