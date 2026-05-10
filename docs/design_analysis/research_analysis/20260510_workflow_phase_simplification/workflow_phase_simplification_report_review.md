@@ -354,3 +354,15 @@ m1〜m8 はすべて反映済みであることを確認した。特に m4（ADR
 2. Phase 5 完了処理として、調査結論・主要根拠・未解決事項（§11 の表）・次 workflow（`spec-change-workflow`）と Step 1 の ADR 起票候補をユーザへ報告する。
 3. m9 / m10 は次 spec-change workflow Phase 0 の依頼整理時に取り込む。
 
+## 10. 追加 Minor 指摘への対応（Codex）
+
+- 対応日: 2026-05-10
+- 対象ファイル:
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md`
+
+| 指摘 | 対応 | 反映箇所 |
+|---|---|---|
+| m9 | §6.2 の案 B 行に、ユーザ確認 NG 時は code / impl 文書のみ Phase 3 へ差し戻し、恒久 docs は未更新のまま据え置く方針を追記した。 | `report.md` §6.2 |
+| m10 | §7.3 のワイルドカード行を具体 path と「他 skill 内の同 procedure 参照箇所」に修正し、確認手段に `rg "autonomous_workflow_orchestrator"` を追加した。 | `report.md` §7.3 |
+
+これにより、再レビューで新規に出た Minor m9 / m10 も次 workflow へ持ち越さず本 research_analysis 内で解消した。
