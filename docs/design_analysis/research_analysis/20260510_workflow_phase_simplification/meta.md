@@ -8,7 +8,8 @@ components:
   - user-agent-assets/skills/*-review-automation
   - user-agent-assets/skills/*workflow-orchestrator
 status: draft
-related_commits: []
+related_commits:
+  - 3fdc918 : Phase 1 ブランチ・meta 初期化
 source_design_path: docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md
 ---
 
