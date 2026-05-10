@@ -7,12 +7,18 @@ components:
   - user-agent-assets/shared/references/procedure/workflow_phase_library/common
   - user-agent-assets/skills/*-review-automation
   - user-agent-assets/skills/*workflow-orchestrator
-status: draft
+status: in_review
 related_commits:
   - 3fdc918 : Phase 1 ブランチ・meta 初期化
   - 0dc0b25 : Phase 2 調査・分析レポート作成
+  - b12ebef : Phase 2 related_commits 初期記録
   - 87df7db : Phase 2 補足反映 shared common hydrate 前提明記
+  - baecceb : Phase 2 related_commits 補足記録
   - 0b500e4 : Phase 2 補足反映 Lanelet 実運用サンプル確認
+  - de8742f : Phase 2 Lanelet 実運用サンプル確認 commit 記録
+  - 8643970 : Phase 2 補足反映 WBS / related_commits 方針追記
+  - 570121a : Phase 3 Claude review 実施
+  - 86a4be3 : Phase 4 Claude review 指摘対応
 source_design_path: docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md
 ---
 
