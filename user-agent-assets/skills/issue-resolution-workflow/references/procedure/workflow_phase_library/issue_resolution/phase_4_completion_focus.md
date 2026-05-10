@@ -1,21 +1,21 @@
-# issue-resolution Phase 5: 文書反映の観点
+# issue-resolution Phase 4: 完了処理の観点
 
 ## 反映先
 
-- `docs/components/<component>/README.md`
-- `docs/components/<component>/basic_design.md`
-- `docs/components/<component>/detail_design.md`
-- `docs/components/<component>/interface_spec.md`
 - `docs/issues/<component>/issues.md`
 - `docs/issues/cross/issues.md`
+- `issues_archive_<year>.md`
+- `docs/history/`
 
 ## 必須観点
 
+- ユーザ動作確認結果を記録する
 - issue 正本へ完了条件の達成根拠を追記する
 - 残課題は follow-up として明示する
 - issue archive へ移すための証跡を揃える
+- `report.md` に課題、解決内容、効果確認、残課題をまとめる
 
 ## レビュー観点
 
 - issue を閉じる材料が十分か
-- 恒久ドキュメントと issue 記録の間に矛盾がないか
+- issue archive 化に必要な証跡が揃っているか

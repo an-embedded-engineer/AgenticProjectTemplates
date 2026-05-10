@@ -13,6 +13,7 @@ docs/design_analysis/
 ├── fix_issues/            — 不具合修正
 ├── issue_resolution/      — 課題解決
 ├── refactoring/           — リファクタリング
+├── wbs/                   — 大規模変更の作業分解
 └── research_analysis/     — 調査・分析
 ```
 
@@ -26,19 +27,31 @@ docs/design_analysis/
 
 ## 標準ファイル構成
 
+core workflow topic は 4 ゲート構成を標準とする。
+要求、範囲、採否理由、リスク、テスト観点は Phase 2 の `design/` 文書へ記録する。
+
 ```
 <YYYYMMDD>_<slug>/
-├── plan/
-│   └── <topic>_plan.md
 ├── design/
 │   └── <topic>_design.md
 ├── impl/
 │   └── <topic>_impl.md
 ├── review/
-│   ├── <topic>_plan_review.md
 │   ├── <topic>_design_review.md
-│   └── <topic>_impl_review.md
+│   ├── <topic>_impl_review.md
+│   └── <topic>_completion_review.md  # optional
 ├── diff.zip
+├── report.md
+└── meta.md
+```
+
+`<topic>_completion_review.md` は、archive / history / merge 前確認が重い場合だけ作成する。
+
+## WBS ファイル構成
+
+```
+<YYYYMMDD>_<slug>/
+├── wbs.md
 ├── report.md
 └── meta.md
 ```
@@ -48,11 +61,11 @@ docs/design_analysis/
 ```yaml
 ---
 title: "<課題タイトル>"
-category: "<spec_change|new_feature|fix_issues|issue_resolution|refactoring|research_analysis>"
+category: "<spec_change|new_feature|fix_issues|issue_resolution|refactoring|wbs|research_analysis>"
 created: "<YYYY-MM-DD>"
-plan_status: "<draft|in_review|approved|N/A>"
-design_status: "<draft|in_review|approved|N/A>"
-impl_status: "<not_started|in_progress|done|N/A>"
+design_status: "<draft|in_review|done>"
+impl_status: "<not_started|draft|in_review|done>"
+completion_status: "<not_started|in_progress|done>"
 related_commits: []
 ---
 ```
@@ -60,7 +73,9 @@ related_commits: []
 ## 運用ルール
 
 1. 課題ディレクトリは日付プレフィックスで一意に識別する
-2. `meta.md` のステータスは各 Phase 完了時に必ず更新する
+2. core workflow topic では `design_status` / `impl_status` / `completion_status` を更新する
 3. レビュー文書は `review/` ディレクトリに配置する
 4. ソース差分レポートは `diff.zip` と `report.md` を課題ディレクトリ直下に配置する
 5. 調査・分析は `research_analysis/` に配置する（workflow Phase を伴わない）
+6. core workflow の `related_commits` は completion Phase で主要 commit をまとめて記録する。research / 多段レビュー topic は従来通り round 単位で記録してよい
+7. 大規模変更は `wbs-planning-workflow` で作業単位へ分解してから、各 work package を通常 workflow で扱う

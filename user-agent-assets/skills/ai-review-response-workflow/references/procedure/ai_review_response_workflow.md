@@ -7,7 +7,7 @@
 ## 概要フロー
 
 1. 入力整理（対象文書、対象コード、レビュー結果）
-2. 工程分類（`plan` / `design` / `impl`）
+2. 工程分類（`design` / `impl` / `completion`）
 3. 指摘分類（重大度・優先度・根拠）
 4. 反映（対象工程の文書 + レビュー文書）
 5. 未解決事項の明確化
@@ -31,21 +31,15 @@
 ## 出力ファイルの配置
 
 - 原則: レビュー結果は `docs/design_analysis/<category>/<yyyymmdd>_<topic>/review/` 配下に配置する
-- 例外: 特定コンポーネントの恒久ドキュメントレビューは、対象ディレクトリ直下の `review/` に配置してよい
+- 例外: 特定コンポーネント単位の追加レビューは、対象ディレクトリ直下の `review/` に配置してよい
 - ファイル名:
-  - `<topic>_plan_review.md`
   - `<topic>_design_review.md`
   - `<topic>_impl_review.md`
-  - `<topic>_docs_review.md`（仕様変更 Phase 5 の文書レビュー）
-  - `<topic>_feature_docs_review.md`（新機能追加 Phase 5 の文書レビュー）
-  - `<topic>_bugfix_docs_review.md`（不具合修正 Phase 5 の文書レビュー）
-  - `<topic>_issue_resolution_docs_review.md`（課題解決 Phase 5 の文書レビュー）
-  - `<topic>_refactoring_docs_review.md`（リファクタリング Phase 5 の文書レビュー）
+  - `<topic>_completion_review.md`（完了処理が重い場合だけ使う optional review）
 - 例:
-  - `docs/design_analysis/spec_change/20260329_api_contract_update/review/api_contract_update_plan_review.md`
   - `docs/design_analysis/spec_change/20260329_api_contract_update/review/api_contract_update_design_review.md`
   - `docs/design_analysis/spec_change/20260329_api_contract_update/review/api_contract_update_impl_review.md`
-  - `docs/design_analysis/new_feature/20260329_bulk_import/review/bulk_import_feature_docs_review.md`
+  - `docs/design_analysis/new_feature/20260329_bulk_import/review/bulk_import_completion_review.md`
   - `docs/components/example_component/review/component_interface_design_review.md`
 
 ## レビュー結果ドキュメント構成（テンプレート）
@@ -131,9 +125,9 @@
 
 ## 成果物
 
-- 対象工程文書更新（`plan` / `design` / `impl`）
+- 対象工程文書更新（`design` / `impl` / `completion`）
 - レビュー文書更新（全指摘に `対応` または `未対応理由` を付与）
-- 必要に応じて `meta.md` の `plan_status` / `design_status` / `impl_status` を更新
+- 必要に応じて `meta.md` の `design_status` / `impl_status` / `completion_status` を更新
 
 ## 完了条件
 
