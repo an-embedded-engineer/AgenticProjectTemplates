@@ -252,3 +252,29 @@
 ## 7. 承認可否
 
 **条件付き未承認**。Major M1〜M5 の解消後に再レビューを実施して承認可否を再判断する。Moderate Mod1〜Mod4、Minor m1〜m8 は、解消が次 spec-change workflow Phase 0 までに完了することを推奨する。
+
+## 8. 対応状況（Codex）
+
+- 対応日: 2026-05-10
+- 対象ファイル:
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md`
+
+| 指摘 | 対応 | 反映箇所 |
+|---|---|---|
+| M1 | Lanelet refactoring サンプルの読み取りを修正し、サンプルが示す事実を「impl 時点で docs 反映先と内容を確定できる」に限定した。docs 実体更新は案 A / 案 B に分け、次 spec-change Phase 0 の意思決定対象にした。 | §4.4, §5.2, §6.2, §10 |
+| M2 | Phase 4 を 4-a 動作確認 STOP / 4-b 完了処理 / 4-c merge 承認に分割し、現行ゲートとの対比と代替検証を追加した。`report.md` / `diff.zip` / archive / history の位置も明記した。 | §6.1, §6.2 |
+| M3 | review automation / orchestrator の対象ファイル、影響セクション、変更内容を表に整理した。Phase 5 docs review 5 種、`ai-review-response-workflow`、orchestrator の Phase 5 gate 文言も対象に含めた。 | §7.3 |
+| M4 | `related_commits` completion 集約の適用範囲を core workflow 5 種に限定し、research / 多段レビュー topic は round 単位の逐次記録を維持する方針に分けた。 | §6.5, §7.4, §8, §10, §11 |
+| M5 | WBS 分解 skill を案 A（独立 `docs/design_analysis/wbs/`）と案 B（`research_analysis` 派生）に分け、配置例と次 spec-change Phase 0 での確定事項を明記した。 | §5.3, §7.4, §9, §11 |
+| Mod1 | 5 種 workflow ごとの plan/design 焦点比較表を追加した。 | §4.2 |
+| Mod2 | status 方針を移行期互換推奨に絞り、`completion_status` を追加した。完全な `phase_status` 移行は別 spec-change / ADR 候補にした。 | §6.3, §11 |
+| Mod3 | 推奨移行手順を「Step / 内容 / 先行依存 / 検証手段」の表に再構成した。 | §9 |
+| Mod4 | 削減される承認ゲートと代替検証の対比表を追加した。 | §6.1 |
+| m1 | 形式適合の記録のみのため、追加対応なし。 | なし |
+| m2 | `wbs.md` の `WP-001` 命名、`source_id`、推奨 workflow 許容値を追記した。 | §5.3 |
+| m3 | `completion_review` を optional として §6.4 / §7.4 の文言を揃えた。 | §6.4, §7.4 |
+| m4 | Phase 簡略化を ADR 候補として扱う Step を追加した。 | §9, §11 |
+| m5 | Lanelet 行数根拠に 2026-05-10 時点を明記した。 | §4.4 |
+| m6 | 未解決事項を、現時点の扱いと次アクションを含む表へ再整理した。 | §11 |
+| m7 | 複数 Phase 混在 commit は `Phase X+Y` 表記を許容する方針を追記した。 | §6.5, §11 |
+| m8 | リスク表の対策に対応セクション参照を追加した。 | §8 |
