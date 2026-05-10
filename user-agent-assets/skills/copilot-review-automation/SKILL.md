@@ -1,7 +1,7 @@
 ---
 name: copilot-review-automation
 description: >-
-   AgenticProjectTemplates のワークフロー全 Phase を設計・実装 Agent（Copilot Chat または Copilot CLI）が自律実行し、各 Phase のレビューを Copilot CLI（デフォルト: claude-sonnet-4.6）に委任して完了させる手順。spec-change/new-feature/bugfix/issue-resolution/refactoring の Phase 2/3 レビューと optional completion review の指摘対応確認を自動化する。Codex ではなく Copilot が設計・実装担当として直接動作する構成。
+   AgenticProjectTemplates のワークフロー全 Phase を設計・実装 Agent（Copilot Chat または Copilot CLI）が自律実行し、各 Phase のレビューを Copilot CLI（デフォルト: claude-sonnet-4.6）に委任して完了させる手順。spec-change/new-feature/bugfix/issue-resolution/refactoring/documentation の Phase 2/3 レビューと optional completion review の指摘対応確認を自動化する。Codex ではなく Copilot が設計・実装担当として直接動作する構成。
 ---
 
 # copilot-review-automation
@@ -46,8 +46,8 @@ description: >-
 
 1. Phase は 1 つずつ順番に進める
 2. Phase 2 design review 完了前に Phase 3 の実装成果物を作り始めてはならない
-3. Phase 3 impl review 完了前に Phase 4-a のユーザ動作確認へ進んではならない
-4. Phase 4-a のユーザ動作確認 OK 前に、Phase 4-b の archive / history / merge 前処理を始めてはならない
+3. Phase 3 impl review 完了前に Phase 4-a へ進んではならない
+4. Phase 4-a のユーザ動作確認 OK 前に、Phase 4-b の archive / history / merge 前処理を始めてはならない。ただし `documentation-workflow` は文書最終確認だけを扱い、アプリ動作確認は要求しない
 5. 1 Phase の標準ループは `commit -> review -> fix -> follow-up -> approval` の順とする
 6. 後続 Phase の正式成果物を承認前に先行生成してはならない
 
@@ -79,6 +79,7 @@ description: >-
    - 不具合修正: `bugfix`
    - 課題解決: `issue-resolution`
    - リファクタリング: `refactoring`
+   - ドキュメント更新: `documentation`
 
 2. 明示指定がない時は `issue-dir` から判定する
    - `docs/design_analysis/spec_change/` 配下 → `spec-change`
@@ -86,6 +87,7 @@ description: >-
    - `docs/design_analysis/fix_issues/` 配下 → `bugfix`
    - `docs/design_analysis/issue_resolution/` 配下 → `issue-resolution`
    - `docs/design_analysis/refactoring/` 配下 → `refactoring`
+   - `docs/design_analysis/documentation/` 配下 → `documentation`
    - 判定不能時はユーザへ確認する
 
 ## review 文書命名

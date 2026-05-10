@@ -39,7 +39,7 @@ docs/
 ├── design_analysis/  — 設計分析・レビュー文書
 ├── rules/            — 開発ルール
 ├── tests/            — テスト方針・構成
-├── todo/             — 追跡項目（spec-change / new-feature / refactoring）
+├── todo/             — 追跡項目（spec-change / new-feature / refactoring / documentation）
 ├── issues/           — 追跡項目（bugfix / issue-resolution）
 └── history/          — 実装履歴
 ```

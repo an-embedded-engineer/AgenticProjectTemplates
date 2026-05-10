@@ -2,7 +2,7 @@
 
 ## 目的
 
-`spec-change` / `new-feature` / `refactoring` の追跡項目を管理する。
+`spec-change` / `new-feature` / `refactoring` / `documentation` の追跡項目を管理する。
 
 ## 正本
 

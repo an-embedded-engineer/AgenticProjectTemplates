@@ -57,7 +57,7 @@
 |---|---|
 | `work_package_id` | `WP-001` 形式 |
 | `source_id` | 元の todo / issue / report があれば記載 |
-| `recommended_workflow` | `spec-change` / `new-feature` / `bugfix` / `issue-resolution` / `refactoring` |
+| `recommended_workflow` | `spec-change` / `new-feature` / `bugfix` / `issue-resolution` / `refactoring` / `documentation` |
 | `depends_on` | 先行 work package |
 | `purpose` | この work package の目的 |
 | `completion_criteria` | 完了条件 |

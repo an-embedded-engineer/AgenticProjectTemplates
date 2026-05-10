@@ -13,6 +13,7 @@ docs/design_analysis/
 ├── fix_issues/            — 不具合修正
 ├── issue_resolution/      — 課題解決
 ├── refactoring/           — リファクタリング
+├── documentation/         — ドキュメント更新・整理
 ├── wbs/                   — 大規模変更の作業分解
 └── research_analysis/     — 調査・分析
 ```
@@ -62,7 +63,7 @@ core workflow topic は 4 ゲート構成を標準とする。
 ```yaml
 ---
 title: "<課題タイトル>"
-category: "<spec_change|new_feature|fix_issues|issue_resolution|refactoring|wbs|research_analysis>"
+category: "<spec_change|new_feature|fix_issues|issue_resolution|refactoring|documentation|wbs|research_analysis>"
 created: "<YYYY-MM-DD>"
 components: []
 status: "<draft|implemented|merged>"

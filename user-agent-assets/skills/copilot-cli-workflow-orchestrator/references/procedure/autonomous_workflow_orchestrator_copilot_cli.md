@@ -4,7 +4,7 @@
 
 Copilot（VS Code Copilot Chat または Copilot CLI）が指揮者となり、
 **Copilot CLI の別セッション**を実装 Agent・レビュー Agent として起動し、
-モデル選択で役割を分担させて 5 種類の workflow を全 Phase 自律的に完了させる。
+モデル選択で役割を分担させて 6 種類の workflow を全 Phase 自律的に完了させる。
 
 > **従来版との違い**: Codex CLI + Claude Code CLI の 2 ツール構成を、
 > Copilot CLI 単一に統一する。GitHub Copilot のサブスクリプションのみで完結する。
@@ -129,7 +129,7 @@ tmux new-session -d -s workflow-orchestrator -x 220 -y 60 -c "${MAIN_PROJECT_DIR
 **実行者: Copilot**
 
 1. workflow 判定ルール を参照し、対象が `docs/issues/` か `docs/todo/` かを判定する
-2. `spec-change` / `new-feature` / `bugfix` / `issue-resolution` / `refactoring` を判定する
+2. `spec-change` / `new-feature` / `bugfix` / `issue-resolution` / `refactoring` / `documentation` を判定する
 3. メインプロジェクトディレクトリを特定する
 
    ```bash
@@ -180,7 +180,7 @@ tmux new-session -d -s workflow-orchestrator -x 220 -y 60 -c "${MAIN_PROJECT_DIR
 TRACKING_FILE="<docs/todo/todo.md | docs/issues/XXX/issues.md>"
 ITEM_ID="<TODO-2026-XXX | C-2026-XXX>"
 ITEM_TITLE="<項目タイトル>"
-SKILL="<spec-change-workflow|new-feature-workflow|bugfix-workflow|issue-resolution-workflow|refactoring-workflow>"
+SKILL="<spec-change-workflow|new-feature-workflow|bugfix-workflow|issue-resolution-workflow|refactoring-workflow|documentation-workflow>"
 
 PROMPT_FILE="${MAIN_PROJECT_DIR}/tmp/orchestrator/copilot_impl_prompt.txt"
 cat > "${PROMPT_FILE}" <<EOF
@@ -207,7 +207,7 @@ OUTPUT=$(~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh capture --se
 
 検知の優先順位:
 1. **構造化シグナル**: `[PHASE_COMPLETE: N]`, `[NEED_USER_VERIFICATION]`, `[ALL_PHASES_COMPLETE]`
-   - `[NEED_USER_VERIFICATION]` は Phase 4-a ユーザ動作確認の依頼待ちを表す
+   - `[NEED_USER_VERIFICATION]` は Phase 4-a ユーザ動作確認の依頼待ちを表す。`documentation-workflow` では文書最終確認待ちとして扱う
 2. **自然言語パターン**: Copilot が出力テキストを読んで待機意図を判断
 
 ---
