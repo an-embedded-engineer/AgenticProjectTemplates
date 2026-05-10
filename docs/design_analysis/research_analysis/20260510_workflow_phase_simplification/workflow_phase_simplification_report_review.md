@@ -366,3 +366,50 @@ m1〜m8 はすべて反映済みであることを確認した。特に m4（ADR
 | m10 | §7.3 のワイルドカード行を具体 path と「他 skill 内の同 procedure 参照箇所」に修正し、確認手段に `rg "autonomous_workflow_orchestrator"` を追加した。 | `report.md` §7.3 |
 
 これにより、再レビューで新規に出た Minor m9 / m10 も次 workflow へ持ち越さず本 research_analysis 内で解消した。
+
+## 11. 追加 Minor 対応レビュー結果（Claude）
+
+- 再レビュー日: 2026-05-10
+- 対象 commit: `da48d4f`（およびその前提となる `cf4801d`）
+- 対象ファイル:
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md`
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/meta.md`
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/workflow_phase_simplification_report_review.md`
+
+### 11.1 Minor 指摘の解消状況
+
+| 指摘 | 結果 | 確認内容 |
+|---|---|---|
+| m9 (§6.2 案 B NG 時差し戻し方針) | **解消** | `report.md` §6.2 の案 B 行 Phase 4 列に「NG 時は code / impl 文書のみ Phase 3 へ差し戻し、恒久 docs は未更新のまま据え置く」が追加された。案 A の NG 時方針と並び、表だけで運用判断ができる粒度に揃った。 |
+| m10 (§7.3 ワイルドカード行) | **解消** | `report.md` §7.3 の最終行が `user-agent-assets/skills/autonomous-workflow-orchestrator/references/procedure/autonomous_workflow_orchestrator.md` および「他 skill 内の同 procedure 参照箇所」に置換された。§7.3 末尾の確認コマンドにも `rg "autonomous_workflow_orchestrator"` が追加され、検索手段で残存参照を網羅できる。 |
+
+### 11.2 review 文書「## 10. 追加 Minor 指摘への対応（Codex）」の妥当性
+
+- 対応日、対象ファイル、指摘番号、対応内容、反映箇所がすべて記録されている。
+- 反映箇所は `report.md` §6.2 / §7.3 と review 文書側で記述が一致している。
+- 「次 workflow へ持ち越さず本 research_analysis 内で解消した」結論が明示されており、9.6 の指揮者向け 3 つ目の項目（「m9 / m10 は次 spec-change workflow Phase 0 の依頼整理時に取り込む」）からの方針変更も整合的に説明されている。
+
+### 11.3 `meta.md` `related_commits` の最新対応 commit 反映
+
+- `cf4801d : Phase 4 追加 Minor 指摘対応` が `related_commits` 末尾に記録されている。本ラウンドで主に確認したかった「最新の m9 / m10 対応の substantive commit が `meta.md` から辿れる」要件は満たしている。
+- `status` も `in_review` → `completed` へ更新済みである。
+- 補足として、`meta.md` 自身を更新するだけの記録 commit（`ad79bdd`、`3a93239`、本 commit となる `da48d4f`）は `related_commits` に載っていない。Phase 2 段階では meta-only 更新 commit（`b12ebef` / `baecceb` / `de8742f`）まで記録されていたため、Phase 3 以降との表記方針に小さな揺れがある。本 research_analysis の結論には影響しないが、次 spec-change workflow の §6.5 実装時に「core workflow の `related_commits` には substantive commit のみ載せ、meta-only 更新 commit は載せない」を明文化する candidate として記録に残しておくと、過去 Phase 2 の運用と統一できる。
+
+### 11.4 観点別チェック結果（追加 Minor 対応）
+
+| 観点 | 評価 | 備考 |
+|---|---|---|
+| m9 / m10 が `report.md` 本体に反映され、次 workflow が review 文書を読まなくても拾える状態になっているか | 整合 | §6.2 / §7.3 本文で完結し、review 文書を参照せずに運用判断ができる |
+| review 文書 §10 の対応記録の妥当性 | 整合 | 指摘番号・対応・反映箇所が漏れなく記録されている |
+| `meta.md` の `related_commits` が最新対応 commit まで含んでいるか | 整合（小さな揺れあり） | `cf4801d` は記録済み。meta-only 更新 commit の扱いは次 spec-change workflow §6.5 で `related_commits` の取扱基準として明文化を推奨 |
+| 追加で修正すべき不備の有無 | なし | 重大度 Major / Moderate に該当する指摘は見当たらない |
+
+### 11.5 承認可否
+
+**承認**。Major M1〜M5、Moderate Mod1〜Mod4、Minor m1〜m10 のすべてが本 research_analysis 内で解消された。`meta.md` `status: completed` のまま Phase 5 完了処理へ進めてよい。
+
+指揮者は次のアクションを進めてよい。
+
+1. ユーザへの完了報告として、調査結論（plan/design 統合、docs 反映の案 A / 案 B、WBS 分解 skill の案 A / 案 B、`related_commits` の core / research 別運用、4 ゲート構成と Phase 4 内 step 4-a / 4-b / 4-c）と未解決事項（§11 表）を §10 結論に沿って整理する。
+2. 次 workflow として `spec-change-workflow` を提案し、Step 1（ADR 候補起票）から開始する旨を通知する。
+3. 11.3 の補足（meta-only 更新 commit の `related_commits` 取扱基準）を、次 spec-change workflow Phase 0 の依頼整理に取り込む候補として申し送る。これは本 research_analysis の完了を妨げない。
