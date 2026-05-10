@@ -33,17 +33,17 @@ shared common phase library、5 種 core workflow procedure と focus 文書、`
 
 > 4. ソース差分レポートは `diff.zip` と `report.md` を課題ディレクトリ直下に配置する
 
-**project-level / SKILL.md / shared common の記載**:
+**project-level / SKILL.md / shared common の当時の記載**:
 
-- `docs/design_analysis/README.md:78`: 「ソース差分レポートは `report.md` を課題ディレクトリ直下に配置し、必要に応じて `diff.zip` も追加する」
-- `user-agent-assets/skills/spec-change-workflow/SKILL.md:38` ほか 5 種 SKILL.md 第 10 項: 「Phase 4-b でソース差分レポート（`report.md`、必要に応じて `diff.zip`）を生成してコミットする」
-- `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_4_verification_and_completion.md:32`: 「課題ディレクトリ配下に `report.md` を作成し、必要なら `diff.zip` も追加する」
+- `docs/design_analysis/README.md:78`: `report.md` を配置し、`diff.zip` は必要に応じて追加する表記
+- `user-agent-assets/skills/spec-change-workflow/SKILL.md:38` ほか 5 種 SKILL.md 第 10 項: `report.md` と必要時の `diff.zip` を生成する表記
+- `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_4_verification_and_completion.md:32`: `report.md` を作成し、`diff.zip` の追加条件が未明確な表記
 
-**差異**: project-level / SKILL.md / shared common phase library は `report.md` 必須・`diff.zip` optional で揃っているが、bootstrap template の Python / C# 双方の README は `diff.zip` を `report.md` と並列に記載しており、両方必須に読める。本コミットで bootstrap template の README は 4 ゲート構成へ更新されているため、同じタイミングで `diff.zip` 表記も project-level と揃えるのが自然。
+**差異**: project-level / SKILL.md / shared common phase library は `diff.zip` の必要条件が曖昧で、bootstrap template の Python / C# 双方の README は `diff.zip` を `report.md` と並列に記載しており、常に両方必須に読める。実際の方針は、`report.md` は常に作成し、ソース変更を含む場合は `diff.zip` も必須、ドキュメント更新や調査のみなどソース以外の変更だけの場合は `diff.zip` を省略可である。
 
-**推奨対応**: Python / C# 双方の bootstrap template の README 第 4 項を `「ソース差分レポートは `report.md` を課題ディレクトリ直下に配置し、必要に応じて `diff.zip` も追加する」` に変更する。あわせて 41-44 行目の「標準ファイル構成」ブロックでも `diff.zip` を `# optional` などのコメント付きにすると、新規プロジェクトで混乱しない。
+**推奨対応**: project-level / Python / C# 双方の README 第 4 項を、`report.md` は常に配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可、と分かる表記へ変更する。あわせて標準ファイル構成ブロックでも `diff.zip` の条件をコメント付きにする。
 
-**対応**: Python / C# 双方の bootstrap template README 第 4 項を `report.md` 必須・`diff.zip` optional の表記へ統一し、標準ファイル構成の `diff.zip` に `# optional` を付与した。project-level README の標準ファイル構成も同じ optional 表記へ揃えた。
+**対応**: Python / C# 双方の bootstrap template README と project-level README を、`report.md` は常に配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可、という表記へ統一した。
 
 **重要度**: 軽微（ファイル数 2、文言 1 行）。
 
@@ -164,7 +164,7 @@ status: "<draft|implemented|merged>"
 | `wbs-planning-workflow` SKILL.md と `wbs_planning_workflow.md` が大規模変更の work package 分解 skill として独立 | ✓ 整合（成果物配置 `docs/design_analysis/wbs/<yyyymmdd>_<topic>/`、`wbs.md` の表構造、推奨 workflow / 依存 / 完了条件 / docs_targets / verification_points を必須化） |
 | `wbs-planning-workflow` が install 対象 skill 群に含まれる（installer の `for skill_dir in "${skill_root}"/*` 経由） | ✓ 整合（`install_user_agent_assets.sh:155-161, 182-187, 192-198`、`report.md:34` で installer dry-run 確認済み） |
 | `docs/design_analysis/README.md` が 4 ゲート構成・wbs/ 区分・completion_review optional・`related_commits` の completion 集約方針を説明している | ✓ 整合（行 28-58, 73-82） |
-| Python / C# bootstrap template の `docs/design_analysis/README.md` が project-level と同一方針へ同期している（`status` / `diff.zip` の細部以外） | ✓ 整合（4 ゲート構成・wbs 区分・status 体系は揃っている） |
+| Python / C# bootstrap template の `docs/design_analysis/README.md` が project-level と同一方針へ同期している | ✓ 整合（4 ゲート構成・wbs 区分・status 体系は揃っている） |
 | ADR-0001 が `docs/adr/README.md` の索引へ追加されている（topic / component / keywords が一致） | ✓ 整合（`docs/adr/README.md:55`） |
 | ADR-0001 が Phase 構成・design 文書必須章・恒久 docs 更新タイミング・`related_commits` 集約方針・wbs 分離を記述している | ✓ 整合 |
 | shared common phase library の hydrate 経路が installer に維持されている | ✓ 整合（`hydrate_workflow_phase_library_common` 関数が target skill の `workflow_phase_library` 配下へ shared common を copy） |
@@ -183,7 +183,7 @@ status: "<draft|implemented|merged>"
 
 | 優先度 | 項目 | 理由 |
 |--------|------|------|
-| 軽微（要対応推奨） | §1.1 bootstrap template の `diff.zip` 必須記載修正 | 本コミットで bootstrap template の README は更新されており、同じ更新範囲で project-level と揃えるのが自然 |
+| 軽微（要対応推奨） | §1.1 `diff.zip` の条件付き必須表記への修正 | 本コミットで bootstrap template の README は更新されており、同じ更新範囲で project-level と揃えるのが自然 |
 | 軽微（要対応推奨） | §1.2 meta.md テンプレートへの `status` / `components` 追加 | `phase_1_branch_and_meta.md` が要求し、Phase 3 / 4 で更新する `status` がテンプレートに無いと運用ミスを誘発しやすい |
 | 任意 | §3.1 `phase_4_completion_focus.md` のレビュー観点文言 | 機能影響なし。新方式の Phase 境界をより明確にする文言整理 |
 | 情報提供 | §3.2 `related_commits` の completion 集約実例 | Phase 4-b で自然解消。指摘ではなく申し送り |
@@ -194,7 +194,7 @@ status: "<draft|implemented|merged>"
 
 `workflow Phase 簡略化` 仕様変更の実装は、shared common phase library から ADR、bootstrap template、review automation / orchestrator 系 skill、`wbs-planning-workflow` 新設まで一貫しており、過去方式の前提知識なしに新 workflow 文書だけで運用できる状態に達している。`plan_status: N/A` などの移行期互換 status は core workflow から完全に取り除かれており、残存は historical research_analysis 文書のみで意図的非移行と整合している。4 ゲート構成・review 文書命名・Phase 4-a/4-b/4-c の STOP 条件・`wbs-planning-workflow` の独立性も観点通り。
 
-未解決指摘 2 件（§1.1 bootstrap template の `diff.zip` 表記、§1.2 meta.md テンプレートの `status` 欠落）はいずれも軽微で、文言・テンプレート整備の範囲。重大・中程度の指摘はなく、本実装は **Phase 4 ゲート進行可** と判定する。
+未解決指摘 2 件（§1.1 `diff.zip` の条件表記、§1.2 meta.md テンプレートの `status` 欠落）はいずれも軽微で、文言・テンプレート整備の範囲。重大・中程度の指摘はなく、本実装は **Phase 4 ゲート進行可** と判定する。
 
 軽微指摘 2 件への対応は、本 spec-change の Phase 4-b で同時整理するか、別 follow-up todo として切り出すかは承認者判断に委ねる。
 
@@ -203,11 +203,12 @@ status: "<draft|implemented|merged>"
 ## 8. 指摘対応再確認（commit `aebc053`）
 
 **確認日**: 2026-05-10
-**対象 commit**: `aebc053dd2fbe080a26ea4891bee388a0fb16c4e`（`docs: address workflow phase review comments`）
+**初回対応 commit**: `aebc053dd2fbe080a26ea4891bee388a0fb16c4e`（`docs: address workflow phase review comments`）
+**方針補正**: 2026-05-11 にユーザ指摘を受け、`diff.zip` は単純な optional ではなく、ソース変更を含む場合は必須、ドキュメント更新や調査のみなどソース以外の変更だけの場合は省略可、として再整理した。
 
 | 指摘 | 確認結果 |
 |------|----------|
-| §1.1 bootstrap template の `diff.zip` 表記統一 | ✓ 解消（`templates/python/docs/design_analysis/README.md` と `templates/csharp/docs/design_analysis/README.md` の第 4 項が「`report.md` を課題ディレクトリ直下に配置し、必要に応じて `diff.zip` も追加する」へ更新され、標準ファイル構成の `diff.zip` に `# optional` を付与。project-level `docs/design_analysis/README.md` の標準ファイル構成も `diff.zip  # optional` へ揃った） |
+| §1.1 `diff.zip` の条件付き必須表記への統一 | ✓ 解消（project-level / Python / C# の README 第 4 項が、`report.md` は常に配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可とする表記へ更新された。標準ファイル構成の `diff.zip` も「ソース変更がある場合は必須」へ揃った） |
 | §1.2 meta.md テンプレートの `status` / `components` 追加 | ✓ 解消（project-level / Python / C# の 3 か所すべての meta.md テンプレートに `components: []` と `status: "<draft|implemented|merged>"` が追加された） |
 | §3.1 `phase_4_completion_focus.md` レビュー観点の文言整理 | ✓ 解消（spec-change の `phase_4_completion_focus.md:19` が「Phase 3 で更新した恒久ドキュメントと、archive / history / report の追跡が一貫しているか」へ更新され、Phase 境界の誤読リスクが解消した） |
 | §3.2 `related_commits` 集約実例 | 申し送り維持（Phase 4-b で自然解消する情報提供） |
