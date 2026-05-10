@@ -10,6 +10,7 @@ components:
 status: draft
 related_commits:
   - 3fdc918 : Phase 1 ブランチ・meta 初期化
+  - 0dc0b25 : Phase 2 調査・分析レポート作成
 source_design_path: docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md
 ---
 
