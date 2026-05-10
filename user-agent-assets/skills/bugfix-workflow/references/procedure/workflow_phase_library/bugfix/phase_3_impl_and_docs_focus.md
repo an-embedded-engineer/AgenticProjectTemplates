@@ -1,23 +1,29 @@
-# bugfix Phase 4: 実装の観点
+# bugfix Phase 3: 実装・恒久ドキュメント反映の観点
 
 ## 実装記録
 
 - `docs/design_analysis/fix_issues/<yyyymmdd>_<topic>/impl/<topic>_bugfix_impl.md`
 
+## 恒久ドキュメント反映先
+
+- `docs/components/<component>/README.md`
+- `docs/components/<component>/basic_design.md`
+- `docs/components/<component>/detail_design.md`
+- `docs/components/<component>/interface_spec.md`
+
 ## 必須観点
 
 - 根本原因を解消する必要十分な差分で修正する
 - 重複ロジックや責務分散が原因の場合は、局所パッチより共通化を優先する
-- 新規関数は責務に合ったクラス/層へ追加し、呼び出し元近傍への場当たり配置で類似関数を増やさない
-- モジュール直下のグローバル関数は原則増やさず、責務に応じたメソッド種別を選択する
 - 例外を握りつぶさない
 - 明示要求がない互換分岐や不要フォールバックを追加しない
+- 恒久ドキュメントに修正後仕様、再発防止観点、既知制約を反映する
 - 追加した回帰テストを必ず記録する
 
 ## レビュー観点
 
 - 再現した不具合が解消しているか
 - 既存機能へ副作用が出ていないか
-- 関数配置が責務に沿っており、場当たり的な helper 追加で不具合を覆い隠していないか
 - 条件分岐の継ぎ足しや互換レイヤーで不具合を覆い隠していないか
 - テストとログで再発時の追跡が可能か
+- 恒久ドキュメントとの記述不整合がないか

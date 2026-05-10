@@ -1,5 +1,19 @@
 # Change History 2026
 
+## 2026-05-11
+
+### workflow skill Phase 簡略化を main へ統合
+
+- design_analysis: `docs/design_analysis/spec_change/20260510_workflow_phase_simplification/`
+- source_branch: `research/workflow-phase-simplification-20260510`
+- adr: `docs/adr/0001_workflow_phase_simplification.md`
+- change_report: `docs/design_analysis/spec_change/20260510_workflow_phase_simplification/change_report.md`
+- merge_commit: `pending`
+
+core workflow skill を 4 ゲート構成へ簡略化し、Phase 2 を方針・設計レビュー、Phase 3 を実装・恒久ドキュメント反映レビュー、Phase 4 を動作確認・完了処理・merge 承認へ再構成した。
+
+あわせて、大規模変更の計画を core workflow に戻さず `wbs-planning-workflow` として独立させ、review automation / orchestrator / ai-review-response 系 skill の Phase 名と review 文書命名を同期した。Phase 4-b の差分・変更レポートは `change_report.md`、ソース変更時の差分アーカイブは `diff.zip` として扱う。
+
 ## 2026-05-09
 
 ### ユーザレベル Agent 資産化を main へ統合

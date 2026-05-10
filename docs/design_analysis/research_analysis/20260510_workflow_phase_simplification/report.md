@@ -1,0 +1,563 @@
+# workflow skill Phase 簡略化 実現性調査レポート
+
+## 1. 調査目的
+
+`user-agent-assets/skills` にある workflow 系 skill は、現在 `plan -> design -> impl -> docs反映` を個別 Phase として扱う。各 Phase ごとに成果物作成、レビュー、指摘対応、コミット、ユーザ承認が発生するため、実行時の読み直しとレビュー依頼が多く、トークン消費が大きい。
+
+本調査では、次の 2 点の実現性と実現案を整理する。
+
+1. `plan` と `design` を 1 Phase に統合できるか
+2. docs 反映を独立 Phase ではなく `design` または `impl` と同時に扱えるか
+
+## 2. 調査対象
+
+主対象:
+
+- `user-agent-assets/skills/spec-change-workflow`
+- `user-agent-assets/skills/new-feature-workflow`
+- `user-agent-assets/skills/bugfix-workflow`
+- `user-agent-assets/skills/issue-resolution-workflow`
+- `user-agent-assets/skills/refactoring-workflow`
+- `user-agent-assets/shared/references/procedure/workflow_phase_library/common`
+
+周辺影響:
+
+- `user-agent-assets/skills/ai-review-response-workflow`
+- `user-agent-assets/skills/claude-review-automation`
+- `user-agent-assets/skills/copilot-review-automation`
+- `user-agent-assets/skills/autonomous-workflow-orchestrator`
+- `user-agent-assets/skills/copilot-cli-workflow-orchestrator`
+- `docs/design_analysis/README.md`
+
+非対象:
+
+- 本調査内で workflow skill 本体は変更しない
+- install / sync script の実装変更は行わない
+- project-level `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` の再生成は行わない
+
+## 3. 根拠ソース
+
+- `user-agent-assets/skills/*-workflow/references/procedure/*_workflow.md`
+  - 5 種の core workflow は共通して Phase 0 から Phase 6 を持つ
+  - Phase 2 は計画、Phase 3 は設計、Phase 4 は実装、Phase 5 は動作確認・文書反映
+- `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_2_plan_review.md`
+  - `plan/` 文書作成、`plan_status` 更新、レビュー、指摘反映、ユーザ承認を個別 Phase として要求する
+- `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_3_design_review.md`
+  - `design/` 文書作成、`design_status` 更新、レビュー、指摘反映、ユーザ承認を個別 Phase として要求する
+- `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_4_impl_review.md`
+  - 実装と `impl/` 文書更新、検証、レビュー、指摘反映、`status=implemented` 更新を要求する
+- `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_5_verification_and_docs.md`
+  - ユーザ動作確認後に恒久ドキュメントを更新し、docs review を個別に要求する
+- `user-agent-assets/install/install_user_agent_assets.sh` / `install_user_agent_assets.ps1`
+  - `user-agent-assets/shared/references/procedure/workflow_phase_library/common` を source 正本とし、install 時に phase library を必要とする各 workflow skill の `references/procedure/workflow_phase_library/common/` へ hydrate する
+- `user-agent-assets/skills/*-workflow/references/procedure/workflow_phase_library/*/phase_2_plan_focus.md`
+  - 受け入れ条件、影響範囲、リスク、テスト観点、完了条件など、設計前の判断材料を要求する
+- `user-agent-assets/skills/*-workflow/references/procedure/workflow_phase_library/*/phase_3_design_focus.md`
+  - 実装差分、責務分割、依存方向、例外・互換方針、関連ドキュメント更新先など、実装直前の判断材料を要求する
+- `user-agent-assets/skills/*-workflow/references/procedure/workflow_phase_library/*/phase_5_sync_focus.md`
+  - 恒久ドキュメントと `todo` / `issue` 正本への反映先を workflow 別に定義する
+- `user-agent-assets/skills/claude-review-automation/SKILL.md`
+  - Phase 2/3/4/5 の review 文書名を固定している
+- `user-agent-assets/skills/copilot-review-automation/SKILL.md`
+  - Phase 2 review 完了前に Phase 3 を始めない、Phase 4 review とユーザ動作確認前に Phase 5 docs 同期を始めない、というゲートを固定している
+- `docs/design_analysis/README.md`
+  - 標準構成として `plan/`, `design/`, `impl/`, `review/`, `report.md`, `meta.md` を示す
+- `reference/LaneletMapViewPy/docs/design_analysis/spec_change/20260429_deleted_state_field_unification/`
+  - 実運用例として `plan` / `design` / `impl` / docs review が分離され、`report.md` に 28 commit の Phase 運用履歴が残っている
+- `reference/LaneletMapViewPy/docs/design_analysis/refactoring/20260426_tmux_agent_cli_script_commonization/`
+  - 実運用例として計画・設計・実装・docs review が分離され、`impl` 文書内にも Phase 5 文書同期内容が先に整理されている
+- `reference/LaneletMapViewPy/docs/design_analysis/research_analysis/20260506_scenario_v2_poc_round1_design/`
+  - research workflow の実運用例として、Phase 1+2 が 1 commit にまとまったことが review 指摘になっており、Phase 粒度と commit 粒度の厳密運用が実コストを生むことを確認できる
+
+関連 ADR:
+
+- `docs/adr/README.md` を確認したが、2026-05-10 時点で ADR 一覧は空であり、本件に該当する採用済み ADR はない。
+
+## 4. 現状整理
+
+### 4.1 現行 Phase 構成
+
+5 種の core workflow は、概ね次の構成で揃っている。
+
+| Phase | 現行目的 | 主な成果物 |
+|---|---|---|
+| 0 | 要求・課題・事象の固定 | todo / issue 正本、スコープ |
+| 1 | ブランチ・meta 初期化 | `meta.md` |
+| 2 | 計画・計画レビュー | `plan/<topic>_*_plan.md`, `<topic>_plan_review.md` |
+| 3 | 設計・設計レビュー | `design/<topic>_*_design.md`, `<topic>_design_review.md` |
+| 4 | 実装・実装レビュー | code, `impl/<topic>_*_impl.md`, `<topic>_impl_review.md` |
+| 5 | 動作確認・文書反映 | 恒久ドキュメント、docs review |
+| 6 | 完了処理 | `report.md`, archive / merge 前処理 |
+
+トークン消費が大きい主因は、Phase 2/3/4/5 がそれぞれ次を要求する点である。
+
+- 対象文書の作成
+- `meta.md` status 更新
+- レビュー依頼前コミット
+- レビュー Agent による review 文書作成
+- 指摘対応
+- follow-up review
+- 次 Phase 進行承認
+
+### 4.2 plan と design の重複
+
+`phase_2_plan_focus.md` は、変更理由、受け入れ条件、影響範囲、リスク、テスト観点、完了条件を扱う。一方で `phase_3_design_focus.md` は、before / after 差分、責務分割、依存方向、移行方針、例外方針、回帰テスト設計、関連ドキュメント更新先を扱う。
+
+重複している、または同じ文書内に置いたほうが自然な項目:
+
+- 受け入れ条件と設計差分
+- 影響範囲とコンポーネント責務
+- リスクと失敗時動作
+- テスト観点と回帰テスト設計
+- 完了条件と確認証跡
+- 移行要否と旧経路削除方針
+
+5 種の workflow それぞれで見ると、統合時に残すべき焦点は少し異なる。
+
+| workflow | plan 側の主な焦点 | design 側の主な焦点 | 統合時の注意 |
+|---|---|---|---|
+| spec-change | 変更理由、受け入れ条件、影響範囲、リスク、テスト観点 | before / after、API / data / domain 変更、互換性、docs 更新先 | 仕様判断と実装差分を 1 文書で追えるため統合しやすい |
+| new-feature | use case、最小スコープ、統合点、migration、テスト観点 | 責務分割、UI / data / service 設計、failure/default、共通化 | MVP 範囲と将来拡張を design 冒頭で明確に分ける |
+| bugfix | 再現条件、原因、恒久対応、回帰リスク、workaround | 修正箇所、例外 / log、rollback、回帰テスト | 再現条件と現行不具合の事実を design 冒頭に残す |
+| issue-resolution | 現課題、完了条件、証跡、follow-up、テスト観点 | 変更方針、効果確認、rollback、残課題整理 | issue 正本との対応と完了証跡を失わない |
+| refactoring | 構造課題、期待依存、振る舞い不変、分割方針、テスト観点 | before / after 責務、依存方向、API 不変、共通化 | 振る舞い不変条件を必須章として固定する |
+
+現行の分割は、巨大案件で「まず実施範囲を承認し、後で詳細設計を承認する」には有効である。一方、通常サイズの修正や文書中心の変更では、Phase 2 で書いた判断を Phase 3 でより具体化して再掲する形になりやすい。
+
+### 4.3 docs 反映 Phase の分離コスト
+
+Phase 5 は、ユーザ動作確認が OK になった後に恒久ドキュメントへ反映する前提である。これは「実装が確定してから docs を更新する」安全さがあるが、次のコストがある。
+
+- Phase 4 実装後に設計・実装文書を再読して docs 更新先を洗い直す
+- docs review のために Phase 5 専用 review 文書を作る
+- 実装差分と恒久ドキュメントの対応が時間的に離れ、文書漏れが起きやすい
+- 軽微な修正でも Phase 5 の review / follow-up / 承認が追加で発生する
+
+docs 反映先自体は workflow 別 `phase_5_sync_focus.md` に明確化されているため、設計時に「更新予定先」を決め、実装時に反映内容を確定する運用へ移せる。恒久 docs の実体更新を Phase 3 に含めるか、Phase 4-b へ残すかは別途選択できる。
+
+### 4.4 Lanelet 実運用サンプルからの補強
+
+`reference/LaneletMapViewPy/docs` の最近の実運用文書を確認した結果、現行 Phase 分割の品質上の利点とコストがどちらも見えた。
+
+`20260429_deleted_state_field_unification` では、2026-05-10 時点で `plan` 214 行、`design` 450 行、`impl` 216 行、review 文書合計 745 行、`report.md` 123 行の規模になっている。`report.md` の commit 一覧では、Phase 2 plan review、Phase 3 design review、Phase 4 impl review、Phase 5 docs review それぞれに reviewer commit / follow-up / approval / status sync が発生し、全体で 28 commit が記録されている。特に Phase 5 docs review は docs review、指摘対応、follow-up、残指摘対応、承認の 5 commit を消費している。
+
+この実例は、Phase 分割によりレビュー観点を細かく閉じられる一方、通常の実装案件でも review loop と meta/status sync の固定費が大きくなることを示す。
+
+`20260429_deleted_state_field_unification` の plan review では、影響ファイル列挙、Phase 3 で確定する API、命名方針などが指摘され、Phase 3 design review では、それらの follow-up が設計に落ちているか確認されている。これは plan/design 分離が有効だった例である。ただし、計画書の多くの内容は背景、対象/非対象、到達点、変更方針、実装ステップ、リスク、テスト方針、受け入れ条件であり、推奨案の統合 design 文書の必須章として保持できる。
+
+`20260426_tmux_agent_cli_script_commonization` では、`impl` 文書内に「Phase 5 文書同期」セクションがあり、実装記録の時点で反映対象と反映内容が整理されている。ただし、これは恒久ドキュメントを impl Phase で実体更新した記録ではなく、後続 Phase 5 で反映する対象と内容を事前列挙した planning 表である。したがって、このサンプルから直接言えるのは「impl 時点で docs 反映先と反映内容を確定できる」ことであり、「impl Phase で恒久 docs を必ず更新すべき」ことではない。
+
+このため、docs 前倒し案は Lanelet の現行運用そのものではなく、次の 2 つの派生案として評価する必要がある。
+
+- 案 A: Phase 3 で code と恒久 docs を同時更新し、impl review で整合を見る
+- 案 B: Phase 3 では impl 文書に docs 反映先と反映内容を確定し、ユーザ動作確認 OK 後の Phase 4 completion で恒久 docs を更新する
+
+Lanelet サンプルは案 B に近く、案 A はそこからさらに review loop 削減を狙う提案である。
+
+`20260506_scenario_v2_poc_round1_design` の review では、`meta.md` の `related_commits` で Phase 1 と Phase 2 が 1 commit にまとまっていることが形式差分として指摘されている。これは研究 workflow の例だが、Phase と commit を細かく一致させる規定が実運用ではレビュー論点になり、トークンと対応コストを増やすことを示している。
+
+実運用サンプルを踏まえると、簡略化方針は次のように補正するのがよい。
+
+- plan/design 統合を標準にする。`20260429_deleted_state_field_unification` のように影響範囲が広く、API 未確定事項が多い案件は、core workflow 内で `plan_required` として抱え込むより、先に WBS 分解用 skill で複数の小さい作業単位へ分ける
+- 実装 Phase の `impl` 文書に恒久ドキュメント反映対象と反映内容を含め、案 A では code / docs 実体差分の整合を、案 B では docs 反映計画の妥当性を impl review で見る
+- completion Phase は、恒久 docs の詳細 review ではなく、`meta.md`、todo / issue / history、archive、最終 report の整合確認に寄せる
+- Phase ごとの commit 粒度は標準推奨に留め、やむを得ず複数 Phase が 1 commit にまとまった場合は `Phase 1+2` のような記録形式を許容するかを設計で決める
+
+## 5. 実現性評価
+
+### 5.1 plan/design 統合
+
+実現性は高い。
+
+理由:
+
+- Phase 2 と Phase 3 の成果物はどちらも実装前の判断を扱う
+- review automation は Phase 名と review 文書名に依存しているが、コードではなく skill 文書上の契約であり、契約更新で対応できる
+- `docs/design_analysis/README.md` の標準構成は `plan/` と `design/` を示しているが、調査・分析では例外構成をすでに許容しているため、運用ガイド側も拡張可能である
+
+注意点:
+
+- plan を完全削除すると「実施すべきか」を判断するゲートが薄くなる
+- 大規模・高リスク案件は core workflow 内で plan/design を分けるより、WBS 分解用 skill で先に作業単位を小さくするほうがよい
+- `meta.md` の `plan_status` / `design_status` をそのまま残すか、統合 status へ移すかを決める必要がある
+
+### 5.2 docs 反映の前倒し
+
+実現性は中から高である。
+
+実装と同時に恒久ドキュメントを更新する案は妥当な選択肢である。特に次の文書は、実装差分と近いタイミングで更新したほうが整合しやすい。
+
+- `docs/components/<component>/README.md`
+- `docs/components/<component>/basic_design.md`
+- `docs/components/<component>/detail_design.md`
+- `docs/components/<component>/interface_spec.md`
+
+一方、`docs/todo/todo.md` や `docs/issues/<component>/issues.md` の archive 準備は、動作確認や最終検証結果が必要になるため、完了処理側へ残すほうがよい。
+
+したがって docs 反映は 2 種類に分けるのが現実的である。
+
+| 種類 | 推奨タイミング | 理由 |
+|---|---|---|
+| 恒久仕様・設計 docs | Phase 3 同時更新、または Phase 3 で反映内容確定後に Phase 4-b 更新 | 実装差分と対応付けやすい |
+| todo / issue の完了証跡・archive 準備 | 完了処理 Phase | 検証結果と完了判断が必要 |
+
+### 5.3 大規模変更は WBS 分解 skill へ逃がす
+
+plan が独立して必要になるほど大きい変更は、1 回の workflow で実装完了まで持っていけないことが多い。Agent は実行中に「やりきれなかった部分を follow-up として別 workflow へ回す」提案をしがちであり、これは core workflow の Phase を厚くするより、最初から分解専用の skill を用意するほうが自然である。
+
+推奨は、core workflow から大規模 planning を外し、別 skill として `wbs-planning-workflow` 相当を追加する案である。
+
+WBS 分解用 skill の責務:
+
+- 大規模変更の背景、目的、完了条件、非対象を固定する
+- 影響コンポーネント、依存関係、実施順序、リスクを整理する
+- 作業を 1 workflow で完了可能な work package に分解する
+- 各 work package に適切な workflow 種別を割り当てる
+  - `spec-change`
+  - `new-feature`
+  - `bugfix`
+  - `issue-resolution`
+  - `refactoring`
+- 各 work package の受け入れ条件、検証観点、関連 docs 更新先を定義する
+- cross-cutting な ADR / 恒久設計判断 / 共通制約を上位計画に残す
+- 分解後の work package を `docs/todo/` または `docs/issues/` に起票し、順序と依存を追跡できるようにする
+
+この構成では、core workflow は「1 work package を設計・実装・検証・文書同期まで終わらせる」ことに集中できる。大規模変更の計画書は core workflow の optional `plan/` ではなく、WBS 分解 skill の成果物として扱う。
+
+WBS 分解 skill の成果物候補:
+
+```text
+案 A: 新 skill として独立配置
+docs/design_analysis/wbs/<YYYYMMDD>_<topic>/
+├── meta.md
+├── report.md
+└── wbs.md
+
+案 B: research-analysis-workflow の派生として配置
+docs/design_analysis/research_analysis/<YYYYMMDD>_<topic>_wbs/
+├── meta.md
+├── report.md
+└── wbs.md
+```
+
+`wbs.md` には最低限、次を残す。
+
+- work package ID
+  - 命名規則は `WP-001` 形式を推奨し、既存 todo / issue ID がある場合は別列で `source_id` として紐付ける
+- 推奨 workflow
+  - 許容値は `spec-change` / `new-feature` / `bugfix` / `issue-resolution` / `refactoring`
+- 依存 work package
+- 目的
+- 完了条件
+- 主な変更対象
+- docs 更新先
+- 検証観点
+- follow-up / deferred 判断
+
+WBS の置き場所は、次 spec-change workflow の Phase 0 で案 A / 案 B を確定する。案 A は責務境界が明瞭である一方、新 category と skill schema が必要になる。案 B は既存 research workflow の review / round 運用を流用しやすい一方、`research_analysis` と WBS の意味が混在する。
+
+core workflow 側に残す例外は、「分解するほどではないが、実装前に複数案の採否だけを明示したい」程度に限定するのがよい。その場合も `plan/` を復活させるより、Phase 2 design 文書の先頭に「採用案 / 不採用案 / 判断理由」を置く運用で足りる可能性が高い。
+
+## 6. 実現案
+
+### 6.1 推奨案: 4 ゲート構成へ再編する
+
+現行 Phase 0/1 は維持し、Phase 2 以降を再編する。
+
+| 新 Phase | 目的 | 旧 Phase 対応 | 主な成果物 |
+|---|---|---|---|
+| 0 | 要求・課題・事象の固定 | 旧 0 | todo / issue 正本、スコープ |
+| 1 | ブランチ・meta 初期化 | 旧 1 | `meta.md` |
+| 2 | 方針・設計 | 旧 2 + 旧 3 | `design/<topic>_*_design.md`, `<topic>_design_review.md` |
+| 3 | 実装・恒久ドキュメント反映確定 | 旧 4 + 旧 5 docs の一部 | code, `impl/<topic>_*_impl.md`, 恒久 docs または反映計画, `<topic>_impl_review.md` |
+| 4 | 動作確認・完了処理 | 旧 5 verification + 旧 6 | ユーザ確認結果、`report.md`, todo / issue archive 準備 |
+
+Phase 4 は 1 つの大きな自由作業ではなく、内部 step と STOP 条件を固定する。
+
+| 内部 step | 目的 | STOP / 進行条件 |
+|---|---|---|
+| 4-a 動作確認 | ユーザ動作確認と最終検証を受ける | ユーザ確認 OK まで archive / history / merge に進まない |
+| 4-b 完了処理 | `report.md`、必要に応じた `diff.zip`、todo / issue 完了証跡、archive 準備、`docs/history/` 更新を行う | completion checklist または optional completion review で確認する |
+| 4-c merge 承認 | merge 前の最終承認を受ける | ユーザの明示承認後に merge / `status=merged` 更新へ進む |
+
+現行ゲートとの対比は次の通りである。
+
+| 現行ゲート | 推奨構成での扱い | 代替検証 |
+|---|---|---|
+| Phase 2 plan review 後ユーザ承認 | Phase 2 design review に統合 | design 文書の要求・範囲・採否理由・リスク章を必須化 |
+| Phase 3 design review 後ユーザ承認 | 維持 | design review 承認 |
+| Phase 4 impl review 後ユーザ承認 | 維持 | impl review 承認 |
+| Phase 5 ユーザ動作確認 STOP | Phase 4-a として維持 | `[NEED_USER_VERIFICATION]` を Phase 4-a の停止条件にする |
+| Phase 5 docs review 後ユーザ承認 | 原則廃止、必要時のみ completion review | impl review の docs 整合チェックと 4-b completion checklist |
+| Phase 6 merge 前承認 | Phase 4-c として維持 | report / archive / history 更新後の明示承認 |
+| Phase 6 merged status 更新後確認 | completion checklist に統合 | `status=merged` と `related_commits` 最終確認 |
+
+この案では、plan 文書を独立成果物にしない。Phase 2 の design 文書へ次の章を必須化する。
+
+- 背景・要求・完了条件
+- 対象範囲と非対象
+- before / after
+- 影響範囲
+- 設計方針
+- 互換性・移行方針
+- 恒久ドキュメント更新予定先
+- テスト・ユーザ確認観点
+- リスクと follow-up
+
+これにより、plan の判断材料を失わずに review loop を 1 回削減できる。
+
+### 6.2 docs 反映の扱い
+
+Phase 2 では「どの恒久ドキュメントを更新するか」を設計書へ明記する。
+
+Phase 3 以降の恒久 docs 実体更新は、次の 2 案から次 spec-change workflow の Phase 0 で選ぶ。
+
+| 案 | Phase 3 | Phase 4 |
+|---|---|---|
+| 案 A: impl 同時更新 | 実装差分と一緒に恒久ドキュメントを更新し、impl review で code / impl 文書 / 恒久 docs をまとめて確認する | ユーザ確認 NG の場合は code と docs を同時に Phase 3 へ差し戻す |
+| 案 B: completion 更新 | Phase 3 では `impl` 文書に反映先と反映内容を確定し、impl review で妥当性を見る | ユーザ確認 OK 後、4-b で恒久 docs を実体更新する。NG 時は code / impl 文書のみ Phase 3 へ差し戻し、恒久 docs は未更新のまま据え置く |
+
+Phase 4 では、ユーザ動作確認結果、検証結果、todo / issue 正本の完了証跡、archive 用リンク、`report.md`、必要に応じた `diff.zip` を扱う。docs review という独立レビューは原則廃止し、必要な場合だけ completion review として扱う。archive / history / merge は 4-a のユーザ確認 OK 後にしか進めない。
+
+### 6.3 `meta.md` の status 方針
+
+長期的には `plan_status` / `design_status` / `impl_status` の 3 分割をやめ、Phase 単位の status へ寄せるほうが自然である。
+
+長期案:
+
+```yaml
+status: draft | in_review | implemented | verification_pending | completed | merged
+phase_status:
+  intake: done
+  setup: done
+  design: draft | in_review | done
+  implementation: not_started | draft | in_review | done
+  completion: not_started | in_progress | done
+```
+
+ただし次 spec-change workflow では、一気に `phase_status` へ切り替えるより、移行期互換を推奨する。理由は、既存 design_analysis 文書、review automation prompt、orchestrator の status 参照が `plan_status` / `design_status` / `impl_status` 前提で残っているためである。
+
+次回実装時の推奨:
+
+```yaml
+plan_status: N/A
+design_status: draft | in_review | done
+impl_status: not_started | draft | in_review | done
+completion_status: not_started | in_progress | done
+```
+
+完全な `phase_status` 移行は、次の条件を満たした後に別 spec-change または ADR で扱う。
+
+- review automation / orchestrator が status を機械参照していない、または参照箇所を移行済み
+- `docs/design_analysis/README.md` が新旧 schema の併存を説明済み
+- 過去文書を移行しない方針が明記済み
+
+### 6.4 review 文書命名
+
+推奨案では、標準 review 文書を次の 2 種に減らす。
+
+- `<topic>_design_review.md`
+- `<topic>_impl_review.md`
+
+必要に応じて完了処理レビューを追加する。
+
+- `<topic>_completion_review.md`
+
+docs review の workflow 別 suffix は廃止候補にする。恒久ドキュメントの整合性は `impl_review` に含め、todo / issue archive の証跡は `completion_review` または completion checklist で見る。
+
+### 6.5 `related_commits` の更新タイミング
+
+現行運用では、各 Phase の commit hash を `meta.md` の `related_commits` に追記するため、次のような commit churn が発生しやすい。
+
+1. Phase 成果物を commit する
+2. commit hash が確定する
+3. `meta.md` の `related_commits` を更新する
+4. `meta.md` 更新だけの commit が増える
+
+branch を Phase / topic 単位で分けている前提では、途中 Phase の hash は `git log` と review 文書から復元できる。そのため、5 種の core workflow（`spec-change` / `new-feature` / `bugfix` / `issue-resolution` / `refactoring`）では、`related_commits` は毎 Phase 必須更新ではなく、完了処理でまとめて記載する運用へ寄せるのがよい。
+
+推奨:
+
+- Phase 1 から Phase 3 の途中では `related_commits` を更新しない、または `pending` のままにする
+- review 依頼や follow-up では、`meta.md` ではなく最新 commit hash をプロンプトまたは review 文書に直接渡す
+- completion Phase で `git log --oneline <base>..HEAD` を確認し、主要 commit を `related_commits` にまとめて記録する
+- `related_commits` は全 commit の完全な再掲ではなく、Phase 境界、review commit、follow-up commit、最終 report / archive commit など意思決定に必要な commit に絞る
+- やむを得ず複数 Phase が 1 commit にまとまった場合は、`Phase 1+2` のように Phase 並記で記録する
+- diff 全体の一覧は `report.md` や `diff.zip` に委譲する
+
+この変更により、`related_commits` 追記だけの commit を減らせる。現行 Phase 6 相当の後始末、推奨案では Phase 4 completion に集約するのが自然である。
+
+一方、`research-analysis-workflow` や多段レビュー topic は対象外にする。Round 1 / Round 2 / follow-up の対応関係が `meta.md` の証跡として重要なため、研究・多段レビューでは従来通り round / review 単位で `related_commits` を追記する。
+
+## 7. 変更が必要な箇所
+
+### 7.1 core workflow skill
+
+5 種の `*_workflow.md` を更新する。
+
+- Phase 一覧を新構成へ変更する
+- Phase 2 の共通手順参照を `phase_2_design_review.md` 相当へ変更する
+- Phase 3 の共通手順参照を `phase_3_impl_and_docs_review.md` 相当へ変更する
+- Phase 4 を `verification_and_completion.md` 相当へ変更する
+- ユーザ承認タイミングを Phase 2 review 後、Phase 3 review 後、ユーザ動作確認、完了前へ減らす
+
+workflow 別 focus 文書は、次のように再編する。
+
+- `phase_2_plan_focus.md` と `phase_3_design_focus.md` を統合する
+- `phase_4_impl_focus.md` に `phase_5_sync_focus.md` の恒久 docs 反映先を取り込む
+- todo / issue archive に必要な観点だけ completion focus へ残す
+
+### 7.2 shared common phase library
+
+`user-agent-assets/shared/references/procedure/workflow_phase_library/common` を更新する。
+ここが source 正本であり、各 workflow skill 配下の `references/procedure/workflow_phase_library/common/` は install / sync 時に hydrate される配布結果として扱う。
+したがって、簡略化時の正本変更は shared common に対して行い、hydrate 後の各 workflow で同じ common phase library が読めることを検証する。
+
+現行:
+
+- `phase_1_branch_and_meta.md`
+- `phase_2_plan_review.md`
+- `phase_3_design_review.md`
+- `phase_4_impl_review.md`
+- `phase_5_verification_and_docs.md`
+- `phase_6_completion.md`
+
+推奨:
+
+- `phase_1_branch_and_meta.md`
+- `phase_2_design_review.md`
+- `phase_3_impl_and_docs_review.md`
+- `phase_4_verification_and_completion.md`
+
+### 7.3 review / orchestration skill
+
+review automation と orchestrator は Phase 契約を強く参照しているため、同時更新が必要である。
+
+更新対象:
+
+| 対象 | 影響セクション | 変更内容 |
+|---|---|---|
+| `claude-review-automation/SKILL.md` | review 文書命名、Phase 2/3/4/5 review 手順 | Phase 5 suffix 5 種（`<topic>_docs_review.md` / `<topic>_feature_docs_review.md` / `<topic>_bugfix_docs_review.md` / `<topic>_issue_resolution_docs_review.md` / `<topic>_refactoring_docs_review.md`）を廃止候補にし、`<topic>_completion_review.md` optional か impl review 統合に変更する |
+| `claude-review-automation/SKILL.md` | review prompt の Phase 名 | `Phase <plan|design|impl|docs>` を `Phase <design|impl|completion>` へ変更する |
+| `copilot-review-automation/SKILL.md` | Phase 進行ゲート、Phase 5 命名 | 「Phase 4 review とユーザ動作確認完了前に Phase 5 docs 同期を始めない」系の文言を、Phase 4-a 動作確認 STOP と Phase 3/4 docs 方針へ差し替える |
+| `ai-review-response-workflow/references/procedure/ai_review_response_workflow.md` | 概要フロー、出力ファイルの配置、工程分類 | `plan / design / impl / docs` 分類を `design / impl / completion` へ更新し、Phase 5 docs review 5 種の命名を optional completion review または impl review 指摘対応へ移す |
+| `autonomous-workflow-orchestrator/SKILL.md` | 禁止事項、Phase loop、ユーザ確認ゲート | 「Phase 5 のユーザ動作確認ゲートをスキップしてはならない」を「Phase 4-a のユーザ動作確認 STOP をスキップしてはならない」へ変更する |
+| `copilot-cli-workflow-orchestrator/SKILL.md` | 禁止事項、Phase loop、ユーザ確認ゲート | 上記と同じく Phase 4-a STOP へ変更し、Phase 5/6 前提の loop を 4 ゲート構成へ更新する |
+| `user-agent-assets/skills/autonomous-workflow-orchestrator/references/procedure/autonomous_workflow_orchestrator.md` および他 skill 内の同 procedure 参照箇所 | prompt template / phase loop | orchestrator が参照する phase list と review request 文言を新 Phase 名へ揃える |
+
+この表は次 spec-change workflow の実装対象リストであり、実装時には `rg "Phase 5|docs_review|plan_review|plan_status|NEED_USER_VERIFICATION"` と `rg "autonomous_workflow_orchestrator"` で残存参照を確認する。
+
+### 7.4 docs/design_analysis 運用
+
+`docs/design_analysis/README.md` の標準構成を更新する必要がある。
+
+推奨構成:
+
+```text
+<YYYYMMDD>_<slug>/
+├── design/
+│   └── <topic>_design.md
+├── impl/
+│   └── <topic>_impl.md
+├── review/
+│   ├── <topic>_design_review.md
+│   └── <topic>_impl_review.md
+├── report.md
+└── meta.md
+```
+
+完了処理レビューを行う場合だけ、`review/<topic>_completion_review.md` を追加する。これは標準必須ではなく、archive / history / merge 前確認が重い案件の optional review として扱う。
+
+大規模案件向けには `plan/` を optional に戻すのではなく、WBS 分解用 skill の成果物を別 topic として作る運用を追加する。
+
+WBS 分解 topic の配置は 2 案を次 spec-change workflow の Phase 0 で選ぶ。
+
+```text
+案 A: 独立 category
+docs/design_analysis/wbs/<YYYYMMDD>_<slug>/
+├── meta.md
+├── report.md
+└── wbs.md
+
+案 B: research-analysis 派生
+docs/design_analysis/research_analysis/<YYYYMMDD>_<slug>_wbs/
+├── meta.md
+├── report.md
+└── wbs.md
+```
+
+案 A は `docs/design_analysis/README.md` に新 category schema を追加する必要がある。案 B は `research-analysis-workflow` に `wbs.md` を成果物として追加する Phase バリエーションが必要である。
+
+各 work package は、分解後に通常の `spec_change` / `new_feature` / `fix_issues` / `issue_resolution` / `refactoring` 配下で個別 topic として回す。
+
+core workflow の `meta.md` については、途中 Phase の `related_commits` 即時更新を標準から外し、completion Phase でまとめて記録する方針を README または common phase library に明記する。research / 多段レビュー topic は従来通り round 単位記録を維持する。
+
+## 8. リスクと対策
+
+| リスク | 内容 | 対策 |
+|---|---|---|
+| 実施可否判断が薄くなる | plan を削ると「やるべきか」の判断が design に埋もれる | §6.1 の必須章として要求・完了条件・非対象・採否理由を design 先頭に置く |
+| 大規模案件で review 粒度が粗くなる | plan/design 統合によりレビュー対象が大きくなる | §5.3 / §7.4 の WBS 分解 skill で複数 work package に分ける |
+| docs 更新が実装中に揺れる | 実装が変わるたび恒久ドキュメントも更新し直す必要がある | §6.2 の案 A / 案 B から選び、少なくとも Phase 2 で更新予定先を固定する |
+| 動作確認前の docs が誤る | ユーザ確認前に恒久 docs を更新するため未確定内容が混ざる | §6.2 案 A では code/docs 同時差し戻し、案 B では実体更新を 4-b へ送る |
+| archive / history が早すぎる | ユーザ確認 OK 前に完了処理を進めると未確定内容が archive される | §6.1 の 4-a STOP 後にのみ 4-b / 4-c へ進む |
+| automation が壊れる | Phase 番号、review 文書名、prompt template が固定されている | §7.3 の対象表を同一仕様変更で更新し、smoke test を行う |
+| 既存 design_analysis との混在 | 過去文書は plan/design/impl 分割のまま残る | §7.4 で「新規案件から適用」と明記し、過去文書は移行しない |
+| `related_commits` 更新 commit が増える | commit hash 確定後に meta 追記 commit が必要になる | §6.5 の core workflow 限定方針として completion Phase で主要 commit をまとめる |
+| 多段レビュー証跡が欠落する | `related_commits` 省略を research / review round に適用すると対応関係が消える | §6.5 の対象外として research / 多段レビューは round 単位追記を維持する |
+
+## 9. 推奨移行手順
+
+次 workflow としては `spec-change-workflow` が適切である。理由は、workflow skill の公開契約、review automation、design_analysis 運用を横断して変更するためである。
+
+推奨する実装順:
+
+| Step | 内容 | 先行依存 | 検証手段 |
+|---|---|---|---|
+| 1 | Phase 簡略化の採用判断を ADR 候補として起票し、`docs/design_analysis/spec_change/<date>_workflow_phase_simplification/` に設計する | なし | ADR 索引と spec-change design review |
+| 2 | WBS 分解 skill を案 A / 案 B のどちらで扱うか Phase 0 で確定する | Step 1 | WBS 成果物配置と schema が設計書にあること |
+| 3 | `docs/design_analysis/README.md` の標準構成を新規案件向けに更新する | Step 1 | README に旧文書非移行、新構成、completion review optional が明記されていること |
+| 4 | shared common phase library を 4 ゲート構成へ更新する | Step 1 | `workflow_phase_library/common` の旧 Phase 2-6 参照が整理されていること |
+| 5 | 5 種の core workflow と workflow 別 focus 文書を更新する | Step 4 | 5 種すべてで plan/design 統合と completion focus が揃っていること |
+| 6 | `ai-review-response-workflow` の工程分類と review 文書名を更新する | Step 5 | review 文書配置・分類の旧 docs review 5 種参照が残らないこと |
+| 7 | `claude-review-automation` / `copilot-review-automation` / orchestrator 群の Phase 契約を更新する | Step 5 | `rg "Phase 5|docs_review|plan_review|plan_status|NEED_USER_VERIFICATION"` で残存参照を確認すること |
+| 8 | core workflow の `related_commits` を completion Phase 集約へ更新し、research / 多段レビューは対象外と明記する | Step 4 | common phase library と README の対象範囲が一致すること |
+| 9 | user-level assets install / sync の hydrate 結果で common phase library が正しく配布されることを確認する | Step 4-8 | install / sync 後の workflow skill 配下 common が shared と一致すること |
+| 10 | 小さな文書変更タスクで smoke test を行う | Step 9 | review 文書が design / impl の 2 本、または必要時 completion review optional で回ること |
+
+WBS skill 仕様そのものの実装は、Step 2 で方針を決めた後、別 spec-change workflow に分割してよい。core workflow 簡略化と WBS 新設を 1 回の実装 workflow に詰め込むと、簡略化対象が逆に大きくなりすぎる。
+
+## 10. 結論
+
+plan/design 統合は実現可能であり、トークン削減効果も見込める。推奨は、plan を独立成果物として廃止し、Phase 2 の design 文書に「要求・完了条件・範囲・リスク・テスト観点」を必須章として統合する方式である。
+
+docs 反映の前倒しも実現可能である。ただし、Lanelet サンプルが直接示すのは「impl 時点で docs 反映先と内容を確定できる」ことであり、恒久 docs の実体更新を impl に必ず同梱することではない。次 spec-change workflow では、案 A（Phase 3 で code と恒久 docs を同時更新）か、案 B（Phase 3 で反映内容を確定し、Phase 4-b で恒久 docs を更新）を選ぶ。
+
+大規模変更については、core workflow 内に重い plan Phase を残すより、WBS 分解用 skill を別に用意するほうがよい。大きな変更を複数の work package に分け、それぞれを既存 workflow skill で完了まで持っていく構成にする。
+
+core workflow の `meta.md` の `related_commits` は、各 Phase で即時更新せず、completion Phase でまとめて記録する案が妥当である。branch が topic 単位で分かれているため、途中の hash は `git log` と review 文書から追跡でき、meta 追記だけの commit を減らせる。一方、research workflow や多段レビュー topic は round 単位の証跡が重要なため、従来通り逐次追記を維持する。
+
+最終的な推奨構成は次である。
+
+- Phase 0: 要求・課題・事象の固定
+- Phase 1: ブランチ・meta 初期化
+- Phase 2: 方針・設計レビュー
+- Phase 3: 実装・恒久ドキュメント反映確定レビュー
+- Phase 4: 動作確認・完了処理
+
+この変更は単独 workflow 文書だけでは完結しない。review automation と orchestrator が Phase 2/3/4/5、review 文書名、ユーザ承認ゲートを固定しているため、仕様変更として一括設計・一括更新する必要がある。
+
+## 11. 未解決事項
+
+| 論点 | 現時点の扱い | 次アクション |
+|---|---|---|
+| plan/design 統合 | 確定推奨 | 次 spec-change で 5 種 focus 文書へ適用する |
+| `meta.md` status | 移行期は `plan_status: N/A` + `design_status` + `impl_status` + `completion_status` を推奨 | 完全な `phase_status` 移行は別 ADR / spec-change 候補にする |
+| docs 実体更新タイミング | 次 spec-change で確定 | §6.2 の案 A / 案 B を Phase 0 で選ぶ |
+| completion review | optional 推奨 | 重い archive / history / merge 前確認だけ `completion_review` を使う |
+| WBS 分解 skill | 別 workflow または別 Phase 0 で確定 | 案 A（独立 `wbs/` category）/ 案 B（research 派生）を選ぶ |
+| 過去 design_analysis 文書 | 移行しない方針を推奨 | README に「新規案件から適用」と明記する |
+| review automation の Phase 表現 | 次 spec-change で確定 | Phase 番号を残す場合も `design` / `impl` / `completion` 名を併記する |
+| commit 粒度 | core workflow は Phase 境界 + review / follow-up 主要 commit に絞る推奨 | 複数 Phase 混在 commit は `Phase X+Y` 表記を許容する |
+| `related_commits` | core workflow は completion 集約、research / 多段レビューは逐次追記を推奨 | common phase library と research workflow の対象範囲を分けて明記する |
+| ADR | 採用時に起票推奨 | Phase 簡略化は横断仕様変更のため Step 1 で ADR 候補にする |

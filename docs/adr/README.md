@@ -52,7 +52,7 @@ ADR は `design_analysis` の代替ではない。判断の詳細な根拠、代
 
 | ADR | topic | component | keywords |
 |---|---|---|---|
-| - | - | - | - |
+| [ADR-0001](0001_workflow_phase_simplification.md) | workflow phase simplification | user-agent-assets/skills, docs/design_analysis | workflow, phase, review, completion, wbs, related_commits |
 
 ## 7. 追加方針
 

@@ -38,7 +38,7 @@ description: CopilotがCopilot CLI（実装Agent・レビューAgent）を指揮
 - ユーザへの確認なしに master マージを行ってはならない
 - 実装 Agent の tmux ペインを Phase 途中で破棄してはならない
 - 実装 Agent に git worktree を作成させてはならない
-- Phase 5 のユーザ動作確認ゲートをスキップしてはならない
+- Phase 4-a のユーザ動作確認 STOP をスキップしてはならない
 - レビュー Agent の承認なしに次の Phase に進んではならない
 
 ## 最低限の必須チェック
@@ -50,7 +50,7 @@ description: CopilotがCopilot CLI（実装Agent・レビューAgent）を指揮
 5. `~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh` で tmux セッション `agentic-orchestrator` を作成し、実装 Agent をペイン 0・レビュー Agent をペイン 1 に起動する
 6. 各 Phase 完了後に待機メッセージを検知してから次の指示を送る
 7. 各 Phase のレビュー後に open 指摘が 0 になるまで修正ループを継続する
-8. Phase 5 ではユーザ動作確認を必ず要求し、結果を待つ
+8. Phase 4-a ではユーザ動作確認を必ず要求し、結果を待つ
 9. open 指摘の修正ループは最大 3 回とし、超過時はユーザへエスカレーションする
 10. 最終マージ前に必ずユーザ承認を取得する
 11. 完了後にユーザへ結果サマリーを報告する

@@ -10,11 +10,11 @@
    - `category`
    - `components`
    - `status`
-   - `plan_status`
    - `design_status`
    - `impl_status`
+   - `completion_status`
    - `related_commits`
-4. 作業ブランチ名を `meta.md` または `plan.md` に残す
+4. 作業ブランチ名を `meta.md` または `design.md` に残す
 5. Phase 1 の成果を 1 コミットで残す
 
 ## 完了条件

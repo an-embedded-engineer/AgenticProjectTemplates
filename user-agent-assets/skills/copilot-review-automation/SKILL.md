@@ -1,7 +1,7 @@
 ---
 name: copilot-review-automation
 description: >-
-   AgenticProjectTemplates のワークフロー全 Phase を設計・実装 Agent（Copilot Chat または Copilot CLI）が自律実行し、各 Phase のレビューを Copilot CLI（デフォルト: claude-sonnet-4.6）に委任して完了させる手順。spec-change/new-feature/bugfix/issue-resolution/refactoring の Phase 2/3/4/5 レビューと指摘対応確認を自動化する。Codex ではなく Copilot が設計・実装担当として直接動作する構成。
+   AgenticProjectTemplates のワークフロー全 Phase を設計・実装 Agent（Copilot Chat または Copilot CLI）が自律実行し、各 Phase のレビューを Copilot CLI（デフォルト: claude-sonnet-4.6）に委任して完了させる手順。spec-change/new-feature/bugfix/issue-resolution/refactoring の Phase 2/3 レビューと optional completion review の指摘対応確認を自動化する。Codex ではなく Copilot が設計・実装担当として直接動作する構成。
 ---
 
 # copilot-review-automation
@@ -45,9 +45,9 @@ description: >-
 ## Phase 進行ゲート
 
 1. Phase は 1 つずつ順番に進める
-2. Phase 2 review 完了前に Phase 3 の設計成果物を作り始めてはならない
-3. Phase 3 review 完了前に Phase 4 の実装成果物を作り始めてはならない
-4. Phase 4 review 完了とユーザ動作確認完了前に、Phase 5 の恒久ドキュメント同期を始めてはならない
+2. Phase 2 design review 完了前に Phase 3 の実装成果物を作り始めてはならない
+3. Phase 3 impl review 完了前に Phase 4-a のユーザ動作確認へ進んではならない
+4. Phase 4-a のユーザ動作確認 OK 前に、Phase 4-b の archive / history / merge 前処理を始めてはならない
 5. 1 Phase の標準ループは `commit -> review -> fix -> follow-up -> approval` の順とする
 6. 後続 Phase の正式成果物を承認前に先行生成してはならない
 
@@ -56,13 +56,13 @@ description: >-
 1. レビュー依頼はユーザの追加承認を待たずに実行してよい
 2. レビュー指摘を反映したら、必ずレビュー Agent に対応内容を通知して再確認を依頼する
 3. レビュー Agent の再確認で未解決指摘が 0、または明示承認が出た場合にのみ次 Phase へ進む
-4. 同一 topic の Phase 2 / 3 / 4 / 5 と follow-up review では、同じ tmux session と同じ Copilot CLI process を継続利用する
+4. 同一 topic の Phase 2 / 3 / optional completion review と follow-up review では、同じ tmux session と同じ Copilot CLI process を継続利用する
 5. 監視は一定間隔ポーリングで行う。初回は `send-prompt --submit-delay 5 --sleep-after 5 --capture-after-sleep`、以降は `capture --sleep-before 10`、`capture --sleep-before 30`、`capture --sleep-before 60` のように待機時間を伸ばす
 6. 停止判定は保守的に行う。Copilot CLI process 終了、tmux session 消滅、明示エラーがない限り終了や session 再作成を行ってはならない
 7. 再作成が必要な場合でも、まず既存 session 再利用を確認し、Copilot CLI process だけ落ちている時は共通スクリプトの `ensure` による再開を優先してよい
 8. レビュー Agent が承認待ちダイアログで停止した場合、安全なツール操作は設計・実装 Agent が内容確認後に承認してよい。危険な操作はユーザ確認を優先する
 9. Phase 完了や review/follow-up 完了など区切りの良いタイミングで短い状態要約を残す
-10. Phase 6 の main マージと後片付けが完了した後だけ、レビュー Agent に終了入力を送り、tmux session も削除する
+10. Phase 4-c の main マージと後片付けが完了した後だけ、レビュー Agent に終了入力を送り、tmux session も削除する
 
 ## 前提
 
@@ -90,23 +90,18 @@ description: >-
 
 ## review 文書命名
 
-1. Phase 2 / 3 / 4 は workflow 共通
-   - Phase 2: `<topic>_plan_review.md`
-   - Phase 3: `<topic>_design_review.md`
-   - Phase 4: `<topic>_impl_review.md`
+1. Phase 2 / 3 は workflow 共通
+   - Phase 2: `<topic>_design_review.md`
+   - Phase 3: `<topic>_impl_review.md`
 
-2. Phase 5 は workflow ごとの suffix を使う
-   - `spec-change`: `<topic>_docs_review.md`
-   - `new-feature`: `<topic>_feature_docs_review.md`
-   - `bugfix`: `<topic>_bugfix_docs_review.md`
-   - `issue-resolution`: `<topic>_issue_resolution_docs_review.md`
-   - `refactoring`: `<topic>_refactoring_docs_review.md`
+2. Phase 4-b で重い archive / history / merge 前確認が必要な場合だけ optional completion review を使う
+   - Optional: `<topic>_completion_review.md`
 
 ## レビュー Agent セッション管理
 
 1. tmux session 名は topic 単位で固定する
    - 書式: `agentic-review-<topic>`
-   - 同じ issue の Phase 2 / 3 / 4 / 5 と再レビューでは同じ session を再利用する
+   - 同じ issue の Phase 2 / 3 / optional completion review と再レビューでは同じ session を再利用する
    - session 再作成は、tmux 消失、Copilot CLI 異常終了、明示エラー、ユーザ指示のいずれかがある時だけ許可する
 
 2. レビュー Agent は共通スクリプトで起動・再利用する
@@ -188,7 +183,7 @@ PROMPT_FILE="${MAIN_PROJECT_DIR}/tmp/agentic_project_templates_copilot_review_pr
 あなたはレビュー担当 Agent です。
 <issue-file>
 <issue-id>. <issue-title>
-の Phase <plan|design|impl|docs> レビューをお願いします。
+の Phase <design|impl|completion> レビューをお願いします。
 下記コミットから必要なファイルを取得して確認してください。
 <commit-hash>
 
@@ -222,7 +217,7 @@ PROMPT_FILE="${MAIN_PROJECT_DIR}/tmp/agentic_project_templates_copilot_review_pr
 4. 生成された review 文書が空でないことを確認する
 5. レビュー Agent が review 文書をコミットした hash を取得してから次の処理に進む
 6. Follow-up 時は未解決指摘ゼロ、または明示承認を確認する
-7. Phase 5 の review 文書名が workflow ごとの命名規則に一致していることを確認する
+7. Phase 2 / 3 / optional completion の review 文書名が命名規則に一致していることを確認する
 8. レビュー指摘反映後は必ずレビュー Agent に follow-up を送って確認結果を取得する
 9. review 完了確認後は停滞せず、そのまま指摘対応を開始する
 10. review ループが 1 Phase 分完了したら、次 Phase へ進む前に短い状態要約を残す
@@ -230,8 +225,8 @@ PROMPT_FILE="${MAIN_PROJECT_DIR}/tmp/agentic_project_templates_copilot_review_pr
 
 ## 終了処理
 
-Phase 2-5 の review / 指摘対応 / follow-up の途中では tmux session を終了しない。
-Phase 6 の main マージと後片付けが完了した後、またはユーザが終了を明示指示した時だけ session を削除する。
+Phase 2 / 3 / optional completion の review / 指摘対応 / follow-up の途中では tmux session を終了しない。
+Phase 4-c の main マージと後片付けが完了した後、またはユーザが終了を明示指示した時だけ session を削除する。
 
 ```bash
 ~/.agentic-project-templates/bin/agentic-agent-cli-tmux.sh stop \
