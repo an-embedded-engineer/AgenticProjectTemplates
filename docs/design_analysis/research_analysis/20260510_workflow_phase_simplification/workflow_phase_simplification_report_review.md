@@ -278,3 +278,79 @@
 | m6 | 未解決事項を、現時点の扱いと次アクションを含む表へ再整理した。 | §11 |
 | m7 | 複数 Phase 混在 commit は `Phase X+Y` 表記を許容する方針を追記した。 | §6.5, §11 |
 | m8 | リスク表の対策に対応セクション参照を追加した。 | §8 |
+
+## 9. 再レビュー結果（Claude）
+
+- 再レビュー日: 2026-05-10
+- 対象 commit: `ad79bdd`（およびその前提となる `86a4be3`）
+- 対象ファイル:
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md`
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/meta.md`
+  - `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/workflow_phase_simplification_report_review.md`
+
+### 9.1 Major 指摘の解消状況
+
+| 指摘 | 結果 | 確認内容 |
+|---|---|---|
+| M1 (Lanelet 過大解釈) | **解消** | `report.md` §4.4 / §5.2 / §6.2 / §10 が Lanelet サンプルの事実を「impl 時点で docs 反映先と内容を確定できる」に限定し、docs 実体更新は案 A / 案 B に切り分けた。次 spec-change Phase 0 の意思決定対象として明記。 |
+| M2 (Phase 4 ゲート圧縮の副作用) | **解消** | §6.1 に Phase 4 内部 step 表（4-a / 4-b / 4-c）と STOP 条件、現行ゲートとの対比表（7 ゲート → 4 ゲート + 代替検証）を追加。`report.md` / `diff.zip` / archive / history の位置を §6.2, §8 で固定。 |
+| M3 (review automation 影響範囲) | **解消** | §7.3 が対象ファイル × 影響セクション × 変更内容の表に整理され、Phase 5 docs review 5 種、`ai-review-response-workflow` の概要フロー / 出力ファイル配置、orchestrator の Phase 5 gate 文言、prompt template の Phase 名まで網羅。`rg "Phase 5\|docs_review\|plan_review\|plan_status\|NEED_USER_VERIFICATION"` の残存検査も明記。 |
+| M4 (`related_commits` 集約と多段レビュー証跡の矛盾) | **解消** | §6.5 で適用範囲を core workflow 5 種に限定し、research / 多段レビュー topic は逐次追記を維持と明示。§7.4 / §8 / §10 / §11 にも整合反映。`研究 workflow / 多段レビューでは round 単位記録` が共通方針として固定された。 |
+| M5 (WBS 分解 skill 位置づけ) | **解消** | §5.3 / §7.4 で 案 A（独立 `docs/design_analysis/wbs/`）と 案 B（`research_analysis` 派生）の 2 案を配置例つきで明示。§9 Step 2 と §11 で次 spec-change Phase 0 の確定事項に位置づけ、WBS skill 仕様の実装は別 spec-change workflow に分割する旨も Step 末尾に明記。 |
+
+### 9.2 Moderate 指摘の解消状況
+
+| 指摘 | 結果 | 確認内容 |
+|---|---|---|
+| Mod1 (5 種 workflow 共通根拠) | **解消** | §4.2 に 5 種 workflow ごとの plan / design 焦点比較表を追加。統合時の注意点まで列挙されており、次 workflow が個別 focus 文書を再調査せずに使える。 |
+| Mod2 (status 移行戦略) | **解消** | §6.3 で「移行期互換（`plan_status: N/A` + `design_status` + `impl_status` + `completion_status`）」を次回実装時の推奨に確定。完全な `phase_status` 移行への切替条件（automation 参照箇所の移行、README 併存記述、過去文書非移行）も列挙。 |
+| Mod3 (実装順依存関係) | **解消** | §9 が Step / 内容 / 先行依存 / 検証手段の 4 列表に再構成され、各 Step の依存関係が辿れる。Step 9 の hydrate 検証、Step 10 の smoke test も明示。 |
+| Mod4 (削除ゲートの代替検証) | **解消** | §6.1 に「現行ゲート × 推奨構成での扱い × 代替検証」の対比表が追加され、削除される 3 ゲートそれぞれの代替手段（design 必須章、impl review docs 整合チェック、completion checklist）が明記。 |
+
+### 9.3 Minor 指摘の解消状況
+
+m1〜m8 はすべて反映済みであることを確認した。特に m4（ADR 起票）は §9 Step 1 と §11 ADR 行で、m6（推奨と未解決の整理）は §11 の 3 列表（論点 / 現時点の扱い / 次アクション）で、m7（`Phase X+Y` 表記許容）は §6.5 と §11 で、m8（リスク表対策の参照付与）は §8 で確認できた。
+
+### 9.4 追加指摘
+
+#### Minor
+
+##### m9. §6.2 案 B の動作確認 NG 時の差し戻し方針が表に明記されていない
+
+**箇所**: `report.md` §6.2 案 A / 案 B 比較表。
+
+**事実**: 案 A の Phase 4 列は「ユーザ確認 NG の場合は code と docs を同時に Phase 3 へ差し戻す」と書かれているが、案 B の Phase 4 列は「ユーザ確認 OK 後、4-b で恒久 docs を実体更新する」のみで NG 時の扱いが書かれていない。`report.md` §8 リスク表行「動作確認前の docs が誤る」では「案 B では実体更新を 4-b へ送る」とあり、案 B の場合は NG でも恒久 docs はまだ未更新のため code / impl 文書のみ Phase 3 へ差し戻せばよい、という整合は読み取れるが、表上は欠落している。
+
+**修正案**: §6.2 表の案 B 行 Phase 4 列に「NG 時は code / impl 文書のみ Phase 3 へ差し戻し、恒久 docs は未更新のまま据え置く」を追記する。次 spec-change で実装する際、案 A / 案 B のどちらを採っても同じ表で運用判断ができる。
+
+##### m10. §7.3 の `user-agent-assets/skills/*/references/procedure/autonomous_workflow_orchestrator*.md` ワイルドカード行の意図確認
+
+**箇所**: `report.md` §7.3 表の最終行。
+
+**事実**: 該当 procedure 文書は `user-agent-assets/skills/autonomous-workflow-orchestrator/references/procedure/autonomous_workflow_orchestrator.md` 配下に実体があり、`claude-review-automation` などの SKILL.md からは「索引参照」されているが、独立コピーとしては配布されていない。ワイルドカード形式で書くと、参照側 skill の SKILL.md 本文も対象に含めるのか、procedure 実体だけを対象にするのかが曖昧になる。
+
+**修正案**: 行を「`user-agent-assets/skills/autonomous-workflow-orchestrator/references/procedure/autonomous_workflow_orchestrator.md`（および他 skill 内の同 procedure 参照箇所）」と書き換える。または検索コマンド `rg "autonomous_workflow_orchestrator"` を §7.3 末尾の確認手段に追加する。
+
+両指摘とも、次 spec-change workflow の Phase 0 / Phase 2 で対応すれば足りる軽微指摘である。
+
+### 9.5 観点別チェック結果（再レビュー）
+
+| 観点 | 評価 | 備考 |
+|---|---|---|
+| plan/design 統合の推奨が、実運用サンプルと矛盾していないか | 整合 | M1 解消 + Mod1 で 5 種共通の根拠が揃った |
+| WBS 分解 skill 分離が core workflow 簡略化方針として妥当か | 整合 | M5 解消、案 A / 案 B 確定が次 Phase 0 タスクに整理された |
+| docs 反映を impl と completion に分ける案の漏れ・副作用 | 整合 | M1 / M2 / Mod4 解消、4-a / 4-b / 4-c 内 step と代替検証で順序が明確 |
+| `workflow_phase_library/common` を source 正本として install/sync で hydrate する前提の取り扱い | 整合 | 初回確認通り。§9 Step 9 で hydrate 結果検証が明示された |
+| `related_commits` を completion でまとめる案と review automation / 研究 workflow 証跡要件の整合 | 整合 | M4 解消、core / research 別運用が複数箇所で整合 |
+| 次の spec-change workflow へ渡せる粒度・実装順 | 整合 | M3 / Mod3 解消、§9 が Step 表で依存付きに整理された |
+
+### 9.6 承認可否
+
+**承認**。Major M1〜M5 と Moderate Mod1〜Mod4、Minor m1〜m8 はすべて解消された。本ラウンドで新たに指摘した Minor m9 / m10 は、いずれも次 spec-change workflow の Phase 0 / Phase 2 で対応可能な軽微指摘であり、本 research_analysis の完了を妨げない。
+
+指揮者は以下の対応を進めてよい。
+
+1. `meta.md` の `status` を `merged` 候補に進める前提で、本 review 文書追加コミットを `related_commits` に記録する。
+2. Phase 5 完了処理として、調査結論・主要根拠・未解決事項（§11 の表）・次 workflow（`spec-change-workflow`）と Step 1 の ADR 起票候補をユーザへ報告する。
+3. m9 / m10 は次 spec-change workflow Phase 0 の依頼整理時に取り込む。
+
