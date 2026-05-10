@@ -48,6 +48,8 @@
   - 実装と `impl/` 文書更新、検証、レビュー、指摘反映、`status=implemented` 更新を要求する
 - `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_5_verification_and_docs.md`
   - ユーザ動作確認後に恒久ドキュメントを更新し、docs review を個別に要求する
+- `user-agent-assets/install/install_user_agent_assets.sh` / `install_user_agent_assets.ps1`
+  - `user-agent-assets/shared/references/procedure/workflow_phase_library/common` を source 正本とし、install 時に phase library を必要とする各 workflow skill の `references/procedure/workflow_phase_library/common/` へ hydrate する
 - `user-agent-assets/skills/*-workflow/references/procedure/workflow_phase_library/*/phase_2_plan_focus.md`
   - 受け入れ条件、影響範囲、リスク、テスト観点、完了条件など、設計前の判断材料を要求する
 - `user-agent-assets/skills/*-workflow/references/procedure/workflow_phase_library/*/phase_3_design_focus.md`
@@ -251,6 +253,8 @@ workflow 別 focus 文書は、次のように再編する。
 ### 7.2 shared common phase library
 
 `user-agent-assets/shared/references/procedure/workflow_phase_library/common` を更新する。
+ここが source 正本であり、各 workflow skill 配下の `references/procedure/workflow_phase_library/common/` は install / sync 時に hydrate される配布結果として扱う。
+したがって、簡略化時の正本変更は shared common に対して行い、hydrate 後の各 workflow で同じ common phase library が読めることを検証する。
 
 現行:
 
