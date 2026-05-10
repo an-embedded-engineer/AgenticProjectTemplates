@@ -40,7 +40,7 @@ core workflow topic は 4 ゲート構成を標準とする。
 │   ├── <topic>_design_review.md
 │   ├── <topic>_impl_review.md
 │   └── <topic>_completion_review.md  # optional
-├── diff.zip
+├── diff.zip  # optional
 ├── report.md
 └── meta.md
 ```
@@ -63,6 +63,8 @@ core workflow topic は 4 ゲート構成を標準とする。
 title: "<課題タイトル>"
 category: "<spec_change|new_feature|fix_issues|issue_resolution|refactoring|wbs|research_analysis>"
 created: "<YYYY-MM-DD>"
+components: []
+status: "<draft|implemented|merged>"
 design_status: "<draft|in_review|done>"
 impl_status: "<not_started|draft|in_review|done>"
 completion_status: "<not_started|in_progress|done>"

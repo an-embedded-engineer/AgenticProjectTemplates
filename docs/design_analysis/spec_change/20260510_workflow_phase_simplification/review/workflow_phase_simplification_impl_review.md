@@ -43,6 +43,8 @@ shared common phase library、5 種 core workflow procedure と focus 文書、`
 
 **推奨対応**: Python / C# 双方の bootstrap template の README 第 4 項を `「ソース差分レポートは `report.md` を課題ディレクトリ直下に配置し、必要に応じて `diff.zip` も追加する」` に変更する。あわせて 41-44 行目の「標準ファイル構成」ブロックでも `diff.zip` を `# optional` などのコメント付きにすると、新規プロジェクトで混乱しない。
 
+**対応**: Python / C# 双方の bootstrap template README 第 4 項を `report.md` 必須・`diff.zip` optional の表記へ統一し、標準ファイル構成の `diff.zip` に `# optional` を付与した。project-level README の標準ファイル構成も同じ optional 表記へ揃えた。
+
 **重要度**: 軽微（ファイル数 2、文言 1 行）。
 
 ---
@@ -87,6 +89,8 @@ status: "<draft|implemented|merged>"
 
 `status` の値域は shared phase library の使用実績（`draft` -> `implemented` -> `merged`）に合わせ、必要なら README 末尾に値域の説明を 1 行追加する。
 
+**対応**: project-level / Python / C# の 3 か所の README の `meta.md` テンプレートへ `components: []` と `status: "<draft|implemented|merged>"` を追加した。
+
 **重要度**: 軽微（テンプレート 3 か所、各 2 行追加）。
 
 ---
@@ -123,6 +127,8 @@ status: "<draft|implemented|merged>"
 **指摘**: 新方式では恒久ドキュメント更新は Phase 3 で実施され、Phase 4-b では archive / history / merge 前確認が中心になる。Phase 4 の focus が「恒久ドキュメント更新の対応」を含むと、Phase 4 で恒久 docs を再度更新するのではないかという誤読を生む可能性がある。「恒久ドキュメント更新の **追跡可能性**」（Phase 3 結果との整合確認）であることが明確になる文言に整理すると親切。
 
 **推奨対応（任意）**: 例えば「Phase 3 で更新した恒久ドキュメントと、archive / history / report の追跡が一貫しているか」のように Phase 境界が読み取れる文言にする。
+
+**対応**: spec-change の `phase_4_completion_focus.md` のレビュー観点を、Phase 3 で更新した恒久ドキュメントと archive / history / report の追跡整合を確認する文言へ変更した。
 
 **重要度**: 軽微（文言調整、機能影響なし）。本レビューでは指摘するに留め、必須対応とはしない。
 
