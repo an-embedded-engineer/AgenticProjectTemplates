@@ -219,6 +219,78 @@ status: "<draft|implemented|merged>"
 
 ---
 
+## 9. 追加修正レビュー（commits `e962b0b` / `8fb8540`）
+
+**確認日**: 2026-05-11
+**対象 commit**:
+
+- `e962b0bbaf81c518404386991d6ea3c421308e8c`（`docs: clarify diff zip requirement`）
+- `8fb85403f23f2d3d339b17796f3f259c87a4ff62`（`docs: rename core workflow change report`）
+
+**目的**:
+
+1. `diff.zip` の方針を「ソース変更を含む場合は必須、ドキュメント更新や調査のみなどソース以外の変更だけの場合は省略可」として一貫表記へ整える
+2. core workflow の差分・変更レポート名を `change_report.md` に統一し、research-analysis-workflow / wbs-planning-workflow の成果物 `report.md` との衝突を回避する
+
+### 9.1 `diff.zip` 方針の一貫性
+
+| 文書 | 該当箇所 | 表記 | 確認 |
+|------|----------|------|------|
+| `docs/design_analysis/README.md:43, 81` | 標準ファイル構成 / 運用ルール 4 | 標準ファイル構成: `diff.zip  # ソース変更がある場合は必須` / 運用ルール 4: 「`change_report.md` を配置する。ソース変更を含む場合は `diff.zip` も必須とし、ドキュメント更新や調査のみなどソース以外の変更だけの場合は `diff.zip` を省略してよい」 | ✓ 整合 |
+| `user-agent-assets/skills/project-doc-bootstrap/templates/python/docs/design_analysis/README.md:43, 81` | 同上 | 同上 | ✓ 整合 |
+| `user-agent-assets/skills/project-doc-bootstrap/templates/csharp/docs/design_analysis/README.md:43, 81` | 同上 | 同上 | ✓ 整合 |
+| `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_4_verification_and_completion.md:8, 32-33, 55` | 4-b 内部 step / Step 4 / 完了条件 | 「`change_report.md`、ソース変更時の `diff.zip`」「ソース変更を含む場合は `diff.zip` を必ず追加する。ドキュメント更新や調査のみなど、ソース以外の変更だけの場合は `diff.zip` を省略してよい」「差分レポート（`change_report.md`、ソース変更を含む場合は `diff.zip`）」 | ✓ 整合 |
+| `spec-change-workflow/SKILL.md:38` | 必須チェック 10 | 「Phase 4-b で差分レポート（`change_report.md`、ソース変更を含む場合は `diff.zip`）を生成してコミットする」 | ✓ 整合 |
+| `new-feature-workflow/SKILL.md:37` | 必須チェック 10 | 同上 | ✓ 整合 |
+| `bugfix-workflow/SKILL.md:38` | 必須チェック 10 | 同上 | ✓ 整合 |
+| `issue-resolution-workflow/SKILL.md:39` | 必須チェック 10 | 同上 | ✓ 整合 |
+| `refactoring-workflow/SKILL.md:38` | 必須チェック 10 | 同上 | ✓ 整合 |
+
+5 種 core workflow の SKILL.md / shared common phase library / project-level README / Python・C# bootstrap template の READMEで、`diff.zip` の必要条件が同じ文言（「ソース変更を含む場合は必須、ソース以外の変更だけの場合は省略可」）で揃っている。**一貫性 OK**。
+
+### 9.2 `change_report.md` 命名統一と `report.md` との衝突回避
+
+| 用途 | レポート名 | 該当文書 | 確認 |
+|------|------------|----------|------|
+| core workflow（spec-change / new-feature / bugfix / issue-resolution / refactoring） | `change_report.md` | shared common phase_4 / 5 SKILL.md / 5 phase_4_completion_focus.md / project-level README / bootstrap templates README | ✓ 統一 |
+| research-analysis-workflow | `report.md` | `research-analysis-workflow/SKILL.md:27, 36, 37` ほか | ✓ 維持 |
+| wbs-planning-workflow | `report.md` | `wbs-planning-workflow/SKILL.md:30`、`wbs_planning_workflow.md:11, 22, 78, 93` | ✓ 維持 |
+
+bootstrap templates / project-level README で「`report.md` は research-analysis / WBS など、workflow 固有の調査・計画レポート名として使う」と運用方針が明示されており、core workflow 5 種で `change_report.md`、研究・分解系で `report.md` という棲み分けが文書化されている。**衝突なし**。
+
+### 9.3 `20260510_workflow_phase_simplification` 内のリネームと参照更新
+
+| 対象 | 変更 | 確認 |
+|------|------|------|
+| `docs/design_analysis/spec_change/20260510_workflow_phase_simplification/report.md` | `change_report.md` へリネーム（git rename detect で similarity 97%） | ✓ 完了 |
+| `change_report.md:1` | 見出しを「workflow skill Phase 簡略化 差分・変更レポート」に更新 | ✓ 完了 |
+| `impl/workflow_phase_simplification_impl.md:27` | 「検証結果は `change_report.md` に記録する」へ更新 | ✓ 完了 |
+| `review/workflow_phase_simplification_impl_review.md` 内の `report.md:34, 37` 参照 | `change_report.md:34, 37` へ追従更新 | ✓ 完了 |
+| `meta.md:15` の `source_report:` | `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md`（research-analysis 配下を参照）— historical 調査文書を指すため変更不要 | ✓ 整合 |
+| `docs/adr/0001_workflow_phase_simplification.md:40` の References | research-analysis 配下の `report.md` を参照する historical link — 変更不要 | ✓ 整合 |
+
+active な spec-change topic 内では新名 `change_report.md` への切替が一貫しており、historical な research-analysis 配下の `report.md` への参照は research-analysis-workflow 用途として正しく残されている。**参照漏れなし**。
+
+### 9.4 historical research_analysis 文書の扱い
+
+`docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/` 配下の `report.md` などは、本 spec-change の起点となった調査文書として historical に残されている。research-analysis-workflow の標準成果物名は `report.md` のままであり、active 運用文書として誤読される箇所はない（meta.md / ADR-0001 から research-analysis 用途として参照される）。historical 文書を `change_report.md` へ書き換える必要はなく、変更不要として整合。**OK**。
+
+### 9.5 追加修正レビュー総括
+
+| 観点 | 結果 |
+|------|------|
+| `diff.zip` 方針の core workflow / shared common / bootstrap template / review 文書での一貫性 | ✓ 整合 |
+| core workflow 差分・変更レポート名の `change_report.md` 統一 | ✓ 整合 |
+| research-analysis / WBS の `report.md` との衝突回避 | ✓ 整合 |
+| `20260510_workflow_phase_simplification` 内のリネームと参照更新の漏れ | ✓ 漏れなし |
+| historical な research_analysis 文書の扱い（active 運用との誤読リスク） | ✓ 整合（変更不要として妥当） |
+
+未解決指摘なし。
+
+> **APPROVED（追加修正レビュー）**: commits `e962b0b` / `8fb8540` による `diff.zip` 方針補正と `change_report.md` リネームは、core workflow / shared common phase library / bootstrap template / 5 種 SKILL.md / 5 種 phase_4_completion_focus.md / 本 review 文書のすべてで一貫しており、research-analysis / WBS の `report.md` 用途とも棲み分けが明示されている。本 spec-change は引き続き Phase 4-a 動作確認 STOP へ進んでよい。
+
+---
+
 ## 7. 参考: 確認に用いたコマンド・チェック
 
 - `git show --stat 262e7e0838fe2c7d60c46d0499fe9ad1f5127df7`（変更 62 ファイル / +836 / -648）
