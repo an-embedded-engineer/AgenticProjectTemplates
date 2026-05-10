@@ -24,4 +24,4 @@
 - Python compile / pytest
 - .NET build / test
 
-検証結果は `report.md` に記録する。
+検証結果は `change_report.md` に記録する。

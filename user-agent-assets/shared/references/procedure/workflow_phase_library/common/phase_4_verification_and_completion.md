@@ -5,7 +5,7 @@
 | Step | 目的 | STOP / 進行条件 |
 |---|---|---|
 | 4-a 動作確認 | ユーザ動作確認と最終検証を受ける | ユーザ確認 OK まで 4-b / 4-c へ進まない |
-| 4-b 完了処理 | `report.md`、ソース変更時の `diff.zip`、todo / issue 完了証跡、archive 準備、`docs/history/` 更新を行う | completion checklist、必要時は completion review で確認する |
+| 4-b 完了処理 | `change_report.md`、ソース変更時の `diff.zip`、todo / issue 完了証跡、archive 準備、`docs/history/` 更新を行う | completion checklist、必要時は completion review で確認する |
 | 4-c merge 承認 | merge 前の最終承認を受ける | ユーザの明示承認後に merge / `status=merged` 更新へ進む |
 
 ## 4-a 動作確認
@@ -26,10 +26,10 @@
    - Phase 境界、review commit、follow-up commit、最終 report / archive commit など意思決定に必要な commit に絞る
    - `related_commits` 追記だけの meta-only commit を Phase 途中で増やさない
    - やむを得ず複数 Phase が 1 commit にまとまった場合は `Phase 1+2` のように記録する
-4. 差分レポートを生成してコミットする。root には共通差分抽出ツールがないため、必要に応じて `git diff --stat` / `git diff --name-only` / テンプレート内 `tools/ExtractGitDiff` を使い、実行した方法を `report.md` に記録する
+4. 差分レポートを生成してコミットする。root には共通差分抽出ツールがないため、必要に応じて `git diff --stat` / `git diff --name-only` / テンプレート内 `tools/ExtractGitDiff` を使い、実行した方法を `change_report.md` に記録する
    - ブランチの分岐元コミットを取得する: `git merge-base master HEAD`
    - 差分対象が C# テンプレートの tool だけなら `dotnet build` / C# test runner の結果も併記する
-   - 課題ディレクトリ配下に `report.md` を作成する
+   - 課題ディレクトリ配下に `change_report.md` を作成する
    - ソース変更を含む場合は `diff.zip` を必ず追加する。ドキュメント更新や調査のみなど、ソース以外の変更だけの場合は `diff.zip` を省略してよい
 5. 追跡元の項目を完了状態へ更新し、archive へ移動または archive 準備状態へ整える
    - `docs/todo/README.md` と `docs/issues/README.md` の運用ルールに従って整理する
@@ -52,7 +52,7 @@
 
 - ユーザ動作確認の結果が記録されている
 - `meta.md` の工程ステータス、`completion_status`、`related_commits` が確定している
-- 差分レポート（`report.md`、ソース変更を含む場合は `diff.zip`）が課題ディレクトリに生成・コミットされている
+- 差分レポート（`change_report.md`、ソース変更を含む場合は `diff.zip`）が課題ディレクトリに生成・コミットされている
 - 追跡元の項目が archive 方針に従って整理されている
 - `docs/history/README.md` の運用に沿って変更履歴が更新されている
 - マージと `status=merged` 更新が完了している

@@ -41,11 +41,12 @@ core workflow topic は 4 ゲート構成を標準とする。
 │   ├── <topic>_impl_review.md
 │   └── <topic>_completion_review.md  # optional
 ├── diff.zip  # ソース変更がある場合は必須
-├── report.md
+├── change_report.md
 └── meta.md
 ```
 
 `<topic>_completion_review.md` は、archive / history / merge 前確認が重い場合だけ作成する。
+`report.md` は research-analysis / WBS など、workflow 固有の調査・計画レポート名として使う。
 
 ## WBS ファイル構成
 
@@ -77,7 +78,7 @@ related_commits: []
 1. 課題ディレクトリは日付プレフィックスで一意に識別する
 2. core workflow topic では `design_status` / `impl_status` / `completion_status` を更新する
 3. レビュー文書は `review/` ディレクトリに配置する
-4. `report.md` は課題ディレクトリ直下に配置する。ソース変更を含む場合は `diff.zip` も必須とし、ドキュメント更新や調査のみなどソース以外の変更だけの場合は `diff.zip` を省略してよい
+4. core workflow topic の差分・変更レポートは `change_report.md` として課題ディレクトリ直下に配置する。ソース変更を含む場合は `diff.zip` も必須とし、ドキュメント更新や調査のみなどソース以外の変更だけの場合は `diff.zip` を省略してよい
 5. 調査・分析は `research_analysis/` に配置する（workflow Phase を伴わない）
 6. core workflow の `related_commits` は completion Phase で主要 commit をまとめて記録する。research / 多段レビュー topic は従来通り round 単位で記録してよい
 7. 大規模変更は `wbs-planning-workflow` で作業単位へ分解してから、各 work package を通常 workflow で扱う

@@ -39,11 +39,11 @@ shared common phase library、5 種 core workflow procedure と focus 文書、`
 - `user-agent-assets/skills/spec-change-workflow/SKILL.md:38` ほか 5 種 SKILL.md 第 10 項: `report.md` と必要時の `diff.zip` を生成する表記
 - `user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_4_verification_and_completion.md:32`: `report.md` を作成し、`diff.zip` の追加条件が未明確な表記
 
-**差異**: project-level / SKILL.md / shared common phase library は `diff.zip` の必要条件が曖昧で、bootstrap template の Python / C# 双方の README は `diff.zip` を `report.md` と並列に記載しており、常に両方必須に読める。実際の方針は、`report.md` は常に作成し、ソース変更を含む場合は `diff.zip` も必須、ドキュメント更新や調査のみなどソース以外の変更だけの場合は `diff.zip` を省略可である。
+**差異**: project-level / SKILL.md / shared common phase library は `diff.zip` の必要条件が曖昧で、bootstrap template の Python / C# 双方の README は `diff.zip` を `report.md` と並列に記載しており、常に両方必須に読める。実際の方針は、core workflow の差分・変更レポートを `change_report.md` として常に作成し、ソース変更を含む場合は `diff.zip` も必須、ドキュメント更新や調査のみなどソース以外の変更だけの場合は `diff.zip` を省略可である。
 
-**推奨対応**: project-level / Python / C# 双方の README 第 4 項を、`report.md` は常に配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可、と分かる表記へ変更する。あわせて標準ファイル構成ブロックでも `diff.zip` の条件をコメント付きにする。
+**推奨対応**: project-level / Python / C# 双方の README 第 4 項を、core workflow の差分・変更レポートは `change_report.md` として配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可、と分かる表記へ変更する。あわせて標準ファイル構成ブロックでも `change_report.md` と `diff.zip` の条件を明示する。
 
-**対応**: Python / C# 双方の bootstrap template README と project-level README を、`report.md` は常に配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可、という表記へ統一した。
+**対応**: Python / C# 双方の bootstrap template README と project-level README を、core workflow の差分・変更レポートは `change_report.md` として配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可、という表記へ統一した。
 
 **重要度**: 軽微（ファイル数 2、文言 1 行）。
 
@@ -162,7 +162,7 @@ status: "<draft|implemented|merged>"
 | orchestrator 手順本体の Step 3 / Step 4 / Step 5 が Phase 2/3 review、Phase 4-a 動作確認、Phase 4-c merge 承認に再構成されている | ✓ 整合（`autonomous_workflow_orchestrator.md:177-405`） |
 | `ai-review-response-workflow` の工程分類が `design` / `impl` / `completion` に揃っている | ✓ 整合（行 12, 36-43, 128, 130） |
 | `wbs-planning-workflow` SKILL.md と `wbs_planning_workflow.md` が大規模変更の work package 分解 skill として独立 | ✓ 整合（成果物配置 `docs/design_analysis/wbs/<yyyymmdd>_<topic>/`、`wbs.md` の表構造、推奨 workflow / 依存 / 完了条件 / docs_targets / verification_points を必須化） |
-| `wbs-planning-workflow` が install 対象 skill 群に含まれる（installer の `for skill_dir in "${skill_root}"/*` 経由） | ✓ 整合（`install_user_agent_assets.sh:155-161, 182-187, 192-198`、`report.md:34` で installer dry-run 確認済み） |
+| `wbs-planning-workflow` が install 対象 skill 群に含まれる（installer の `for skill_dir in "${skill_root}"/*` 経由） | ✓ 整合（`install_user_agent_assets.sh:155-161, 182-187, 192-198`、`change_report.md:34` で installer dry-run 確認済み） |
 | `docs/design_analysis/README.md` が 4 ゲート構成・wbs/ 区分・completion_review optional・`related_commits` の completion 集約方針を説明している | ✓ 整合（行 28-58, 73-82） |
 | Python / C# bootstrap template の `docs/design_analysis/README.md` が project-level と同一方針へ同期している | ✓ 整合（4 ゲート構成・wbs 区分・status 体系は揃っている） |
 | ADR-0001 が `docs/adr/README.md` の索引へ追加されている（topic / component / keywords が一致） | ✓ 整合（`docs/adr/README.md:55`） |
@@ -170,11 +170,11 @@ status: "<draft|implemented|merged>"
 | shared common phase library の hydrate 経路が installer に維持されている | ✓ 整合（`hydrate_workflow_phase_library_common` 関数が target skill の `workflow_phase_library` 配下へ shared common を copy） |
 | `plan_status: N/A` 等の移行期互換 status が core workflow / shared phase library / SKILL.md / README / meta.md template から完全に削除されている | ✓ 整合（残存は historical research_analysis 文書 2 種のみ。`docs/todo/todo.md:37` の `phase0_decisions` は判断選択肢の記録で、運用に再導入されてはいない） |
 | `phase_2_plan_review.md` / `phase_5_verification_and_docs.md` / `phase_6_completion.md` / `phase_2_plan_focus.md` / `phase_3_design_focus.md` / `phase_4_impl_focus.md` / `phase_5_sync_focus.md` の旧 common / focus 文書が 5 種すべてで削除されている | ✓ 整合（差分 stat で 6 ファイル × 5 workflow = 30 文書相当が削除または rename） |
-| 過去方式（plan 文書、`plan_status`、Phase 5/6 user approval gate、`docs_review` 命名）の前提知識なしに現行 workflow 文書だけで実行可能 | ✓ 整合（残存参照は historical 文書と `research-analysis-workflow` 内 Phase 5 のみ。後者は `report.md:37` で意図的非移行が明記） |
-| `research-analysis-workflow` の Phase 5 表記が同 workflow 固有の現行手順として残されている | ✓ 整合（`research_analysis_workflow.md:93, 116`、`spec_change/.../report.md:37` の宣言と一致） |
+| 過去方式（plan 文書、`plan_status`、Phase 5/6 user approval gate、`docs_review` 命名）の前提知識なしに現行 workflow 文書だけで実行可能 | ✓ 整合（残存参照は historical 文書と `research-analysis-workflow` 内 Phase 5 のみ。後者は `change_report.md:37` で意図的非移行が明記） |
+| `research-analysis-workflow` の Phase 5 表記が同 workflow 固有の現行手順として残されている | ✓ 整合（`research_analysis_workflow.md:93, 116`、`spec_change/.../change_report.md:37` の宣言と一致） |
 | 設計書（`design/<topic>_design.md`）が要求・採用方針・非対象・影響範囲・恒久ドキュメント更新先・検証観点を網羅 | ✓ 整合 |
 | 実装記録（`impl/<topic>_impl.md`）が実装内容・決定事項・検証コマンドを記録 | ✓ 整合 |
-| `report.md` が変更概要・検証結果（installer dry-run / Python pytest / .NET build / ExtractGitDiff build）・残存参照チェック結果をまとめている | ✓ 整合 |
+| `change_report.md` が変更概要・検証結果（installer dry-run / Python pytest / .NET build / ExtractGitDiff build）・残存参照チェック結果をまとめている | ✓ 整合 |
 | `meta.md` フロントマターが新 status 体系（`design_status: done` / `impl_status: done` / `completion_status: in_progress`）と `adr` フィールドを含む | ✓ 整合 |
 
 ---
@@ -204,11 +204,11 @@ status: "<draft|implemented|merged>"
 
 **確認日**: 2026-05-10
 **初回対応 commit**: `aebc053dd2fbe080a26ea4891bee388a0fb16c4e`（`docs: address workflow phase review comments`）
-**方針補正**: 2026-05-11 にユーザ指摘を受け、`diff.zip` は単純な optional ではなく、ソース変更を含む場合は必須、ドキュメント更新や調査のみなどソース以外の変更だけの場合は省略可、として再整理した。
+**方針補正**: 2026-05-11 にユーザ指摘を受け、core workflow の差分・変更レポートは `change_report.md` とし、`diff.zip` は単純な optional ではなく、ソース変更を含む場合は必須、ドキュメント更新や調査のみなどソース以外の変更だけの場合は省略可、として再整理した。
 
 | 指摘 | 確認結果 |
 |------|----------|
-| §1.1 `diff.zip` の条件付き必須表記への統一 | ✓ 解消（project-level / Python / C# の README 第 4 項が、`report.md` は常に配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可とする表記へ更新された。標準ファイル構成の `diff.zip` も「ソース変更がある場合は必須」へ揃った） |
+| §1.1 `change_report.md` と `diff.zip` の条件付き必須表記への統一 | ✓ 解消（project-level / Python / C# の README 第 4 項が、core workflow の差分・変更レポートは `change_report.md` として配置し、ソース変更を含む場合は `diff.zip` も必須、ソース以外の変更だけの場合は `diff.zip` を省略可とする表記へ更新された。標準ファイル構成も `change_report.md` と「ソース変更がある場合は必須」の `diff.zip` へ揃った） |
 | §1.2 meta.md テンプレートの `status` / `components` 追加 | ✓ 解消（project-level / Python / C# の 3 か所すべての meta.md テンプレートに `components: []` と `status: "<draft|implemented|merged>"` が追加された） |
 | §3.1 `phase_4_completion_focus.md` レビュー観点の文言整理 | ✓ 解消（spec-change の `phase_4_completion_focus.md:19` が「Phase 3 で更新した恒久ドキュメントと、archive / history / report の追跡が一貫しているか」へ更新され、Phase 境界の誤読リスクが解消した） |
 | §3.2 `related_commits` 集約実例 | 申し送り維持（Phase 4-b で自然解消する情報提供） |
@@ -223,6 +223,6 @@ status: "<draft|implemented|merged>"
 
 - `git show --stat 262e7e0838fe2c7d60c46d0499fe9ad1f5127df7`（変更 62 ファイル / +836 / -648）
 - `grep -rn "plan_status" --include="*.md"`（残存は historical research_analysis 内のみ）
-- `grep -rn "phase_5\|Phase 5\|phase_6\|Phase 6\|phase_2_plan\|phase_3_design\|phase_4_impl\|phase_5_sync\|phase_5_verification\|phase_6_completion\|docs_review\|plan_review" user-agent-assets docs/adr docs/design_analysis/README.md docs/design_analysis/spec_change/20260510_workflow_phase_simplification --include="*.md"`（残存は `research-analysis-workflow` の Phase 5 のみ、`report.md:37` の宣言と整合）
+- `grep -rn "phase_5\|Phase 5\|phase_6\|Phase 6\|phase_2_plan\|phase_3_design\|phase_4_impl\|phase_5_sync\|phase_5_verification\|phase_6_completion\|docs_review\|plan_review" user-agent-assets docs/adr docs/design_analysis/README.md docs/design_analysis/spec_change/20260510_workflow_phase_simplification --include="*.md"`（残存は `research-analysis-workflow` の Phase 5 のみ、`change_report.md:37` の宣言と整合）
 - `grep -rn "wbs-planning\|wbs_planning\|wbs/" user-agent-assets --include="*.md"`（bootstrap template / wbs-planning-workflow 自身に存在、整合）
 - installer の hydrate 関数（`install_user_agent_assets.sh:102-124, 155-161, 182-187, 192-198`）と shared common phase library のディレクトリ存在確認

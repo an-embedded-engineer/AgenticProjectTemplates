@@ -1,4 +1,4 @@
-# workflow skill Phase 簡略化 変更レポート
+# workflow skill Phase 簡略化 差分・変更レポート
 
 ## 概要
 
