@@ -8,7 +8,7 @@
 - status: `done`
 - completed_at: `2026-05-11`
 - source_branch: `research/workflow-phase-simplification-20260510`
-- merge_commit: `pending`
+- merge_commit: `4440093`
 - source_report: `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/report.md`
 - source_review: `docs/design_analysis/research_analysis/20260510_workflow_phase_simplification/workflow_phase_simplification_report_review.md`
 - meta: `docs/design_analysis/spec_change/20260510_workflow_phase_simplification/meta.md`
@@ -27,6 +27,8 @@
 	- `1153778`: レビュー指摘対応承認
 	- `8fb8540`: `change_report.md` 命名補正
 	- `8ec0551`: 追加修正レビュー承認
+	- `4f00f85`: 完了処理
+	- `4440093`: main merge
 
 #### 概要
 

@@ -8,7 +8,7 @@
 - source_branch: `research/workflow-phase-simplification-20260510`
 - adr: `docs/adr/0001_workflow_phase_simplification.md`
 - change_report: `docs/design_analysis/spec_change/20260510_workflow_phase_simplification/change_report.md`
-- merge_commit: `pending`
+- merge_commit: `4440093`
 
 core workflow skill を 4 ゲート構成へ簡略化し、Phase 2 を方針・設計レビュー、Phase 3 を実装・恒久ドキュメント反映レビュー、Phase 4 を動作確認・完了処理・merge 承認へ再構成した。
 
