@@ -4,10 +4,11 @@ phase: "impl"
 reviewer: "Claude Opus 4.7"
 reviewed_at: "2026-05-12"
 review_target_commit: "9c40c1d Add project-local user agent assets workflow"
-status: "changes_requested"
+status: "responded"
 unresolved_major: 0
-unresolved_moderate: 1
-unresolved_minor: 4
+unresolved_moderate: 0
+unresolved_minor: 0
+response_status: "complete"
 ---
 
 # user-agent-assets-update-workflow skill 実装レビュー
@@ -132,3 +133,15 @@ unresolved_minor: 4
 - Moderate 指摘 1 件（M-1: `meta.md` `components` 修正）の反映を必須とする。
 - Minor 4 件は反映を推奨するが、Phase 3 完了の阻害要因ではない。
 - 上記 M-1 反映後、`impl_status=done` の維持と Phase 4-a 承認待ちへの遷移を推奨する。
+
+## 6. 指摘対応状況
+
+| ID | status | 対応 |
+|---|---|---|
+| M-1 | done | `meta.md` の `components` を実変更ファイルへ揃え、未変更の `user-agent-assets/skills/wbs-planning-workflow` を除外した |
+| m-1 | done | `.gitignore` に `*/.codex/skills/` を追加し、subdirectory 配下の `.github` / `.claude` / `.codex` skill 生成物の扱いを揃えた |
+| m-2 | done | `change_report.md` 冒頭に Phase 3 時点の検証中間結果であり、実インストール結果・最終承認・merge 結果は Phase 6 で追記する旨を明記した |
+| m-3 | done | README の project-local skill sync 案内に PowerShell 版と Windows cmd 版を追記した |
+| m-4 | done | `validate_temp_install.py` の `--forbid-skill` 判定に、generic set-diff より先に専用メッセージで失敗させる意図をコメントで残した |
+
+補足: レビュー時点で記録された `.gitignore` の未ステージ差分は、重複した `__pycache__/` 行であり、対応前に削除して作業ツリーを clean に戻した。

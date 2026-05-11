@@ -60,6 +60,7 @@ output/
 */CLAUDE.md
 */.github/copilot-instructions.md
 */.claude/skills/
+*/.codex/skills/
 */.github/skills/
 /.claude/skills/
 /.codex/skills/

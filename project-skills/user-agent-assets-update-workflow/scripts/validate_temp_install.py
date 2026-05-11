@@ -151,6 +151,7 @@ def validate_skill_targets(
             installed_names = {
                 path.name for path in target_root.iterdir() if path.is_dir()
             }
+            # Fail with a dedicated message before the generic set-diff check.
             forbidden_installed = sorted(forbidden_skills & installed_names)
             if forbidden_installed:
                 fail(
