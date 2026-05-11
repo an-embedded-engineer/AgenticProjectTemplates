@@ -16,10 +16,12 @@ components:
   - docs/todo/README.md
   - docs/todo/todo.md
   - docs/history/change_history_2026.md
-status: "responded"
+status: "approved"
 review_phase: "impl"
 review_target_commit: "80e42ee"
 response_status: "complete"
+re_review_target_commit: "973cfcd"
+re_review_status: "approved"
 ---
 
 # documentation-workflow skill 実装レビュー
@@ -208,3 +210,51 @@ Major が解消され次第、documentation-workflow を 6 種類目の core wor
 - docs-only 変更であり、ソースコードは変更していない
 - `diff.zip` は作成していない
 - 追加確認は `change_report.md` に記録する
+
+## 再レビュー結果
+
+- 再レビュー対象コミット: `973cfcd Address documentation workflow review`
+- 再レビュー観点:
+  - 初回レビューの Major / Moderate / Minor 指摘が `973cfcd` で実質的に解消されているか
+  - `documentation-workflow` が docs-only 専用 workflow として、動作確認フローや `diff.zip` 作成を要求しない設計のままか
+  - orchestrator / WBS / review automation / README / design_analysis / history の横断整合に新たな齟齬が生じていないか
+
+### 指摘解消の再確認
+
+| ID | 再確認結果 | 確認した箇所 |
+|---|---|---|
+| M1 | 解消 | `README.md` 107 行目に `documentation-workflow` 行が追加されている |
+| M2 | 解消 | `documentation_workflow.md` Phase 1 step 1 が「対象プロジェクトの既定ブランチ（例: `main`）」表記へ変更されており、`documentation-workflow` 配下から `master` 固定参照は消えている |
+| M3 | 解消 | `documentation_workflow.md` Phase 4 が `4-a 文書最終確認` / `4-b 完了処理` / `4-c merge 前承認` に分割され、`[PHASE_COMPLETE: <phase_number>]` / `[NEED_USER_VERIFICATION]` / `[ALL_PHASES_COMPLETE]` と自然言語文言（「文書の最終確認をお願いします」「docs-only の確認をお願いします」「マージしてよいですか」）が orchestrator 側パターンと一致している |
+| Mo1 | 解消 | `documentation_workflow.md` Phase 1 step 3 末尾に `verification_status` を持たない旨が記載され、design 側にも同趣旨の記録がある |
+| Mo2 | 解消 | `wbs_planning_workflow.md` 75 行目に documentation work package 固有の完了条件（動作確認・`diff.zip` 非必須、リンク/索引/archive/history/重複整合）が追記されている |
+| Mo3 | 解消 | `claude-review-automation/SKILL.md` と `copilot-review-automation/SKILL.md` の判定ルールに、`docs/todo/todo.md` の `workflow: documentation` を documentation 判定に取り込む条項が追加されている |
+| Mo4 | 解消 | `documentation_workflow.md` に「共通 phase library との差分」節が追加され、phase library 非共有の理由が明文化された。design にも同記録あり |
+| Mo5 | 解消 | SKILL.md 禁止事項が「ソース変更を含む場合は workflow を中止し、適切な core workflow へ切り替える」に統一され、procedure Phase 4-b の表現と一致している |
+| Mo6 | 解消 | `docs/design_analysis/documentation/20260511_documentation_workflow_skill/` 配下に `meta.md` / `design/documentation_workflow_design.md` / `impl/documentation_workflow_impl.md` / `change_report.md` が作成され、history `2026-05-11` 節にも `design_analysis:` 参照が追加された |
+| Mi1 | 解消 | SKILL.md frontmatter description が 2 文構成に整理されている |
+| Mi2 | 解消 | 実行ルール索引に `docs/rules/coding_rules.md` / `docs/design_analysis/README.md` / `docs/rules/development_workflow.md` が例示として括弧書きで添えられた |
+| Mi3 | 解消 | SKILL.md と procedure Phase 0 step 4 で「orchestrator 配下または追跡項目指定で実行する場合は必須、単独の軽微な文書修正では省略可」と条件が明文化された |
+| Mi4 | 解消 | 禁止事項（docs-only では `diff.zip` を作成してはならない）と必須チェック（`change_report.md` に非作成理由を記録する）の役割分担が明確になり、表現重複が解消された |
+| Mi5 | 解消 | design に「`spec_change` / `new_feature` / `fix_issues` / `issue_resolution` / `refactoring` / `documentation` / `wbs` / `research_analysis`」の列挙順方針が記録された |
+
+### 横断整合の再確認
+
+- `README.md` 100-108 行目: `documentation-workflow` 行が追加され、6 種類の core workflow と整合
+- `docs/design_analysis/README.md`、Python / C# bootstrap template の `design_analysis/README.md`: ディレクトリ構成と `category` enum の列挙順が一致（`refactoring` の直後に `documentation`）
+- `wbs_planning_workflow.md`: `recommended_workflow` enum と documentation work package 固有条件が同期
+- `autonomous-workflow-orchestrator` / `copilot-cli-workflow-orchestrator` / `claude-review-automation` / `copilot-review-automation` の SKILL.md と procedure: 「6 種類の workflow」「Phase 4-a documentation は文書最終確認」「`docs/todo/todo.md` の `workflow: documentation` 判定」「natural language pattern として『文書の最終確認をお願いします』『docs-only の確認をお願いします』『マージしてよいですか』」が一貫している
+- `docs/history/change_history_2026.md` 2026-05-11 節: skill ディレクトリと `docs/design_analysis/documentation/20260511_documentation_workflow_skill/` の両方を参照
+- `docs/architecture/overview.md` / `docs/todo/README.md` / `docs/todo/todo.md`: 追跡項目カテゴリに `documentation` が含まれる旨が反映済み
+
+新規指摘なし。`documentation-workflow` 配下の procedure / SKILL.md からは `master` への固定参照が排除されている。`user-agent-assets/shared/references/procedure/workflow_phase_library/common/phase_1_branch_and_meta.md` には依然 `master` 表記が残るが、これは本トピックの責務外であり、`documentation-workflow` は当該 phase library を直接共有しない設計（Mo4 解消の通り）であるため再レビューの対象外とする。
+
+### 結論
+
+**未解決指摘 0 件で承認する。**
+
+- Major（M1〜M3）、Moderate（Mo1〜Mo6）、Minor（Mi1〜Mi5）の全 14 件が `973cfcd` で実質的に解消されている
+- `documentation-workflow` は docs-only 専用 workflow として、動作確認・`diff.zip` 作成を要求しない設計を維持している
+- orchestrator / WBS / review automation / README / design_analysis / history の横断整合に新規の齟齬は見当たらない
+
+`documentation-workflow` を 6 種類目の core workflow として正式リリース可とする。
