@@ -54,12 +54,15 @@ output/
 # Backups
 *.bak
 
-# Agent sync generated files (produced by scripts/sync_agent_skills.*)
+# Agent sync generated files (produced by scripts/sync_agent_instructions.* and scripts/sync_project_skills.*)
 # Edit instructions/agent_common_master.md and re-run sync instead
 */AGENTS.md
 */CLAUDE.md
 */.github/copilot-instructions.md
 */.claude/skills/
 */.github/skills/
+/.claude/skills/
+/.codex/skills/
+/.github/skills/
 reference/
 tmp/

@@ -2,6 +2,15 @@
 
 ## 2026-05-11
 
+### user-agent-assets 更新 workflow skill を追加
+
+- project-local skill: `project-skills/user-agent-assets-update-workflow/`
+- design_analysis: `docs/design_analysis/spec_change/20260511_user_agent_assets_update_workflow_skill/`
+
+user-level skills、review/orchestration workflow、runtime、installer、project-doc-bootstrap templates を更新するための project-local `user-agent-assets-update-workflow` を追加した。変更方針レビュー、実装レビュー、installer dry-run、`tmp/` 仮インストール、実インストール前ユーザ確認、merge 前承認を標準手順として定義した。
+
+あわせて、`tmp/` 仮インストール結果を検証する `validate_temp_install.py` と、`project-skills/` から `.github/skills` / `.claude/skills` / `.codex/skills` へ同期する `sync_project_skills.*` を追加した。この workflow は AgenticProjectTemplates 専用のため、`user-agent-assets/` の install 対象には含めない。
+
 ### ドキュメント専用 workflow skill を追加
 
 - skill: `user-agent-assets/skills/documentation-workflow/`
