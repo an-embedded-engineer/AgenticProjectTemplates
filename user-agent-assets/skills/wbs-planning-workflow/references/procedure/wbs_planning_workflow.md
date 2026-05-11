@@ -72,6 +72,7 @@
 - workflow 種別が混ざる場合は work package を分ける
 - 依存がある場合は、先行 package の完了条件を後続 package の前提条件として明記する
 - 共通設計判断は個別 package に埋め込まず、WBS topic の上位判断として残す
+- `recommended_workflow` が `documentation` の work package では、動作確認を必須にせず、`diff.zip` を作成しない。完了条件と検証観点には、リンク、索引、archive、history、重複記述の整合確認を含める
 
 ### Phase 4: 完了処理
 

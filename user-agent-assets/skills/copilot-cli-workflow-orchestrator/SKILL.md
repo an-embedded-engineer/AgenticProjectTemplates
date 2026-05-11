@@ -36,7 +36,7 @@ description: CopilotがCopilot CLI（実装Agent・レビューAgent）を指揮
 
 ## 禁止事項
 
-- ユーザへの確認なしに master マージを行ってはならない
+- ユーザへの確認なしに既定ブランチへマージしてはならない
 - 実装 Agent の tmux ペインを Phase 途中で破棄してはならない
 - 実装 Agent に git worktree を作成させてはならない
 - Phase 4-a のユーザ動作確認 STOP をスキップしてはならない。ただし `documentation-workflow` は文書最終確認ゲートとして扱い、アプリ動作確認は要求しない

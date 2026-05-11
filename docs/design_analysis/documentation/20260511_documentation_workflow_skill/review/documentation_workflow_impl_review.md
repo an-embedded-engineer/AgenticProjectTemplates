@@ -16,9 +16,10 @@ components:
   - docs/todo/README.md
   - docs/todo/todo.md
   - docs/history/change_history_2026.md
-status: "draft"
+status: "responded"
 review_phase: "impl"
 review_target_commit: "80e42ee"
+response_status: "complete"
 ---
 
 # documentation-workflow skill 実装レビュー
@@ -182,3 +183,28 @@ Major が解消され次第、documentation-workflow を 6 種類目の core wor
 4. WBS と claude/copilot review automation に documentation 固有の判定・検証観点（todo 経由判定、diff.zip 不要、動作確認不要）を補強する。
 5. SKILL.md の禁止事項・必須チェック表現を統一し、ソース変更混入時の切り替え境界を design 文書に残す。
 6. documentation-workflow 自身の追加経緯を残す `docs/design_analysis/documentation/20260511_documentation_workflow_skill/` 配下に design / impl / change_report を後追い整備し、history エントリと突合させる。
+
+## 指摘対応状況
+
+| ID | status | 対応 |
+|---|---|---|
+| M1 | done | `README.md` の workflow skills 表に `documentation-workflow` を追加した |
+| M2 | done | `documentation_workflow.md` Phase 1 の `master` 固定を、対象プロジェクトの既定ブランチ（例: `main`）へ変更した |
+| M3 | done | `documentation_workflow.md` Phase 4 を `4-a 文書最終確認` / `4-b 完了処理` / `4-c merge 前承認` に分割し、`[NEED_USER_VERIFICATION]`、`[PHASE_COMPLETE: <phase_number>]`、`[ALL_PHASES_COMPLETE]` と自然言語文言を明記した |
+| Mo1 | done | `documentation_workflow.md` と design に、実行時動作確認を行わないため `verification_status` を持たない旨を記録した |
+| Mo2 | done | `wbs_planning_workflow.md` に documentation work package 固有の完了条件・検証観点を追記した |
+| Mo3 | done | `claude-review-automation` と `copilot-review-automation` の判定ルールに、`docs/todo/todo.md` の `workflow: documentation` を追加した |
+| Mo4 | done | `documentation_workflow.md` と design に、共通 phase library を直接共有しない理由を記録した |
+| Mo5 | done | SKILL.md の禁止事項と procedure の表現を、ソース変更混入時は workflow を切り替える方針へ統一した |
+| Mo6 | done | `docs/design_analysis/documentation/20260511_documentation_workflow_skill/` に `meta.md`、`design/`、`impl/`、`change_report.md` を追加し、history に `design_analysis` 参照を追加した |
+| Mi1 | done | SKILL.md frontmatter description を短く整理した |
+| Mi2 | done | SKILL.md の実行ルール索引に、配布先で参照しやすい代表ファイル例を追記した |
+| Mi3 | done | todo 記録条件を、orchestrator 配下・追跡項目指定時は必須、単独軽微修正では省略可として明文化した |
+| Mi4 | done | diff.zip 関連の表現を、禁止事項と必須チェックで役割分担する形に整理した |
+| Mi5 | done | design にカテゴリ列挙順の方針を記録した |
+
+## 対応後の確認
+
+- docs-only 変更であり、ソースコードは変更していない
+- `diff.zip` は作成していない
+- 追加確認は `change_report.md` に記録する

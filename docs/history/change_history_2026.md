@@ -5,6 +5,7 @@
 ### ドキュメント専用 workflow skill を追加
 
 - skill: `user-agent-assets/skills/documentation-workflow/`
+- design_analysis: `docs/design_analysis/documentation/20260511_documentation_workflow_skill/`
 
 ドキュメントのみの作成・更新・整理を扱う `documentation-workflow` を追加した。ソース変更を伴う core workflow と分け、アプリ動作確認や docs-only 変更での `diff.zip` 作成を不要とし、リンク、索引、重複、archive、history の整合確認を完了条件にした。
 

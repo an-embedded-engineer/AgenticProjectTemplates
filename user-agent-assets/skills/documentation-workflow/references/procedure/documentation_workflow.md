@@ -31,7 +31,7 @@
    - ソースコード、スクリプト、設定、生成テンプレート、runtime を変更する
    - 仕様や挙動の変更を伴う
    - 不具合修正、課題解決、リファクタリング、調査レポート作成が主目的である
-4. 必要なら `docs/todo/todo.md` に `workflow: documentation` として追跡項目を追加する
+4. orchestrator 配下または追跡項目指定で実行する場合は `docs/todo/todo.md` に `workflow: documentation` として追跡項目を追加する。単独の軽微な文書修正では省略してよい
 
 ### Phase 0 完了条件
 
@@ -41,7 +41,7 @@
 
 ## Phase 1: ブランチ・meta 初期化
 
-1. `master` を最新化して、documentation 専用ブランチを作成する
+1. 対象プロジェクトの既定ブランチ（例: `main`）を最新化して、documentation 専用ブランチを作成する
 2. `docs/design_analysis/documentation/<yyyymmdd>_<topic>/` を作成する
 3. `meta.md` を作成し、最低限次を記録する
    - `title`
@@ -53,7 +53,12 @@
    - `impl_status`
    - `completion_status`
    - `related_commits`
+   - documentation-workflow は実行時動作確認を行わないため、`verification_status` は持たない
 4. Phase 1 の成果を 1 コミットで残す
+
+### 共通 phase library との差分
+
+documentation-workflow は docs-only 変更を扱うため、core workflow の `workflow_phase_library/common/phase_4_verification_and_completion.md` を直接参照しない。実行時動作確認と `diff.zip` 作成を標準化しないことが目的である。
 
 ### Phase 1 完了条件
 
@@ -107,23 +112,37 @@
 
 ## Phase 4: 文書確認・完了処理
 
+### 4-a 文書最終確認
+
 1. `completion_status` を `in_progress` に更新する
-2. ユーザ動作確認は要求しない。必要な場合でも、文書の最終確認依頼に限定する
-3. アプリ起動、E2E、単体テスト、手動操作確認は必須にしない
-4. `change_report.md` を作成し、次を記録する
+2. アプリ起動、E2E、単体テスト、手動操作確認は必須にしない
+3. 文書の最終確認が必要な場合は、次の文言を含めてユーザへ依頼する
+   - `文書の最終確認をお願いします`
+   - `docs-only の確認をお願いします`
+4. orchestrator 配下で実行している場合は、文書最終確認待ちとして `[NEED_USER_VERIFICATION]` を出力する
+5. NG の場合は Phase 3 へ戻り、docs と `impl/<topic>_impl.md` を修正する
+
+### 4-b 完了処理
+
+1. `change_report.md` を作成し、次を記録する
    - 変更概要
    - 更新した文書一覧
    - 削除、移動、統合した文書
    - 実行した確認コマンド
    - docs-only であり `diff.zip` を作成しない理由
-5. `diff.zip` は作成しない。ソース変更が後から混入した場合は、この workflow を中止して適切な core workflow へ切り替える
-6. `meta.md` の `related_commits` を主要 commit 中心で更新する
-7. 追跡元の todo を完了状態へ更新し、必要なら `docs/todo/todo_archive_<year>.md` へ移動する
-8. `docs/history/README.md` の運用に従い、テンプレート利用者や運用者に影響する変更を history に記録する
-9. 残課題があれば follow-up を作成する
-10. archive / history / merge 前確認が重い場合だけ、`review/<topic>_completion_review.md` の作成をレビュー担当 Agent に依頼する
-11. `completion_status` を `done` に更新し、完了処理成果をコミットする
-12. ユーザの最終承認後に merge する
+2. `diff.zip` は作成しない。ソース変更が後から混入した場合は、この workflow を中止して適切な core workflow へ切り替える
+3. `meta.md` の `related_commits` を主要 commit 中心で更新する
+4. 追跡元の todo を完了状態へ更新し、必要なら `docs/todo/todo_archive_<year>.md` へ移動する
+5. `docs/history/README.md` の運用に従い、テンプレート利用者や運用者に影響する変更を history に記録する
+6. 残課題があれば follow-up を作成する
+7. archive / history / merge 前確認が重い場合だけ、`review/<topic>_completion_review.md` の作成をレビュー担当 Agent に依頼する
+8. `completion_status` を `done` に更新し、完了処理成果をコミットする
+
+### 4-c merge 前承認
+
+1. ユーザへ `マージしてよいですか` と明示して、最終承認を求める
+2. ユーザの最終承認後に対象プロジェクトの既定ブランチへ merge する
+3. orchestrator 配下で全 Phase が完了した場合は `[ALL_PHASES_COMPLETE]` を出力する
 
 ### Phase 4 完了条件
 
@@ -133,6 +152,13 @@
 - 追跡元の todo と archive が整理されている
 - 必要な history が更新されている
 - マージ前の最終承認を受けている
+
+## 構造化シグナル
+
+- Phase 0 / 1 / 2 / 3 の完了時は、orchestrator が検知できるよう `[PHASE_COMPLETE: <phase_number>]` を出力する
+- Phase 4-a の文書最終確認待ちは `[NEED_USER_VERIFICATION]` を出力する
+- Phase 4-c の merge 後は `[ALL_PHASES_COMPLETE]` を出力する
+- 単独実行時も、上記シグナルを出してよい。人間向けの自然言語では「文書の最終確認をお願いします」「docs-only の確認をお願いします」「マージしてよいですか」を使う
 
 ## コミット運用
 

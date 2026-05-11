@@ -88,6 +88,7 @@ description: >-
    - `docs/design_analysis/issue_resolution/` 配下 → `issue-resolution`
    - `docs/design_analysis/refactoring/` 配下 → `refactoring`
    - `docs/design_analysis/documentation/` 配下 → `documentation`
+   - `docs/todo/todo.md` の追跡項目に `workflow: documentation` が明記されている場合 → `documentation`
    - 判定不能時はユーザへ確認する
 
 ## review 文書命名

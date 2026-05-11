@@ -104,6 +104,7 @@ workflow 手順の正本は各 skill 配下の `references/procedure/` に同梱
 | `bugfix-workflow` | 既存機能の不具合修正を行う時 |
 | `issue-resolution-workflow` | bug ではない既知課題を解決する時 |
 | `refactoring-workflow` | 外部仕様を変えない構造改善を行う時 |
+| `documentation-workflow` | docs だけを作成・更新・整理する時 |
 | `ai-review-response-workflow` | 設計/コードレビューの結果を反映する時 |
 
 ## ツール
